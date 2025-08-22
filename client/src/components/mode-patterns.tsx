@@ -116,10 +116,11 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
   };
 
   const startPlayback = () => {
-    if (settings.currentPattern.length === 0) return;
+    if (settings.currentPattern.length === 0 || !audioContext) return;
 
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
+    let nextNoteTime = audioContext.currentTime;
     
     const scheduleNote = () => {
       if (!settings.playback.isPlaying) return;
@@ -141,8 +142,11 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
       const note = settings.currentPattern[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
       
+      // Schedule note at precise Web Audio time
+      const playTime = nextNoteTime;
+      
       const frequency = AudioEngine.midiToFrequency(note.midi);
-      audioEngine.playNote(frequency, 0.3, audioContext?.currentTime);
+      audioEngine.playNote(frequency, 0.3, playTime);
 
       playbackRepetition++;
       
@@ -152,7 +156,12 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
         playbackRepetition = 0;
       }
       
-      playbackTimeoutRef.current = setTimeout(scheduleNote, noteInterval * 1000);
+      // Schedule next note using Web Audio precision
+      nextNoteTime += noteInterval;
+      
+      // Schedule callback slightly before next note time
+      const timeUntilNext = Math.max(0, (nextNoteTime - audioContext.currentTime) * 1000 - 25);
+      playbackTimeoutRef.current = setTimeout(scheduleNote, timeUntilNext);
     };
 
     scheduleNote();

@@ -53,8 +53,9 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     stopMetronomeBeats(); // Clear any existing interval
     
     // Metronome ALWAYS plays quarter notes regardless of subdivision
-    const beatInterval = (60 / currentBpm) * 1000; // Quarter note intervals only
+    const beatInterval = 60 / currentBpm; // Quarter note intervals in seconds
     let beatCount = 0;
+    let nextBeatTime = audioContext.currentTime;
     
     const playBeat = () => {
       if (!settings.isActive) return;
@@ -64,6 +65,9 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
       const frequency = isAccent ? 1200 : 800;
       const duration = isAccent ? 0.1 : 0.05;
       
+      // Schedule click at precise Web Audio time
+      const playTime = nextBeatTime;
+      
       // Create click sound with proper volume
       if (audioContext) {
         const oscillator = audioContext.createOscillator();
@@ -72,32 +76,36 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
         
-        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(frequency, playTime);
         oscillator.type = 'square';
         
         const volume = (settings.volume / 100) * 0.3; // Scale volume
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+        gainNode.gain.setValueAtTime(0, playTime);
+        gainNode.gain.linearRampToValueAtTime(volume, playTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, playTime + duration);
         
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + duration);
+        oscillator.start(playTime);
+        oscillator.stop(playTime + duration);
       }
       
       setCurrentBeat(beatCount % 4);
       beatCount++;
+      
+      // Schedule next beat using Web Audio precision
+      nextBeatTime += beatInterval;
+      
+      // Schedule callback slightly before next beat time
+      const timeUntilNext = Math.max(0, (nextBeatTime - audioContext.currentTime) * 1000 - 25);
+      metronomeIntervalRef.current = setTimeout(playBeat, timeUntilNext);
     };
     
-    // Play first beat immediately
+    // Start immediately
     playBeat();
-    
-    // Schedule subsequent beats
-    metronomeIntervalRef.current = setInterval(playBeat, beatInterval);
   };
 
   const stopMetronomeBeats = () => {
     if (metronomeIntervalRef.current) {
-      clearInterval(metronomeIntervalRef.current);
+      clearTimeout(metronomeIntervalRef.current);
       metronomeIntervalRef.current = null;
     }
     setCurrentBeat(0);

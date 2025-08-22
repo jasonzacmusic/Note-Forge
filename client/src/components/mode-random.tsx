@@ -99,30 +99,22 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   }, [settings.generatedNotes, settings.difficulty]);
 
   const generateRandomNotes = () => {
-    // Stop current playback first
-    stopPlayback();
-    
+    // Stop current playback and immediately start new playback
     const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
+    
     onSettingsChange({
       ...settings,
-      generatedNotes: newNotes
+      generatedNotes: newNotes,
+      playback: { ...settings.playback, isPlaying: true }
     });
-    
-    // Auto-start playback after a brief delay to ensure cleanup
-    setTimeout(() => {
-      onSettingsChange({
-        ...settings,
-        generatedNotes: newNotes,
-        playback: { ...settings.playback, isPlaying: true }
-      });
-    }, 100);
   };
 
   const startPlayback = () => {
-    if (settings.generatedNotes.length === 0) return;
+    if (settings.generatedNotes.length === 0 || !audioContext) return;
 
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
+    let nextNoteTime = audioContext.currentTime;
     
     const scheduleNote = () => {
       if (!settings.playback.isPlaying) return;
@@ -144,22 +136,25 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
       const note = settings.generatedNotes[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
       
+      // Schedule note at precise Web Audio time
+      const playTime = nextNoteTime;
+      
       // Play note across multiple octaves for beginner mode
       if (settings.difficulty === 'beginner') {
         for (let octave = 3; octave <= 6; octave++) {
           const frequency = AudioEngine.midiToFrequency(note.midi + (octave - 4) * 12);
-          audioEngine.playNote(frequency, 0.2, audioContext?.currentTime);
+          audioEngine.playNote(frequency, 0.2, playTime);
         }
       } else {
         // Intermediate mode: play note + interval
         const frequency = AudioEngine.midiToFrequency(note.midi);
-        audioEngine.playNote(frequency, 0.3, audioContext?.currentTime);
+        audioEngine.playNote(frequency, 0.3, playTime);
         
         // If there's a next note, play the interval
         if (currentNoteIndex < settings.generatedNotes.length - 1) {
           const nextNote = settings.generatedNotes[currentNoteIndex + 1];
           const intervalFreq = AudioEngine.midiToFrequency(nextNote.midi);
-          audioEngine.playNote(intervalFreq, 0.2, (audioContext?.currentTime || 0) + 0.15);
+          audioEngine.playNote(intervalFreq, 0.2, playTime + 0.15);
         }
       }
 
@@ -177,7 +172,12 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
         adjustedInterval = AudioEngine.applySwing(playbackRepetition, settings.playback.swing, noteInterval);
       }
       
-      playbackTimeoutRef.current = setTimeout(scheduleNote, adjustedInterval * 1000);
+      // Schedule next note using Web Audio precision
+      nextNoteTime += adjustedInterval;
+      
+      // Schedule callback slightly before next note time
+      const timeUntilNext = Math.max(0, (nextNoteTime - audioContext.currentTime) * 1000 - 25);
+      playbackTimeoutRef.current = setTimeout(scheduleNote, timeUntilNext);
     };
 
     scheduleNote();

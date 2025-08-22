@@ -77,10 +77,11 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
   }, [settings.playback.subdivision, settings.playback.swing]);
 
   const startPlayback = () => {
-    if (!settings.currentProgression) return;
+    if (!settings.currentProgression || !audioContext) return;
 
     let currentChordIndex = settings.cycleStart;
     let playbackRepetition = 0;
+    let nextChordTime = audioContext.currentTime;
     
     const scheduleChord = () => {
       if (!settings.playback.isPlaying || !settings.currentProgression) return;
@@ -102,11 +103,14 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
       const chord = settings.currentProgression.chords[currentChordIndex];
       setCurrentChordIndex(currentChordIndex);
       
+      // Schedule chord at precise Web Audio time
+      const playTime = nextChordTime;
+      
       // Play chord notes simultaneously  
       chord.notes.forEach((noteName, noteIndex) => {
         const frequency = AudioEngine.midiToFrequency(MusicTheory.getMidiFromNote(noteName, 4));
         const delay = noteIndex * 0.03; // Slight arpeggio effect
-        audioEngine.playNote(frequency, 0.8, (audioContext?.currentTime || 0) + delay);
+        audioEngine.playNote(frequency, 0.8, playTime + delay);
       });
 
       playbackRepetition++;
@@ -117,7 +121,12 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
         playbackRepetition = 0;
       }
       
-      playbackTimeoutRef.current = setTimeout(scheduleChord, chordInterval * 1000);
+      // Schedule next chord using Web Audio precision
+      nextChordTime += chordInterval;
+      
+      // Schedule callback slightly before next chord time
+      const timeUntilNext = Math.max(0, (nextChordTime - audioContext.currentTime) * 1000 - 25);
+      playbackTimeoutRef.current = setTimeout(scheduleChord, timeUntilNext);
     };
 
     scheduleChord();
