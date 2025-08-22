@@ -39,6 +39,14 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
     }
   }, [settings.playback.isPlaying]);
 
+  // Restart playback when BPM changes to apply new tempo immediately
+  useEffect(() => {
+    if (settings.playback.isPlaying) {
+      stopPlayback();
+      startPlayback();
+    }
+  }, [settings.playback.bpm]);
+
   const startPlayback = () => {
     if (!settings.currentProgression) return;
 

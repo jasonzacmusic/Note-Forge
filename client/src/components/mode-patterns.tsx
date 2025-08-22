@@ -39,6 +39,14 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
     }
   }, [settings.playback.isPlaying]);
 
+  // Restart playback when BPM changes to apply new tempo immediately
+  useEffect(() => {
+    if (settings.playback.isPlaying) {
+      stopPlayback();
+      startPlayback();
+    }
+  }, [settings.playback.bpm]);
+
   const generatePattern = () => {
     let pattern: Note[] = [];
 

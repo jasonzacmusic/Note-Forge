@@ -10,9 +10,10 @@ interface GlobalMetronomeProps {
   settings: AppSettings['globalMetronome'];
   onSettingsChange: (settings: AppSettings['globalMetronome']) => void;
   audioContext: AudioContext | null;
+  currentBpm: number;
 }
 
-export function GlobalMetronome({ settings, onSettingsChange, audioContext }: GlobalMetronomeProps) {
+export function GlobalMetronome({ settings, onSettingsChange, audioContext, currentBpm }: GlobalMetronomeProps) {
   const [currentBeat, setCurrentBeat] = useState(0);
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -30,14 +31,14 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext }: Gl
     } else {
       stopMetronomeBeats();
     }
-  }, [settings.isActive, settings.bpm]);
+  }, [settings.isActive, currentBpm]);
 
   const startMetronomeBeats = () => {
     if (!audioContext) return;
     
     stopMetronomeBeats(); // Clear any existing interval
     
-    const beatInterval = (60 / settings.bpm) * 1000; // Convert to milliseconds
+    const beatInterval = (60 / currentBpm) * 1000; // Convert to milliseconds
     let beatCount = 0;
     
     const playBeat = () => {
@@ -91,9 +92,6 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext }: Gl
     onSettingsChange({ ...settings, isActive: newState });
   };
 
-  const updateBPM = (newBpm: number[]) => {
-    onSettingsChange({ ...settings, bpm: newBpm[0] });
-  };
 
   const updateCountIn = (value: string) => {
     onSettingsChange({ ...settings, countIn: value as "4" | "8" });
@@ -119,29 +117,11 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext }: Gl
             } text-white`}
             data-testid="button-toggle-metronome"
           >
-            {settings.isActive ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-            {settings.isActive ? 'Stop' : 'Start'}
+            {settings.isActive ? 'ON' : 'OFF'}
           </Button>
         </div>
         
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-          {/* BPM Control */}
-          <div className="flex items-center space-x-3">
-            <label className="app-text-secondary font-medium">BPM:</label>
-            <span className="text-xl font-mono app-bg px-3 py-1 rounded" data-testid="text-metronome-bpm">
-              {settings.bpm}
-            </span>
-            <Slider
-              value={[settings.bpm]}
-              onValueChange={updateBPM}
-              min={20}
-              max={240}
-              step={1}
-              className="w-24 sm:w-32"
-              data-testid="slider-metronome-bpm"
-            />
-          </div>
-          
           {/* Count-in */}
           <div className="flex items-center space-x-3">
             <label className="app-text-secondary font-medium">Count-in:</label>

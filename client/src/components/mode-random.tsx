@@ -35,6 +35,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     }
   }, [settings.playback.isPlaying]);
 
+  // Restart playback when BPM changes to apply new tempo immediately
+  useEffect(() => {
+    if (settings.playback.isPlaying) {
+      stopPlayback();
+      startPlayback();
+    }
+  }, [settings.playback.bpm]);
+
   useEffect(() => {
     if (settings.generatedNotes.length > 1 && settings.difficulty === 'intermediate') {
       // For intermediate mode, show ALL intervals between consecutive notes
@@ -62,10 +70,16 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   }, [settings.generatedNotes, settings.difficulty]);
 
   const generateRandomNotes = () => {
+    // Stop current playback first
+    if (settings.playback.isPlaying) {
+      stopPlayback();
+    }
+    
     const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
     onSettingsChange({
       ...settings,
-      generatedNotes: newNotes
+      generatedNotes: newNotes,
+      playback: { ...settings.playback, isPlaying: true } // Auto-start playback
     });
   };
 

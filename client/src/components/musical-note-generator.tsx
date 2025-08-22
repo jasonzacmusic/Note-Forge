@@ -15,7 +15,6 @@ import type { AppSettings } from "@shared/schema";
 const defaultSettings: AppSettings = {
   globalMetronome: {
     isActive: false,
-    bpm: 120,
     countIn: "4",
     volume: 75
   },
@@ -218,6 +217,11 @@ export function MusicalNoteGenerator() {
           settings={settings.globalMetronome}
           onSettingsChange={(metronome) => setSettings(prev => ({ ...prev, globalMetronome: metronome }))}
           audioContext={audioContext}
+          currentBpm={(() => {
+            const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+            const modeSettings = settings[modeKey] as any;
+            return modeSettings?.playback?.bpm || 120;
+          })()}
         />
       </header>
 

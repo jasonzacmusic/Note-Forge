@@ -67,7 +67,6 @@ export const patternsModeSettingsSchema = z.object({
 export const appSettingsSchema = z.object({
   globalMetronome: z.object({
     isActive: z.boolean(),
-    bpm: z.number().min(20).max(240),
     countIn: z.enum(["4", "8"]),
     volume: z.number().min(0).max(100)
   }),
