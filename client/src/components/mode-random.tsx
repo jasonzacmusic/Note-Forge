@@ -60,7 +60,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     }
   }, [settings.playback.bpm]);
 
-  // Restart playback when subdivision changes to apply new timing immediately
+  // Restart playback when subdivision or swing changes to apply new timing immediately
   useEffect(() => {
     if (settings.playback.isPlaying) {
       stopPlayback();
@@ -70,7 +70,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
       
       return () => clearTimeout(timer);
     }
-  }, [settings.playback.subdivision]);
+  }, [settings.playback.subdivision, settings.playback.swing]);
 
   useEffect(() => {
     if (settings.generatedNotes.length > 1 && settings.difficulty === 'intermediate') {
@@ -171,9 +171,9 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
         playbackRepetition = 0;
       }
       
-      // Apply swing only to even subdivisions (2x and 4x)
+      // Apply swing only to quavers (2x)
       let adjustedInterval = noteInterval;
-      if ((settings.playback.subdivision === "2" || settings.playback.subdivision === "4") && settings.playback.swing !== 50) {
+      if (settings.playback.subdivision === "2" && settings.playback.swing !== 50) {
         adjustedInterval = AudioEngine.applySwing(playbackRepetition, settings.playback.swing, noteInterval);
       }
       
@@ -373,8 +373,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                 </div>
               </div>
               
-              {/* Swing */}
-              {(settings.playback.subdivision === "2" || settings.playback.subdivision === "4") && (
+              {/* Swing - Only for Quavers */}
+              {settings.playback.subdivision === "2" && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className="app-text-secondary font-medium">Swing %</Label>

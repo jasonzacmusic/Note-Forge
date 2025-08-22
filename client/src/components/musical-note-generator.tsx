@@ -224,11 +224,6 @@ export function MusicalNoteGenerator() {
             const modeSettings = settings[modeKey] as any;
             return modeSettings?.playback?.bpm || 120;
           })()}
-          currentSubdivision={(() => {
-            const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-            const modeSettings = settings[modeKey] as any;
-            return modeSettings?.playback?.subdivision || "1";
-          })()}
           isCurrentModePlayingBack={(() => {
             const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
             const modeSettings = settings[modeKey] as any;

@@ -64,7 +64,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
     }
   }, [settings.playback.bpm]);
 
-  // Restart playback when subdivision changes to apply new timing immediately
+  // Restart playback when subdivision or swing changes to apply new timing immediately
   useEffect(() => {
     if (settings.playback.isPlaying) {
       stopPlayback();
@@ -74,7 +74,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
       
       return () => clearTimeout(timer);
     }
-  }, [settings.playback.subdivision]);
+  }, [settings.playback.subdivision, settings.playback.swing]);
 
   const generatePattern = () => {
     let pattern: Note[] = [];

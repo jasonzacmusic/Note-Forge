@@ -11,11 +11,10 @@ interface GlobalMetronomeProps {
   onSettingsChange: (settings: AppSettings['globalMetronome']) => void;
   audioContext: AudioContext | null;
   currentBpm: number;
-  currentSubdivision: string;
   isCurrentModePlayingBack: boolean;
 }
 
-export function GlobalMetronome({ settings, onSettingsChange, audioContext, currentBpm, currentSubdivision, isCurrentModePlayingBack }: GlobalMetronomeProps) {
+export function GlobalMetronome({ settings, onSettingsChange, audioContext, currentBpm, isCurrentModePlayingBack }: GlobalMetronomeProps) {
   const [currentBeat, setCurrentBeat] = useState(0);
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -36,7 +35,7 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     } else {
       stopMetronomeBeats();
     }
-  }, [shouldPlayMetronome, currentBpm, currentSubdivision, isCurrentModePlayingBack]);
+  }, [shouldPlayMetronome, currentBpm, isCurrentModePlayingBack]);
 
   // Listen for global stop event and stop metronome
   useEffect(() => {
@@ -53,27 +52,15 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     
     stopMetronomeBeats(); // Clear any existing interval
     
-    // Calculate same timing as playback - subdivision-based intervals
-    const getRepetitionsPerBar = (subdivision: string) => {
-      switch (subdivision) {
-        case "1": return 4;  // Quarter notes: 4 per bar
-        case "2": return 8;  // Quavers: 8 per bar  
-        case "3": return 12; // Triplets: 12 per bar
-        case "4": return 16; // Semiquavers: 16 per bar
-        default: return 4;
-      }
-    };
-    
-    const repetitionsPerBar = getRepetitionsPerBar(currentSubdivision);
-    const beatInterval = ((60 / currentBpm) / (repetitionsPerBar / 4)) * 1000; // Same as playback timing
+    // Metronome ALWAYS plays quarter notes regardless of subdivision
+    const beatInterval = (60 / currentBpm) * 1000; // Quarter note intervals only
     let beatCount = 0;
     
     const playBeat = () => {
       if (!settings.isActive) return;
       
-      // Accent on beats 1 and 3 (quarter note positions) regardless of subdivision
-      const quarterNotePosition = Math.floor(beatCount / (repetitionsPerBar / 4));
-      const isAccent = (quarterNotePosition % 4) === 0 || (quarterNotePosition % 4) === 2;
+      // Accent on beats 1 and 3 (standard quarter note accenting)
+      const isAccent = (beatCount % 4) === 0 || (beatCount % 4) === 2;
       const frequency = isAccent ? 1200 : 800;
       const duration = isAccent ? 0.1 : 0.05;
       
@@ -97,7 +84,7 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
         oscillator.stop(audioContext.currentTime + duration);
       }
       
-      setCurrentBeat(beatCount % repetitionsPerBar);
+      setCurrentBeat(beatCount % 4);
       beatCount++;
     };
     

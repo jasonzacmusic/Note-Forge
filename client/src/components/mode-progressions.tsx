@@ -64,7 +64,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
     }
   }, [settings.playback.bpm]);
 
-  // Restart playback when subdivision changes to apply new timing immediately
+  // Restart playback when subdivision or swing changes to apply new timing immediately
   useEffect(() => {
     if (settings.playback.isPlaying) {
       stopPlayback();
@@ -74,7 +74,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
       
       return () => clearTimeout(timer);
     }
-  }, [settings.playback.subdivision]);
+  }, [settings.playback.subdivision, settings.playback.swing]);
 
   const startPlayback = () => {
     if (!settings.currentProgression) return;
