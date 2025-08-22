@@ -99,16 +99,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   }, [settings.generatedNotes, settings.difficulty]);
 
   const generateRandomNotes = () => {
-    // Generate new notes based on difficulty and interval category
-    let newNotes: Note[];
-    
-    if (settings.difficulty === 'intermediate' && settings.intervalCategory) {
-      // Use interval-based generation for intermediate mode
-      newNotes = MusicTheory.generateIntervalSequence(settings.intervalCategory, 4);
-    } else {
-      // Use random sequence for beginner mode
-      newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
-    }
+    // Always generate random notes - intervals are selected separately
+    const newNotes = MusicTheory.generateRandomSequence('all', 4);
     
     // Stop current playback immediately and set new notes
     onSettingsChange({
@@ -171,15 +163,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
           audioEngine.playNote(frequency, 0.2, playTime);
         }
       } else {
-        // Intermediate mode: play note + interval
+        // Intermediate mode: play note + selected interval simultaneously
         const frequency = AudioEngine.midiToFrequency(note.midi);
         audioEngine.playNote(frequency, 0.3, playTime);
         
-        // If there's a next note, play the interval
-        if (currentNoteIndex < currentNotes.length - 1) {
-          const nextNote = currentNotes[currentNoteIndex + 1];
-          const intervalFreq = AudioEngine.midiToFrequency(nextNote.midi);
-          audioEngine.playNote(intervalFreq, 0.2, playTime + 0.15);
+        // Play the selected interval with the note
+        if (settings.selectedInterval !== undefined) {
+          const intervalFreq = AudioEngine.midiToFrequency(note.midi + settings.selectedInterval);
+          audioEngine.playNote(intervalFreq, 0.2, playTime);
         }
       }
 
@@ -235,8 +226,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     onSettingsChange({ ...settings, noteSelection });
   };
 
-  const updateIntervalCategory = (intervalCategory: 'resolutions' | 'tensions' | 'anticipations' | 'mystery') => {
-    onSettingsChange({ ...settings, intervalCategory });
+  const updateSelectedInterval = (selectedInterval: number) => {
+    onSettingsChange({ ...settings, selectedInterval });
   };
 
   const updateBPM = (bpm: number[]) => {
@@ -314,32 +305,107 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
               </div>
             )}
             
-            {/* Interval Category for Intermediate */}
+            {/* Interval Selection for Intermediate */}
             {settings.difficulty === 'intermediate' && (
               <div className="mb-6">
-                <Label className="block app-text-secondary font-medium mb-3">Interval Category</Label>
-                <RadioGroup
-                  value={settings.intervalCategory}
-                  onValueChange={updateIntervalCategory}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="resolutions" id="resolutions" />
-                    <Label htmlFor="resolutions" className="app-text-primary">Resolutions</Label>
+                <Label className="block app-text-secondary font-medium mb-3">Select Interval</Label>
+                <div className="space-y-4">
+                  {/* Resolutions */}
+                  <div>
+                    <h4 className="text-sm font-medium app-text-primary mb-2">Resolutions</h4>
+                    <RadioGroup
+                      value={settings.selectedInterval?.toString()}
+                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="0" id="unison" />
+                        <Label htmlFor="unison" className="app-text-primary text-sm">Unison</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="5" id="perfect-4th" />
+                        <Label htmlFor="perfect-4th" className="app-text-primary text-sm">Perfect 4th</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="7" id="perfect-5th" />
+                        <Label htmlFor="perfect-5th" className="app-text-primary text-sm">Perfect 5th</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="12" id="octave" />
+                        <Label htmlFor="octave" className="app-text-primary text-sm">Octave</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="tensions" id="tensions" />
-                    <Label htmlFor="tensions" className="app-text-primary">Tensions</Label>
+                  
+                  {/* Tensions */}
+                  <div>
+                    <h4 className="text-sm font-medium app-text-primary mb-2">Tensions</h4>
+                    <RadioGroup
+                      value={settings.selectedInterval?.toString()}
+                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="1" id="minor-2nd" />
+                        <Label htmlFor="minor-2nd" className="app-text-primary text-sm">Minor 2nd</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="6" id="tritone" />
+                        <Label htmlFor="tritone" className="app-text-primary text-sm">Tritone</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="10" id="minor-7th" />
+                        <Label htmlFor="minor-7th" className="app-text-primary text-sm">Minor 7th</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="11" id="major-7th" />
+                        <Label htmlFor="major-7th" className="app-text-primary text-sm">Major 7th</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="anticipations" id="anticipations" />
-                    <Label htmlFor="anticipations" className="app-text-primary">Anticipations</Label>
+
+                  {/* Anticipations */}
+                  <div>
+                    <h4 className="text-sm font-medium app-text-primary mb-2">Anticipations</h4>
+                    <RadioGroup
+                      value={settings.selectedInterval?.toString()}
+                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="2" id="major-2nd" />
+                        <Label htmlFor="major-2nd" className="app-text-primary text-sm">Major 2nd</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="4" id="major-3rd" />
+                        <Label htmlFor="major-3rd" className="app-text-primary text-sm">Major 3rd</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="9" id="major-6th" />
+                        <Label htmlFor="major-6th" className="app-text-primary text-sm">Major 6th</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="mystery" id="mystery" />
-                    <Label htmlFor="mystery" className="app-text-primary">Mystery</Label>
+
+                  {/* Mystery */}
+                  <div>
+                    <h4 className="text-sm font-medium app-text-primary mb-2">Mystery</h4>
+                    <RadioGroup
+                      value={settings.selectedInterval?.toString()}
+                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="3" id="minor-3rd" />
+                        <Label htmlFor="minor-3rd" className="app-text-primary text-sm">Minor 3rd</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="8" id="minor-6th" />
+                        <Label htmlFor="minor-6th" className="app-text-primary text-sm">Minor 6th</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
-                </RadioGroup>
+                </div>
               </div>
             )}
             
