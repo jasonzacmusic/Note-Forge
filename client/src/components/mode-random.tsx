@@ -99,14 +99,24 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   }, [settings.generatedNotes, settings.difficulty]);
 
   const generateRandomNotes = () => {
-    // Stop current playback and immediately start new playback
+    // Generate new notes
     const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
     
+    // Stop current playback immediately and set new notes
     onSettingsChange({
       ...settings,
       generatedNotes: newNotes,
-      playback: { ...settings.playback, isPlaying: true }
+      playback: { ...settings.playback, isPlaying: false }
     });
+    
+    // Restart playback with new notes after brief delay to ensure cleanup
+    setTimeout(() => {
+      onSettingsChange({
+        ...settings,
+        generatedNotes: newNotes,
+        playback: { ...settings.playback, isPlaying: true }
+      });
+    }, 100);
   };
 
   const startPlayback = () => {
@@ -117,7 +127,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     let nextNoteTime = audioContext.currentTime;
     
     const scheduleNote = () => {
-      if (!settings.playback.isPlaying) return;
+      // Always check current settings, don't cache
+      if (!settings.playback.isPlaying || settings.generatedNotes.length === 0) return;
 
       // Dynamically calculate repetitions per bar based on current subdivision
       const getRepetitionsPerBar = (subdivision: string) => {
@@ -133,7 +144,13 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
       const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
       const noteInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
 
-      const note = settings.generatedNotes[currentNoteIndex];
+      // Always use current notes from settings
+      const currentNotes = settings.generatedNotes;
+      if (currentNoteIndex >= currentNotes.length) {
+        currentNoteIndex = 0; // Reset if index is out of bounds
+      }
+      
+      const note = currentNotes[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
       
       // Schedule note at precise Web Audio time
@@ -151,8 +168,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
         audioEngine.playNote(frequency, 0.3, playTime);
         
         // If there's a next note, play the interval
-        if (currentNoteIndex < settings.generatedNotes.length - 1) {
-          const nextNote = settings.generatedNotes[currentNoteIndex + 1];
+        if (currentNoteIndex < currentNotes.length - 1) {
+          const nextNote = currentNotes[currentNoteIndex + 1];
           const intervalFreq = AudioEngine.midiToFrequency(nextNote.midi);
           audioEngine.playNote(intervalFreq, 0.2, playTime + 0.15);
         }
@@ -162,7 +179,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
       
       // Move to next note after completing all repetitions for current note
       if (playbackRepetition >= repetitionsPerBar) {
-        currentNoteIndex = (currentNoteIndex + 1) % settings.generatedNotes.length;
+        currentNoteIndex = (currentNoteIndex + 1) % currentNotes.length;
         playbackRepetition = 0;
       }
       

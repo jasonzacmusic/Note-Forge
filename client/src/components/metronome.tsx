@@ -52,15 +52,16 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     
     stopMetronomeBeats(); // Clear any existing interval
     
-    // Metronome ALWAYS plays quarter notes regardless of subdivision
+    // Synchronize metronome start time with quarter note grid
+    // This ensures metronome and music stay in perfect sync
     const beatInterval = 60 / currentBpm; // Quarter note intervals in seconds
     let beatCount = 0;
-    let nextBeatTime = audioContext.currentTime;
+    let nextBeatTime = audioContext.currentTime + 0.1; // Small offset to align with music
     
     const playBeat = () => {
-      if (!settings.isActive) return;
+      if (!settings.isActive || !audioContext) return;
       
-      // Accent on beats 1 and 3 (standard quarter note accenting)
+      // Accent on beats 1 and 3 (standard quarter note accenting)  
       const isAccent = (beatCount % 4) === 0 || (beatCount % 4) === 2;
       const frequency = isAccent ? 1200 : 800;
       const duration = isAccent ? 0.1 : 0.05;
@@ -69,24 +70,22 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
       const playTime = nextBeatTime;
       
       // Create click sound with proper volume
-      if (audioContext) {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(frequency, playTime);
-        oscillator.type = 'square';
-        
-        const volume = (settings.volume / 100) * 0.3; // Scale volume
-        gainNode.gain.setValueAtTime(0, playTime);
-        gainNode.gain.linearRampToValueAtTime(volume, playTime + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, playTime + duration);
-        
-        oscillator.start(playTime);
-        oscillator.stop(playTime + duration);
-      }
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(frequency, playTime);
+      oscillator.type = 'square';
+      
+      const volume = (settings.volume / 100) * 0.3; // Scale volume
+      gainNode.gain.setValueAtTime(0, playTime);
+      gainNode.gain.linearRampToValueAtTime(volume, playTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, playTime + duration);
+      
+      oscillator.start(playTime);
+      oscillator.stop(playTime + duration);
       
       setCurrentBeat(beatCount % 4);
       beatCount++;
