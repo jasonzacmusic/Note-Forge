@@ -39,7 +39,11 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   useEffect(() => {
     if (settings.playback.isPlaying) {
       stopPlayback();
-      startPlayback();
+      const timer = setTimeout(() => {
+        startPlayback();
+      }, 50); // Small delay to ensure cleanup completes
+      
+      return () => clearTimeout(timer);
     }
   }, [settings.playback.bpm]);
 
@@ -71,16 +75,22 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
 
   const generateRandomNotes = () => {
     // Stop current playback first
-    if (settings.playback.isPlaying) {
-      stopPlayback();
-    }
+    stopPlayback();
     
     const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
     onSettingsChange({
       ...settings,
-      generatedNotes: newNotes,
-      playback: { ...settings.playback, isPlaying: true } // Auto-start playback
+      generatedNotes: newNotes
     });
+    
+    // Auto-start playback after a brief delay to ensure cleanup
+    setTimeout(() => {
+      onSettingsChange({
+        ...settings,
+        generatedNotes: newNotes,
+        playback: { ...settings.playback, isPlaying: true }
+      });
+    }, 100);
   };
 
   const startPlayback = () => {
@@ -155,6 +165,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     }
     audioEngine.stop();
     setCurrentNoteIndex(0);
+    
+    // Force update playback state to stop
+    if (settings.playback.isPlaying) {
+      onSettingsChange({
+        ...settings,
+        playback: { ...settings.playback, isPlaying: false }
+      });
+    }
   };
 
   const togglePlayback = () => {

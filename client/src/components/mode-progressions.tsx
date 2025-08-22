@@ -43,7 +43,11 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
   useEffect(() => {
     if (settings.playback.isPlaying) {
       stopPlayback();
-      startPlayback();
+      const timer = setTimeout(() => {
+        startPlayback();
+      }, 50); // Small delay to ensure cleanup completes
+      
+      return () => clearTimeout(timer);
     }
   }, [settings.playback.bpm]);
 
@@ -101,6 +105,14 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
     }
     audioEngine.stop();
     setCurrentChordIndex(0);
+    
+    // Force update playback state to stop
+    if (settings.playback.isPlaying) {
+      onSettingsChange({
+        ...settings,
+        playback: { ...settings.playback, isPlaying: false }
+      });
+    }
   };
 
   const togglePlayback = () => {

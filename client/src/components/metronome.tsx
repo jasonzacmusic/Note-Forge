@@ -11,9 +11,10 @@ interface GlobalMetronomeProps {
   onSettingsChange: (settings: AppSettings['globalMetronome']) => void;
   audioContext: AudioContext | null;
   currentBpm: number;
+  isAnyModePlayingBack: boolean;
 }
 
-export function GlobalMetronome({ settings, onSettingsChange, audioContext, currentBpm }: GlobalMetronomeProps) {
+export function GlobalMetronome({ settings, onSettingsChange, audioContext, currentBpm, isAnyModePlayingBack }: GlobalMetronomeProps) {
   const [currentBeat, setCurrentBeat] = useState(0);
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,13 +26,16 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     }
   }, [audioContext]);
 
+  // Only play metronome when it's active AND there's actual playback happening
+  const shouldPlayMetronome = settings.isActive && isAnyModePlayingBack;
+  
   useEffect(() => {
-    if (settings.isActive) {
+    if (shouldPlayMetronome) {
       startMetronomeBeats();
     } else {
       stopMetronomeBeats();
     }
-  }, [settings.isActive, currentBpm]);
+  }, [shouldPlayMetronome, currentBpm, isAnyModePlayingBack]);
 
   const startMetronomeBeats = () => {
     if (!audioContext) return;

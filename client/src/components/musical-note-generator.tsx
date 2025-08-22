@@ -160,23 +160,23 @@ export function MusicalNoteGenerator() {
   };
 
   const switchTab = (mode: AppSettings['currentMode']) => {
-    // Stop any current playback
-    Object.keys(settings).forEach(key => {
-      if (key.endsWith('Mode')) {
-        const modeSettings = settings[key as keyof AppSettings] as any;
-        if (modeSettings?.playback?.isPlaying) {
-          setSettings(prev => ({
-            ...prev,
-            [key]: {
-              ...modeSettings,
-              playback: { ...modeSettings.playback, isPlaying: false }
-            }
-          }));
-        }
+    // Immediately stop ALL playback in all modes
+    setSettings(prev => ({
+      ...prev,
+      currentMode: mode,
+      randomMode: {
+        ...prev.randomMode,
+        playback: { ...prev.randomMode.playback, isPlaying: false }
+      },
+      progressionsMode: {
+        ...prev.progressionsMode,
+        playback: { ...prev.progressionsMode.playback, isPlaying: false }
+      },
+      patternsMode: {
+        ...prev.patternsMode,
+        playback: { ...prev.patternsMode.playback, isPlaying: false }
       }
-    });
-
-    setSettings(prev => ({ ...prev, currentMode: mode }));
+    }));
   };
 
   return (
@@ -221,6 +221,12 @@ export function MusicalNoteGenerator() {
             const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
             const modeSettings = settings[modeKey] as any;
             return modeSettings?.playback?.bpm || 120;
+          })()}
+          isAnyModePlayingBack={(() => {
+            const randomPlaying = settings.randomMode.playback.isPlaying;
+            const progressionsPlaying = settings.progressionsMode.playback.isPlaying;
+            const patternsPlaying = settings.patternsMode.playback.isPlaying;
+            return randomPlaying || progressionsPlaying || patternsPlaying;
           })()}
         />
       </header>
