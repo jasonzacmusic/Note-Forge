@@ -110,7 +110,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
       chord.notes.forEach((noteName, noteIndex) => {
         const frequency = AudioEngine.midiToFrequency(MusicTheory.getMidiFromNote(noteName, 4));
         const delay = noteIndex * 0.03; // Slight arpeggio effect
-        audioEngine.playNote(frequency, 0.8, playTime + delay);
+        audioEngine.playNote(frequency, 0.8, playTime + delay, settings.playback.waveType);
       });
 
       playbackRepetition++;

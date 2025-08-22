@@ -153,24 +153,24 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
       const note = currentNotes[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
       
-      // Schedule note at precise Web Audio time
+      // Schedule note at precise Web Audio time (with swing already applied)
       const playTime = nextNoteTime;
       
       // Play note across multiple octaves for beginner mode
       if (settings.difficulty === 'beginner') {
         for (let octave = 3; octave <= 6; octave++) {
           const frequency = AudioEngine.midiToFrequency(note.midi + (octave - 4) * 12);
-          audioEngine.playNote(frequency, 0.2, playTime);
+          audioEngine.playNote(frequency, 0.2, playTime, settings.playback.waveType);
         }
       } else {
         // Intermediate mode: play note + selected interval simultaneously
         const frequency = AudioEngine.midiToFrequency(note.midi);
-        audioEngine.playNote(frequency, 0.3, playTime);
+        audioEngine.playNote(frequency, 0.3, playTime, settings.playback.waveType);
         
         // Play the selected interval with the note
         if (settings.selectedInterval !== undefined) {
           const intervalFreq = AudioEngine.midiToFrequency(note.midi + settings.selectedInterval);
-          audioEngine.playNote(intervalFreq, 0.2, playTime);
+          audioEngine.playNote(intervalFreq, 0.2, playTime, settings.playback.waveType);
         }
       }
 
@@ -182,14 +182,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
         playbackRepetition = 0;
       }
       
-      // Apply swing only to quavers (2x)
-      let adjustedInterval = noteInterval;
+      // Apply swing only to quavers (eighth notes) - affects timing placement, not tempo
+      let swingDelay = 0;
       if (settings.playback.subdivision === "2" && settings.playback.swing !== 50) {
-        adjustedInterval = AudioEngine.applySwing(playbackRepetition, settings.playback.swing, noteInterval);
+        swingDelay = AudioEngine.getSwingDelay(playbackRepetition, settings.playback.swing, noteInterval);
       }
       
-      // Schedule next note using Web Audio precision
-      nextNoteTime += adjustedInterval;
+      // Schedule next note using Web Audio precision with swing delay
+      nextNoteTime += noteInterval + swingDelay;
       
       // Schedule callback slightly before next note time
       const timeUntilNext = Math.max(0, (nextNoteTime - audioContext.currentTime) * 1000 - 25);
@@ -251,6 +251,13 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     });
   };
 
+  const updateWaveType = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
+    onSettingsChange({
+      ...settings,
+      playback: { ...settings.playback, waveType }
+    });
+  };
+
   return (
     <section className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -309,14 +316,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
             {settings.difficulty === 'intermediate' && (
               <div className="mb-6">
                 <Label className="block app-text-secondary font-medium mb-3">Select Interval</Label>
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   {/* Resolutions */}
-                  <div>
-                    <h4 className="text-sm font-medium app-text-primary mb-2">Resolutions</h4>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Resolutions</h4>
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
-                      className="space-y-2"
+                      className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="0" id="unison" />
@@ -338,12 +345,12 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                   </div>
                   
                   {/* Tensions */}
-                  <div>
-                    <h4 className="text-sm font-medium app-text-primary mb-2">Tensions</h4>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Tensions</h4>
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
-                      className="space-y-2"
+                      className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="1" id="minor-2nd" />
@@ -365,12 +372,12 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                   </div>
 
                   {/* Anticipations */}
-                  <div>
-                    <h4 className="text-sm font-medium app-text-primary mb-2">Anticipations</h4>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Anticipations</h4>
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
-                      className="space-y-2"
+                      className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="2" id="major-2nd" />
@@ -388,12 +395,12 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                   </div>
 
                   {/* Mystery */}
-                  <div>
-                    <h4 className="text-sm font-medium app-text-primary mb-2">Mystery</h4>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Mystery</h4>
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
-                      className="space-y-2"
+                      className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="3" id="minor-3rd" />
@@ -408,6 +415,37 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                 </div>
               </div>
             )}
+            
+            {/* Audio Sample Selection */}
+            <div className="mb-6">
+              <Label className="block app-text-secondary font-medium mb-3">Audio Sample</Label>
+              <RadioGroup
+                value={settings.playback.waveType || 'piano'}
+                onValueChange={updateWaveType}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="piano" id="piano" />
+                  <Label htmlFor="piano" className="app-text-primary text-sm">🎹 Piano</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sine" id="sine" />
+                  <Label htmlFor="sine" className="app-text-primary text-sm">🌊 Sine Wave</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="triangle" id="triangle" />
+                  <Label htmlFor="triangle" className="app-text-primary text-sm">📐 Triangle Wave</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sawtooth" id="sawtooth" />
+                  <Label htmlFor="sawtooth" className="app-text-primary text-sm">🔺 Sawtooth Wave</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="square" id="square" />
+                  <Label htmlFor="square" className="app-text-primary text-sm">🔲 Square Wave</Label>
+                </div>
+              </RadioGroup>
+            </div>
             
             {/* Generate Button */}
             <Button

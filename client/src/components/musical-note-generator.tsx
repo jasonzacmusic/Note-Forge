@@ -27,7 +27,8 @@ const defaultSettings: AppSettings = {
       bpm: 120,
       subdivision: "1",
       swing: 50,
-      volume: 75
+      volume: 75,
+      waveType: "piano"
     }
   },
   progressionsMode: {
@@ -39,7 +40,8 @@ const defaultSettings: AppSettings = {
       bpm: 100,
       subdivision: "1",
       swing: 50,
-      volume: 75
+      volume: 75,
+      waveType: "piano"
     }
   },
   patternsMode: {
@@ -51,7 +53,8 @@ const defaultSettings: AppSettings = {
       bpm: 80,
       subdivision: "1",
       swing: 50,
-      volume: 75
+      volume: 75,
+      waveType: "piano"
     }
   },
   history: []

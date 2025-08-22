@@ -75,8 +75,64 @@ export class AudioEngine {
     this.currentBeat++;
   }
 
-  createOscillator(frequency: number, startTime: number, duration: number = 0.1): OscillatorNode {
+  createPianoSound(frequency: number, startTime: number, duration: number = 0.5): void {
+    if (!this.audioContext) return;
+
+    // Create multiple oscillators for a richer piano-like sound
+    const fundamental = this.audioContext.createOscillator();
+    const harmonic2 = this.audioContext.createOscillator();
+    const harmonic3 = this.audioContext.createOscillator();
+    
+    const fundamentalGain = this.audioContext.createGain();
+    const harmonic2Gain = this.audioContext.createGain();
+    const harmonic3Gain = this.audioContext.createGain();
+    const masterGain = this.audioContext.createGain();
+
+    // Connect oscillators to gains
+    fundamental.connect(fundamentalGain);
+    harmonic2.connect(harmonic2Gain);
+    harmonic3.connect(harmonic3Gain);
+    
+    fundamentalGain.connect(masterGain);
+    harmonic2Gain.connect(masterGain);
+    harmonic3Gain.connect(masterGain);
+    masterGain.connect(this.audioContext.destination);
+
+    // Set frequencies (fundamental + harmonics)
+    fundamental.frequency.setValueAtTime(frequency, startTime);
+    harmonic2.frequency.setValueAtTime(frequency * 2, startTime);
+    harmonic3.frequency.setValueAtTime(frequency * 3, startTime);
+
+    // Use triangle waves for warmer sound
+    fundamental.type = 'triangle';
+    harmonic2.type = 'sine';
+    harmonic3.type = 'sine';
+
+    // Set volumes for each harmonic
+    fundamentalGain.gain.setValueAtTime(0.5, startTime);
+    harmonic2Gain.gain.setValueAtTime(0.2, startTime);
+    harmonic3Gain.gain.setValueAtTime(0.1, startTime);
+
+    // Piano-like envelope (quick attack, longer decay)
+    masterGain.gain.setValueAtTime(0, startTime);
+    masterGain.gain.linearRampToValueAtTime(0.4, startTime + 0.02);
+    masterGain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.1);
+    masterGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    // Start and stop all oscillators
+    [fundamental, harmonic2, harmonic3].forEach(osc => {
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    });
+  }
+
+  createOscillator(frequency: number, startTime: number, duration: number = 0.1, waveType: OscillatorType | 'piano' = 'sine'): void {
     if (!this.audioContext) throw new Error('Audio context not initialized');
+
+    if (waveType === 'piano') {
+      this.createPianoSound(frequency, startTime, duration);
+      return;
+    }
 
     const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
@@ -85,7 +141,7 @@ export class AudioEngine {
     gainNode.connect(this.audioContext.destination);
 
     oscillator.frequency.setValueAtTime(frequency, startTime);
-    oscillator.type = 'sine';
+    oscillator.type = waveType as OscillatorType;
 
     // Envelope
     gainNode.gain.setValueAtTime(0, startTime);
@@ -94,8 +150,6 @@ export class AudioEngine {
 
     oscillator.start(startTime);
     oscillator.stop(startTime + duration);
-
-    return oscillator;
   }
 
   createClick(isAccent: boolean = false, startTime: number): void {
@@ -107,11 +161,11 @@ export class AudioEngine {
     this.createOscillator(frequency, startTime, duration);
   }
 
-  playNote(frequency: number, duration: number = 0.5, startTime?: number): void {
+  playNote(frequency: number, duration: number = 0.5, startTime?: number, waveType: OscillatorType | 'piano' = 'sine'): void {
     if (!this.audioContext) return;
 
     const time = startTime || this.audioContext.currentTime;
-    this.createOscillator(frequency, time, duration);
+    this.createOscillator(frequency, time, duration, waveType);
   }
 
   start(bpm: number = 120) {
@@ -148,19 +202,20 @@ export class AudioEngine {
     return 440 * Math.pow(2, (midiNote - 69) / 12);
   }
 
-  // Apply swing to timing
-  static applySwing(noteIndex: number, swingPercent: number, baseInterval: number): number {
-    if (swingPercent === 50) return baseInterval; // No swing
+  // Apply swing to eighth note timing (only affects off-beat placement)
+  static getSwingDelay(noteIndex: number, swingPercent: number, eighthNoteInterval: number): number {
+    if (swingPercent === 50) return 0; // No swing delay
     
-    const swingRatio = swingPercent / 100;
-    const isOffBeat = noteIndex % 2 === 1;
+    const isOffBeatEighth = noteIndex % 2 === 1;
     
-    if (isOffBeat) {
-      // Delay off-beat notes
-      return baseInterval * (1 + (swingRatio - 0.5));
+    if (isOffBeatEighth) {
+      // Convert swing percentage to delay/advance ratio
+      // 50% = no swing, 67% = triplet swing, 75% = dotted swing
+      const swingFactor = (swingPercent - 50) / 100; // -0.5 to +0.5 range
+      return eighthNoteInterval * swingFactor * 0.5; // Delay/advance by up to 25% of eighth note
     }
     
-    return baseInterval;
+    return 0; // On-beat notes stay exactly on beat
   }
 
   destroy() {

@@ -146,7 +146,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
       const playTime = nextNoteTime;
       
       const frequency = AudioEngine.midiToFrequency(note.midi);
-      audioEngine.playNote(frequency, 0.3, playTime);
+      audioEngine.playNote(frequency, 0.3, playTime, settings.playback.waveType);
 
       playbackRepetition++;
       
