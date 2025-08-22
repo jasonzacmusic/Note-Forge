@@ -95,6 +95,7 @@ export class MusicTheory {
     }
 
     const sequence: Note[] = [];
+    const usedSemitones = new Set<number>(); // Prevent enharmonic duplicates
     let consecutiveSeconds = 0;
 
     for (let i = 0; i < length; i++) {
@@ -103,14 +104,24 @@ export class MusicTheory {
       
       while (!validNote && attempts < 50) {
         const randomNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+        const noteMidi = this.getMidiFromNote(randomNote, 4);
+        const semitone = noteMidi % 12; // Get pitch class only
+        
+        // Skip if we already used this pitch class (enharmonic equivalent)
+        if (usedSemitones.has(semitone)) {
+          attempts++;
+          continue;
+        }
+        
         const note: Note = {
           name: randomNote,
-          midi: this.getMidiFromNote(randomNote, 4),
+          midi: noteMidi,
           octave: 4
         };
 
         if (sequence.length === 0) {
           sequence.push(note);
+          usedSemitones.add(semitone);
           validNote = true;
         } else {
           const lastNote = sequence[sequence.length - 1];
@@ -131,6 +142,7 @@ export class MusicTheory {
           const preferredIntervals = [3, 4, 5, 7, 8, 9]; // m3, M3, P4, P5, m6, M6
           if (preferredIntervals.includes(interval.semitones) || Math.random() > 0.3) {
             sequence.push(note);
+            usedSemitones.add(semitone);
             validNote = true;
           }
         }
@@ -143,9 +155,16 @@ export class MusicTheory {
         const lastNote = sequence[sequence.length - 1];
         const safeSemitones = [5, 7]; // P4, P5
         const randomSemitones = safeSemitones[Math.floor(Math.random() * safeSemitones.length)];
-        const newMidi = (lastNote.midi + randomSemitones) % 12;
+        let newMidi = (lastNote.midi + randomSemitones) % 12;
+        
+        // Ensure we don't use an already used semitone
+        while (usedSemitones.has(newMidi)) {
+          newMidi = (newMidi + 1) % 12;
+        }
+        
         const newNote = this.getNoteFromMidi(newMidi + 60); // Keep in 5th octave
         sequence.push({ ...newNote, octave: 4 });
+        usedSemitones.add(newMidi);
       }
     }
 

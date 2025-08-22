@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Shuffle, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -19,6 +19,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   const [audioEngine] = useState(() => new AudioEngine());
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [intervalAnalysis, setIntervalAnalysis] = useState<Interval[]>([]);
+  const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (audioContext) {
@@ -71,51 +72,73 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   const startPlayback = () => {
     if (settings.generatedNotes.length === 0) return;
 
-    audioEngine.setBPM(settings.playback.bpm);
+    let currentNoteIndex = 0;
+    let playbackRepetition = 0;
     
-    let noteIndex = 0;
+    // Calculate repetitions per bar based on subdivision
+    const getRepetitionsPerBar = (subdivision: string) => {
+      switch (subdivision) {
+        case "1": return 4;  // Quarter notes: 4 per bar
+        case "2": return 8;  // Quavers: 8 per bar  
+        case "3": return 12; // Triplets: 12 per bar
+        case "4": return 16; // Semiquavers: 16 per bar
+        default: return 4;
+      }
+    };
+    
+    const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
+    const noteInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
+    
     const scheduleNote = () => {
       if (!settings.playback.isPlaying) return;
 
-      const note = settings.generatedNotes[noteIndex % settings.generatedNotes.length];
-      setCurrentNoteIndex(noteIndex % settings.generatedNotes.length);
+      const note = settings.generatedNotes[currentNoteIndex];
+      setCurrentNoteIndex(currentNoteIndex);
       
       // Play note across multiple octaves for beginner mode
       if (settings.difficulty === 'beginner') {
         for (let octave = 3; octave <= 6; octave++) {
           const frequency = AudioEngine.midiToFrequency(note.midi + (octave - 4) * 12);
-          audioEngine.playNote(frequency, 0.3, audioContext?.currentTime);
+          audioEngine.playNote(frequency, 0.2, audioContext?.currentTime);
         }
       } else {
         // Intermediate mode: play note + interval
         const frequency = AudioEngine.midiToFrequency(note.midi);
-        audioEngine.playNote(frequency, 0.5, audioContext?.currentTime);
+        audioEngine.playNote(frequency, 0.3, audioContext?.currentTime);
         
         // If there's a next note, play the interval
-        if (noteIndex < settings.generatedNotes.length - 1) {
-          const nextNote = settings.generatedNotes[noteIndex + 1];
+        if (currentNoteIndex < settings.generatedNotes.length - 1) {
+          const nextNote = settings.generatedNotes[currentNoteIndex + 1];
           const intervalFreq = AudioEngine.midiToFrequency(nextNote.midi);
-          audioEngine.playNote(intervalFreq, 0.3, (audioContext?.currentTime || 0) + 0.2);
+          audioEngine.playNote(intervalFreq, 0.2, (audioContext?.currentTime || 0) + 0.15);
         }
       }
 
-      noteIndex++;
+      playbackRepetition++;
       
-      // Calculate next note timing based on subdivision and swing
-      const baseInterval = (60 / settings.playback.bpm) * (4 / parseInt(settings.playback.subdivision));
-      const swingAdjustedInterval = AudioEngine.applySwing(
-        noteIndex, 
-        settings.playback.swing, 
-        baseInterval
-      );
+      // Move to next note after completing all repetitions for current note
+      if (playbackRepetition >= repetitionsPerBar) {
+        currentNoteIndex = (currentNoteIndex + 1) % settings.generatedNotes.length;
+        playbackRepetition = 0;
+      }
       
-      setTimeout(scheduleNote, swingAdjustedInterval * 1000);
+      // Apply swing only to even subdivisions (2x and 4x)
+      let adjustedInterval = noteInterval;
+      if ((settings.playback.subdivision === "2" || settings.playback.subdivision === "4") && settings.playback.swing !== 50) {
+        adjustedInterval = AudioEngine.applySwing(playbackRepetition, settings.playback.swing, noteInterval);
+      }
+      
+      playbackTimeoutRef.current = setTimeout(scheduleNote, adjustedInterval * 1000);
     };
 
     scheduleNote();
   };
 
   const stopPlayback = () => {
+    if (playbackTimeoutRef.current) {
+      clearTimeout(playbackTimeoutRef.current);
+      playbackTimeoutRef.current = null;
+    }
     audioEngine.stop();
     setCurrentNoteIndex(0);
   };

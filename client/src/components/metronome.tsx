@@ -13,10 +13,9 @@ interface GlobalMetronomeProps {
 }
 
 export function GlobalMetronome({ settings, onSettingsChange, audioContext }: GlobalMetronomeProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentBeat, setCurrentBeat] = useState(0);
   const audioEngineRef = useRef<AudioEngine | null>(null);
-  const animationRef = useRef<number>();
+  const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (audioContext && !audioEngineRef.current) {
@@ -26,57 +25,65 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext }: Gl
   }, [audioContext]);
 
   useEffect(() => {
-    if (settings.isActive && !isPlaying) {
-      startMetronome();
-    } else if (!settings.isActive && isPlaying) {
-      stopMetronome();
+    if (settings.isActive) {
+      startMetronomeBeats();
+    } else {
+      stopMetronomeBeats();
     }
-  }, [settings.isActive]);
+  }, [settings.isActive, settings.bpm]);
 
-  const startMetronome = async () => {
-    if (!audioEngineRef.current || !audioContext) return;
-
-    setIsPlaying(true);
-    setCurrentBeat(0);
+  const startMetronomeBeats = () => {
+    if (!audioContext) return;
     
-    const countInBeats = parseInt(settings.countIn);
+    stopMetronomeBeats(); // Clear any existing interval
+    
+    const beatInterval = (60 / settings.bpm) * 1000; // Convert to milliseconds
     let beatCount = 0;
-    let isCountingIn = true;
     
-    const scheduleNextBeat = () => {
-      if (!isPlaying) return;
+    const playBeat = () => {
+      if (!settings.isActive) return;
       
-      const now = audioContext.currentTime;
-      const beatInterval = 60 / settings.bpm;
-      const nextBeatTime = now + beatInterval;
-      
-      // Create metronome click
       const isAccent = (beatCount % 4) === 0;
-      audioEngineRef.current?.createClick(isAccent, nextBeatTime);
+      const frequency = isAccent ? 1200 : 800;
+      const duration = isAccent ? 0.1 : 0.05;
       
-      // Update visual beat indicator
-      setCurrentBeat(beatCount % 4);
-      
-      beatCount++;
-      
-      // Check if count-in is complete
-      if (isCountingIn && beatCount >= countInBeats) {
-        isCountingIn = false;
-        beatCount = 0;
+      // Create click sound with proper volume
+      if (audioContext) {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.type = 'square';
+        
+        const volume = (settings.volume / 100) * 0.3; // Scale volume
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + duration);
       }
       
-      // Schedule next beat
-      const timeoutDelay = (nextBeatTime - audioContext.currentTime) * 1000;
-      setTimeout(scheduleNextBeat, Math.max(0, timeoutDelay - 5)); // 5ms early for precision
+      setCurrentBeat(beatCount % 4);
+      beatCount++;
     };
     
-    scheduleNextBeat();
+    // Play first beat immediately
+    playBeat();
+    
+    // Schedule subsequent beats
+    metronomeIntervalRef.current = setInterval(playBeat, beatInterval);
   };
 
-  const stopMetronome = () => {
-    setIsPlaying(false);
+  const stopMetronomeBeats = () => {
+    if (metronomeIntervalRef.current) {
+      clearInterval(metronomeIntervalRef.current);
+      metronomeIntervalRef.current = null;
+    }
     setCurrentBeat(0);
-    audioEngineRef.current?.stop();
   };
 
   const toggleMetronome = () => {
@@ -166,7 +173,7 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext }: Gl
       </div>
 
       {/* Beat Indicator */}
-      {isPlaying && (
+      {settings.isActive && (
         <div className="flex justify-center mt-4 space-x-2">
           {[0, 1, 2, 3].map((beat) => (
             <div

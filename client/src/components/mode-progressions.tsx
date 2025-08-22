@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,6 +17,7 @@ interface ProgressionsModeProps {
 export function ProgressionsMode({ settings, onSettingsChange, audioContext }: ProgressionsModeProps) {
   const [audioEngine] = useState(() => new AudioEngine());
   const [currentChordIndex, setCurrentChordIndex] = useState(0);
+  const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (audioContext) {
@@ -41,33 +42,55 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
   const startPlayback = () => {
     if (!settings.currentProgression) return;
 
-    audioEngine.setBPM(settings.playback.bpm);
+    let currentChordIndex = settings.cycleStart;
+    let playbackRepetition = 0;
     
-    let chordIndex = settings.cycleStart;
+    // Calculate repetitions per bar based on subdivision  
+    const getRepetitionsPerBar = (subdivision: string) => {
+      switch (subdivision) {
+        case "1": return 4;  // Quarter notes: 4 per bar
+        case "2": return 8;  // Quavers: 8 per bar
+        case "3": return 12; // Triplets: 12 per bar  
+        case "4": return 16; // Semiquavers: 16 per bar
+        default: return 4;
+      }
+    };
+    
+    const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
+    const chordInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
+    
     const scheduleChord = () => {
       if (!settings.playback.isPlaying || !settings.currentProgression) return;
 
-      const chord = settings.currentProgression.chords[chordIndex];
-      setCurrentChordIndex(chordIndex);
+      const chord = settings.currentProgression.chords[currentChordIndex];
+      setCurrentChordIndex(currentChordIndex);
       
-      // Play chord notes simultaneously
+      // Play chord notes simultaneously  
       chord.notes.forEach((noteName, noteIndex) => {
         const frequency = AudioEngine.midiToFrequency(MusicTheory.getMidiFromNote(noteName, 4));
-        const delay = noteIndex * 0.05; // Slight arpeggio effect
-        audioEngine.playNote(frequency, 1.0, (audioContext?.currentTime || 0) + delay);
+        const delay = noteIndex * 0.03; // Slight arpeggio effect
+        audioEngine.playNote(frequency, 0.8, (audioContext?.currentTime || 0) + delay);
       });
 
-      chordIndex = (chordIndex + 1) % settings.currentProgression.chords.length;
+      playbackRepetition++;
       
-      // Calculate next chord timing
-      const baseInterval = (60 / settings.playback.bpm) * (4 / parseInt(settings.playback.subdivision));
-      setTimeout(scheduleChord, baseInterval * 1000);
+      // Move to next chord after completing all repetitions for current chord
+      if (playbackRepetition >= repetitionsPerBar) {
+        currentChordIndex = (currentChordIndex + 1) % settings.currentProgression.chords.length;
+        playbackRepetition = 0;
+      }
+      
+      playbackTimeoutRef.current = setTimeout(scheduleChord, chordInterval * 1000);
     };
 
     scheduleChord();
   };
 
   const stopPlayback = () => {
+    if (playbackTimeoutRef.current) {
+      clearTimeout(playbackTimeoutRef.current);
+      playbackTimeoutRef.current = null;
+    }
     audioEngine.stop();
     setCurrentChordIndex(0);
   };

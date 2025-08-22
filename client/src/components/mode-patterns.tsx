@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -18,6 +18,7 @@ interface PatternsModeProps {
 export function PatternsMode({ settings, onSettingsChange, audioContext }: PatternsModeProps) {
   const [audioEngine] = useState(() => new AudioEngine());
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
+  const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (audioContext) {
@@ -80,29 +81,51 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
   const startPlayback = () => {
     if (settings.currentPattern.length === 0) return;
 
-    audioEngine.setBPM(settings.playback.bpm);
+    let currentNoteIndex = 0;
+    let playbackRepetition = 0;
     
-    let noteIndex = 0;
+    // Calculate repetitions per bar based on subdivision
+    const getRepetitionsPerBar = (subdivision: string) => {
+      switch (subdivision) {
+        case "1": return 4;  // Quarter notes: 4 per bar
+        case "2": return 8;  // Quavers: 8 per bar
+        case "3": return 12; // Triplets: 12 per bar
+        case "4": return 16; // Semiquavers: 16 per bar
+        default: return 4;
+      }
+    };
+    
+    const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
+    const noteInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
+    
     const scheduleNote = () => {
       if (!settings.playback.isPlaying) return;
 
-      const note = settings.currentPattern[noteIndex % settings.currentPattern.length];
-      setCurrentNoteIndex(noteIndex % settings.currentPattern.length);
+      const note = settings.currentPattern[currentNoteIndex];
+      setCurrentNoteIndex(currentNoteIndex);
       
       const frequency = AudioEngine.midiToFrequency(note.midi);
-      audioEngine.playNote(frequency, 0.5, audioContext?.currentTime);
+      audioEngine.playNote(frequency, 0.3, audioContext?.currentTime);
 
-      noteIndex++;
+      playbackRepetition++;
       
-      // Calculate next note timing
-      const baseInterval = (60 / settings.playback.bpm) * (4 / parseInt(settings.playback.subdivision));
-      setTimeout(scheduleNote, baseInterval * 1000);
+      // Move to next note after completing all repetitions for current note
+      if (playbackRepetition >= repetitionsPerBar) {
+        currentNoteIndex = (currentNoteIndex + 1) % settings.currentPattern.length;
+        playbackRepetition = 0;
+      }
+      
+      playbackTimeoutRef.current = setTimeout(scheduleNote, noteInterval * 1000);
     };
 
     scheduleNote();
   };
 
   const stopPlayback = () => {
+    if (playbackTimeoutRef.current) {
+      clearTimeout(playbackTimeoutRef.current);
+      playbackTimeoutRef.current = null;
+    }
     audioEngine.stop();
     setCurrentNoteIndex(0);
   };
