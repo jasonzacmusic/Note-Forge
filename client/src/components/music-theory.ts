@@ -233,7 +233,22 @@ export class MusicTheory {
   }
 
   static getCircleOfFifthsPattern(startNote: string, direction: 'clockwise' | 'counterclockwise', length: number = 4): Note[] {
-    const startIndex = this.circleOfFifths.indexOf(startNote);
+    // Handle enharmonic equivalents
+    const enharmonicMap: Record<string, string> = {
+      'C#': 'Db',
+      'D#': 'Eb', 
+      'F#': 'F#', // Already in circle
+      'G#': 'Ab',
+      'A#': 'Bb',
+      'Db': 'Db', // Already in circle
+      'Eb': 'Eb', // Already in circle
+      'Gb': 'F#',
+      'Ab': 'Ab', // Already in circle
+      'Bb': 'Bb'  // Already in circle
+    };
+    
+    const circleNote = enharmonicMap[startNote] || startNote;
+    const startIndex = this.circleOfFifths.indexOf(circleNote);
     if (startIndex === -1) throw new Error(`Note ${startNote} not found in circle of fifths`);
 
     const pattern: Note[] = [];

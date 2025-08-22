@@ -35,8 +35,19 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   }, [settings.playback.isPlaying]);
 
   useEffect(() => {
-    if (settings.generatedNotes.length > 1) {
-      // Analyze intervals between consecutive notes
+    if (settings.generatedNotes.length > 1 && settings.difficulty === 'intermediate') {
+      // For intermediate mode, show ALL intervals between consecutive notes
+      const analysis: Interval[] = [];
+      for (let i = 1; i < settings.generatedNotes.length; i++) {
+        const allIntervals = MusicTheory.getAllIntervalsBetween(
+          settings.generatedNotes[i - 1],
+          settings.generatedNotes[i]
+        );
+        analysis.push(...allIntervals);
+      }
+      setIntervalAnalysis(analysis);
+    } else if (settings.generatedNotes.length > 1) {
+      // For beginner mode, show basic interval
       const analysis: Interval[] = [];
       for (let i = 1; i < settings.generatedNotes.length; i++) {
         const interval = MusicTheory.getInterval(
@@ -47,7 +58,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
       }
       setIntervalAnalysis(analysis);
     }
-  }, [settings.generatedNotes]);
+  }, [settings.generatedNotes, settings.difficulty]);
 
   const generateRandomNotes = () => {
     const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
@@ -330,7 +341,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                     </div>
                     {settings.difficulty === 'intermediate' && index < settings.generatedNotes.length - 1 && (
                       <div className="app-accent text-xs mt-2" data-testid={`interval-${index}`}>
-                        {intervalAnalysis[index]?.abbreviation}
+                        →{settings.generatedNotes[index + 1].name}
                       </div>
                     )}
                   </div>
@@ -349,7 +360,19 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                 <div className="app-text-secondary text-sm space-y-1">
                   <p>• No more than 2 consecutive seconds (M2/m2)</p>
                   <p>• Preferred intervals: P5, P4, M3, m3, M6, m6</p>
-                  {intervalAnalysis.length > 0 && (
+                  {intervalAnalysis.length > 0 && settings.difficulty === 'intermediate' && (
+                    <div>
+                      <p>• All possible intervals:</p>
+                      <div className="grid grid-cols-2 gap-1 mt-2 text-xs">
+                        {intervalAnalysis.map((interval, i) => (
+                          <div key={i} className="app-elevated p-1 rounded">
+                            {interval.abbreviation}: {interval.name}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {intervalAnalysis.length > 0 && settings.difficulty === 'beginner' && (
                     <p>• Intervals: {intervalAnalysis.map(interval => interval.abbreviation).join(', ')}</p>
                   )}
                 </div>
