@@ -99,8 +99,16 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
   }, [settings.generatedNotes, settings.difficulty]);
 
   const generateRandomNotes = () => {
-    // Generate new notes
-    const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
+    // Generate new notes based on difficulty and interval category
+    let newNotes: Note[];
+    
+    if (settings.difficulty === 'intermediate' && settings.intervalCategory) {
+      // Use interval-based generation for intermediate mode
+      newNotes = MusicTheory.generateIntervalSequence(settings.intervalCategory, 4);
+    } else {
+      // Use random sequence for beginner mode
+      newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
+    }
     
     // Stop current playback immediately and set new notes
     onSettingsChange({
@@ -281,44 +289,57 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
               </RadioGroup>
             </div>
             
-            {/* Note Selection */}
-            <div className="mb-6">
-              <Label className="block app-text-secondary font-medium mb-3">Note Selection</Label>
-              <RadioGroup
-                value={settings.noteSelection}
-                onValueChange={updateNoteSelection}
-                className="space-y-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="all" id="all-notes" />
-                  <Label htmlFor="all-notes" className="app-text-primary">All 12 Notes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="white" id="white-notes" />
-                  <Label htmlFor="white-notes" className="app-text-primary">White Notes Only</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="accidentals" id="black-notes" />
-                  <Label htmlFor="black-notes" className="app-text-primary">Black Notes Only</Label>
-                </div>
-              </RadioGroup>
-            </div>
+            {/* Note Selection - Only for Beginner */}
+            {settings.difficulty === 'beginner' && (
+              <div className="mb-6">
+                <Label className="block app-text-secondary font-medium mb-3">Note Selection</Label>
+                <RadioGroup
+                  value={settings.noteSelection}
+                  onValueChange={updateNoteSelection}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="all-notes" />
+                    <Label htmlFor="all-notes" className="app-text-primary">All 12 Notes</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="white" id="white-notes" />
+                    <Label htmlFor="white-notes" className="app-text-primary">White Notes Only</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="accidentals" id="black-notes" />
+                    <Label htmlFor="black-notes" className="app-text-primary">Black Notes Only</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
             
             {/* Interval Category for Intermediate */}
             {settings.difficulty === 'intermediate' && (
               <div className="mb-6">
-                <Label className="block app-text-secondary font-medium mb-2">Interval Category</Label>
-                <Select value={settings.intervalCategory} onValueChange={updateIntervalCategory}>
-                  <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-interval-category">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="app-surface border-[var(--app-elevated)]">
-                    <SelectItem value="resolutions">Resolutions</SelectItem>
-                    <SelectItem value="tensions">Tensions</SelectItem>
-                    <SelectItem value="anticipations">Anticipations</SelectItem>
-                    <SelectItem value="mystery">Mystery</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="block app-text-secondary font-medium mb-3">Interval Category</Label>
+                <RadioGroup
+                  value={settings.intervalCategory}
+                  onValueChange={updateIntervalCategory}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="resolutions" id="resolutions" />
+                    <Label htmlFor="resolutions" className="app-text-primary">Resolutions</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="tensions" id="tensions" />
+                    <Label htmlFor="tensions" className="app-text-primary">Tensions</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="anticipations" id="anticipations" />
+                    <Label htmlFor="anticipations" className="app-text-primary">Anticipations</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="mystery" id="mystery" />
+                    <Label htmlFor="mystery" className="app-text-primary">Mystery</Label>
+                  </div>
+                </RadioGroup>
               </div>
             )}
             

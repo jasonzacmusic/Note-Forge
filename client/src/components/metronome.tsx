@@ -61,10 +61,9 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     const playBeat = () => {
       if (!settings.isActive || !audioContext) return;
       
-      // Accent on beats 1 and 3 (standard quarter note accenting)  
-      const isAccent = (beatCount % 4) === 0 || (beatCount % 4) === 2;
-      const frequency = isAccent ? 1200 : 800;
-      const duration = isAccent ? 0.1 : 0.05;
+      // Single consistent sound for all beats
+      const frequency = 1000;
+      const duration = 0.08;
       
       // Schedule click at precise Web Audio time
       const playTime = nextBeatTime;

@@ -185,6 +185,56 @@ export class MusicTheory {
     return sequence;
   }
 
+  static generateIntervalSequence(
+    intervalCategory: 'resolutions' | 'tensions' | 'anticipations' | 'mystery', 
+    length: number = 4
+  ): Note[] {
+    const intervalsByCategory = {
+      resolutions: [
+        { interval: 7, name: 'Perfect Fifth' },
+        { interval: 5, name: 'Perfect Fourth' },
+        { interval: 12, name: 'Octave' },
+        { interval: 0, name: 'Unison' }
+      ],
+      tensions: [
+        { interval: 1, name: 'Minor Second' },
+        { interval: 6, name: 'Tritone' },
+        { interval: 10, name: 'Minor Seventh' },
+        { interval: 11, name: 'Major Seventh' }
+      ],
+      anticipations: [
+        { interval: 2, name: 'Major Second' },
+        { interval: 4, name: 'Major Third' },
+        { interval: 9, name: 'Major Sixth' },
+        { interval: 5, name: 'Perfect Fourth' }
+      ],
+      mystery: [
+        { interval: 3, name: 'Minor Third' },
+        { interval: 8, name: 'Minor Sixth' },
+        { interval: 6, name: 'Tritone' },
+        { interval: 9, name: 'Major Sixth' }
+      ]
+    };
+
+    const categoryIntervals = intervalsByCategory[intervalCategory];
+    const sequence: Note[] = [];
+    
+    // Start with a random root note
+    const rootMidi = 48 + Math.floor(Math.random() * 24); // C3-B4 range
+    const rootNote = this.getNoteFromMidi(rootMidi);
+    sequence.push(rootNote);
+
+    // Generate intervals based on category
+    for (let i = 1; i < length; i++) {
+      const intervalData = categoryIntervals[Math.floor(Math.random() * categoryIntervals.length)];
+      const newMidi = rootMidi + intervalData.interval;
+      const newNote = this.getNoteFromMidi(newMidi);
+      sequence.push(newNote);
+    }
+
+    return sequence;
+  }
+
   static getChordFromRomanNumeral(key: string, romanNumeral: string): Chord {
     const keyNotes = this.keySignatures[key as keyof typeof this.keySignatures]?.notes || this.keySignatures['C'].notes;
     
