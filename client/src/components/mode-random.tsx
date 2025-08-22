@@ -65,11 +65,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   useEffect(() => {
     if (settings.playback.isPlaying) {
       stopPlayback();
-      const timer = setTimeout(() => {
-        startPlayback();
-      }, 50); // Small delay to ensure cleanup completes
-      
-      return () => clearTimeout(timer);
+      startPlayback();
     }
   }, [settings.playback.subdivision, settings.playback.swing]);
 
@@ -103,21 +99,13 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     // Always generate random notes - intervals are selected separately
     const newNotes = MusicTheory.generateRandomSequence('all', 4);
     
-    // Stop current playback immediately and set new notes
+    // Stop current playback and update notes immediately
+    stopPlayback();
     onSettingsChange({
       ...settings,
       generatedNotes: newNotes,
-      playback: { ...settings.playback, isPlaying: false }
+      playback: { ...settings.playback, isPlaying: true }
     });
-    
-    // Restart playback with new notes after brief delay to ensure cleanup
-    setTimeout(() => {
-      onSettingsChange({
-        ...settings,
-        generatedNotes: newNotes,
-        playback: { ...settings.playback, isPlaying: true }
-      });
-    }, 100);
   };
 
   const startPlayback = () => {
@@ -192,21 +180,33 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       // Schedule next note using Web Audio precision with swing delay
       nextNoteTime += noteInterval + swingDelay;
       
-      // Schedule callback slightly before next note time
-      const timeUntilNext = Math.max(0, (nextNoteTime - audioContext.currentTime) * 1000 - 25);
-      playbackTimeoutRef.current = setTimeout(scheduleNote, timeUntilNext);
+      // Only continue if still playing
+      if (settings.playback.isPlaying) {
+        // Schedule callback slightly before next note time
+        const timeUntilNext = Math.max(50, (nextNoteTime - audioContext.currentTime) * 1000 - 25);
+        playbackTimeoutRef.current = setTimeout(scheduleNote, timeUntilNext);
+      }
     };
 
     scheduleNote();
   };
 
   const stopPlayback = () => {
+    // Clear any pending timeouts immediately
     if (playbackTimeoutRef.current) {
       clearTimeout(playbackTimeoutRef.current);
       playbackTimeoutRef.current = null;
     }
+    
+    // Force stop audio engine
     audioEngine.stop();
     setCurrentNoteIndex(0);
+    
+    // Update state to ensure playback stops
+    onSettingsChange({
+      ...settings,
+      playback: { ...settings.playback, isPlaying: false }
+    });
   };
 
   const togglePlayback = () => {

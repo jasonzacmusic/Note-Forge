@@ -169,12 +169,21 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
   };
 
   const stopPlayback = () => {
+    // Clear any pending timeouts immediately
     if (playbackTimeoutRef.current) {
       clearTimeout(playbackTimeoutRef.current);
       playbackTimeoutRef.current = null;
     }
+    
+    // Force stop audio engine
     audioEngine.stop();
     setCurrentNoteIndex(0);
+    
+    // Update state to ensure playback stops
+    onSettingsChange({
+      ...settings,
+      playback: { ...settings.playback, isPlaying: false }
+    });
   };
 
   const togglePlayback = () => {

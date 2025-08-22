@@ -179,9 +179,6 @@ export function MusicalNoteGenerator() {
   };
 
   const switchTab = (mode: AppSettings['currentMode']) => {
-    // Force stop all audio immediately by dispatching stop events
-    window.dispatchEvent(new CustomEvent('stopAllAudio'));
-    
     // Immediately stop ALL playback in all modes
     setSettings(prev => ({
       ...prev,
