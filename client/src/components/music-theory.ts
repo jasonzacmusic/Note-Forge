@@ -88,10 +88,24 @@ export class MusicTheory {
         availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
         break;
       case 'accidentals':
-        availableNotes = ['C#', 'D#', 'F#', 'G#', 'A#'];
+        // Randomly mix sharps and flats for black keys
+        availableNotes = [];
+        const blackKeyPairs = [
+          ['C#', 'Db'], ['D#', 'Eb'], ['F#', 'Gb'], ['G#', 'Ab'], ['A#', 'Bb']
+        ];
+        blackKeyPairs.forEach(([sharp, flat]) => {
+          availableNotes.push(Math.random() < 0.5 ? sharp : flat);
+        });
         break;
       default:
-        availableNotes = this.noteNames;
+        // For 'all', randomly mix sharps and flats for all chromatic notes
+        availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const chromaticPairs = [
+          ['C#', 'Db'], ['D#', 'Eb'], ['F#', 'Gb'], ['G#', 'Ab'], ['A#', 'Bb']
+        ];
+        chromaticPairs.forEach(([sharp, flat]) => {
+          availableNotes.push(Math.random() < 0.5 ? sharp : flat);
+        });
     }
 
     const sequence: Note[] = [];

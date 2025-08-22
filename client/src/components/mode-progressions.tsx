@@ -64,10 +64,15 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
     }
   }, [settings.playback.bpm]);
 
-  // Subdivision changes should continue playback seamlessly with new timing
+  // Restart playback when subdivision changes to apply new timing immediately
   useEffect(() => {
     if (settings.playback.isPlaying) {
-      // Don't restart, the existing playback will pick up new subdivision timing automatically
+      stopPlayback();
+      const timer = setTimeout(() => {
+        startPlayback();
+      }, 50); // Small delay to ensure cleanup completes
+      
+      return () => clearTimeout(timer);
     }
   }, [settings.playback.subdivision]);
 

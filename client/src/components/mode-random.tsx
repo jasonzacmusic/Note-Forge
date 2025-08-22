@@ -60,10 +60,15 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     }
   }, [settings.playback.bpm]);
 
-  // Subdivision changes should continue playback seamlessly with new timing
+  // Restart playback when subdivision changes to apply new timing immediately
   useEffect(() => {
     if (settings.playback.isPlaying) {
-      // Don't restart, the existing playback will pick up new subdivision timing automatically
+      stopPlayback();
+      const timer = setTimeout(() => {
+        startPlayback();
+      }, 50); // Small delay to ensure cleanup completes
+      
+      return () => clearTimeout(timer);
     }
   }, [settings.playback.subdivision]);
 
@@ -261,17 +266,25 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
             
             {/* Note Selection */}
             <div className="mb-6">
-              <Label className="block app-text-secondary font-medium mb-2">Note Selection</Label>
-              <Select value={settings.noteSelection} onValueChange={updateNoteSelection}>
-                <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-note-selection">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="app-surface border-[var(--app-elevated)]">
-                  <SelectItem value="all">All 12 Notes</SelectItem>
-                  <SelectItem value="white">White Notes Only</SelectItem>
-                  <SelectItem value="accidentals">Sharps/Flats Only</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="block app-text-secondary font-medium mb-3">Note Selection</Label>
+              <RadioGroup
+                value={settings.noteSelection}
+                onValueChange={updateNoteSelection}
+                className="space-y-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="all-notes" />
+                  <Label htmlFor="all-notes" className="app-text-primary">All 12 Notes</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="white" id="white-notes" />
+                  <Label htmlFor="white-notes" className="app-text-primary">White Notes Only</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="accidentals" id="black-notes" />
+                  <Label htmlFor="black-notes" className="app-text-primary">Black Notes Only</Label>
+                </div>
+              </RadioGroup>
             </div>
             
             {/* Interval Category for Intermediate */}
