@@ -60,6 +60,13 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     }
   }, [settings.playback.bpm]);
 
+  // Subdivision changes should continue playback seamlessly with new timing
+  useEffect(() => {
+    if (settings.playback.isPlaying) {
+      // Don't restart, the existing playback will pick up new subdivision timing automatically
+    }
+  }, [settings.playback.subdivision]);
+
   useEffect(() => {
     if (settings.generatedNotes.length > 1 && settings.difficulty === 'intermediate') {
       // For intermediate mode, show ALL intervals between consecutive notes
@@ -112,22 +119,22 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
     
-    // Calculate repetitions per bar based on subdivision
-    const getRepetitionsPerBar = (subdivision: string) => {
-      switch (subdivision) {
-        case "1": return 4;  // Quarter notes: 4 per bar
-        case "2": return 8;  // Quavers: 8 per bar  
-        case "3": return 12; // Triplets: 12 per bar
-        case "4": return 16; // Semiquavers: 16 per bar
-        default: return 4;
-      }
-    };
-    
-    const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
-    const noteInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
-    
     const scheduleNote = () => {
       if (!settings.playback.isPlaying) return;
+
+      // Dynamically calculate repetitions per bar based on current subdivision
+      const getRepetitionsPerBar = (subdivision: string) => {
+        switch (subdivision) {
+          case "1": return 4;  // Quarter notes: 4 per bar
+          case "2": return 8;  // Quavers: 8 per bar  
+          case "3": return 12; // Triplets: 12 per bar
+          case "4": return 16; // Semiquavers: 16 per bar
+          default: return 4;
+        }
+      };
+      
+      const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
+      const noteInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
 
       const note = settings.generatedNotes[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
@@ -252,22 +259,20 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
               </RadioGroup>
             </div>
             
-            {/* Note Selection for Beginner */}
-            {settings.difficulty === 'beginner' && (
-              <div className="mb-6">
-                <Label className="block app-text-secondary font-medium mb-2">Note Selection</Label>
-                <Select value={settings.noteSelection} onValueChange={updateNoteSelection}>
-                  <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-note-selection">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="app-surface border-[var(--app-elevated)]">
-                    <SelectItem value="all">All 12 Notes</SelectItem>
-                    <SelectItem value="white">White Notes Only</SelectItem>
-                    <SelectItem value="accidentals">Sharps/Flats Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {/* Note Selection */}
+            <div className="mb-6">
+              <Label className="block app-text-secondary font-medium mb-2">Note Selection</Label>
+              <Select value={settings.noteSelection} onValueChange={updateNoteSelection}>
+                <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-note-selection">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="app-surface border-[var(--app-elevated)]">
+                  <SelectItem value="all">All 12 Notes</SelectItem>
+                  <SelectItem value="white">White Notes Only</SelectItem>
+                  <SelectItem value="accidentals">Sharps/Flats Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             {/* Interval Category for Intermediate */}
             {settings.difficulty === 'intermediate' && (

@@ -64,28 +64,35 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
     }
   }, [settings.playback.bpm]);
 
+  // Subdivision changes should continue playback seamlessly with new timing
+  useEffect(() => {
+    if (settings.playback.isPlaying) {
+      // Don't restart, the existing playback will pick up new subdivision timing automatically
+    }
+  }, [settings.playback.subdivision]);
+
   const startPlayback = () => {
     if (!settings.currentProgression) return;
 
     let currentChordIndex = settings.cycleStart;
     let playbackRepetition = 0;
     
-    // Calculate repetitions per bar based on subdivision  
-    const getRepetitionsPerBar = (subdivision: string) => {
-      switch (subdivision) {
-        case "1": return 4;  // Quarter notes: 4 per bar
-        case "2": return 8;  // Quavers: 8 per bar
-        case "3": return 12; // Triplets: 12 per bar  
-        case "4": return 16; // Semiquavers: 16 per bar
-        default: return 4;
-      }
-    };
-    
-    const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
-    const chordInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
-    
     const scheduleChord = () => {
       if (!settings.playback.isPlaying || !settings.currentProgression) return;
+
+      // Dynamically calculate repetitions per bar based on current subdivision  
+      const getRepetitionsPerBar = (subdivision: string) => {
+        switch (subdivision) {
+          case "1": return 4;  // Quarter notes: 4 per bar
+          case "2": return 8;  // Quavers: 8 per bar
+          case "3": return 12; // Triplets: 12 per bar  
+          case "4": return 16; // Semiquavers: 16 per bar
+          default: return 4;
+        }
+      };
+      
+      const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
+      const chordInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
 
       const chord = settings.currentProgression.chords[currentChordIndex];
       setCurrentChordIndex(currentChordIndex);

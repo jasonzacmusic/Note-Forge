@@ -107,9 +107,6 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
   };
 
 
-  const updateCountIn = (value: string) => {
-    onSettingsChange({ ...settings, countIn: value as "4" | "8" });
-  };
 
   const updateVolume = (newVolume: number[]) => {
     onSettingsChange({ ...settings, volume: newVolume[0] });
@@ -136,19 +133,6 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
         </div>
         
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-          {/* Count-in */}
-          <div className="flex items-center space-x-3">
-            <label className="app-text-secondary font-medium">Count-in:</label>
-            <Select value={settings.countIn} onValueChange={updateCountIn}>
-              <SelectTrigger className="w-32 app-bg border-[var(--app-elevated)]" data-testid="select-count-in">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="app-surface border-[var(--app-elevated)]">
-                <SelectItem value="4">1 Bar (4 beats)</SelectItem>
-                <SelectItem value="8">2 Bars (8 beats)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           
           {/* Volume */}
           <div className="flex items-center space-x-3">

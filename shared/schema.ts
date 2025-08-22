@@ -67,7 +67,6 @@ export const patternsModeSettingsSchema = z.object({
 export const appSettingsSchema = z.object({
   globalMetronome: z.object({
     isActive: z.boolean(),
-    countIn: z.enum(["4", "8"]),
     volume: z.number().min(0).max(100)
   }),
   currentMode: z.enum(["random", "progressions", "patterns", "glossary"]),

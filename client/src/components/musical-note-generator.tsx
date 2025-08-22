@@ -15,7 +15,6 @@ import type { AppSettings } from "@shared/schema";
 const defaultSettings: AppSettings = {
   globalMetronome: {
     isActive: false,
-    countIn: "4",
     volume: 75
   },
   currentMode: "random",
