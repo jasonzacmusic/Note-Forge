@@ -160,6 +160,9 @@ export function MusicalNoteGenerator() {
   };
 
   const switchTab = (mode: AppSettings['currentMode']) => {
+    // Force stop all audio immediately by dispatching stop events
+    window.dispatchEvent(new CustomEvent('stopAllAudio'));
+    
     // Immediately stop ALL playback in all modes
     setSettings(prev => ({
       ...prev,
@@ -222,11 +225,10 @@ export function MusicalNoteGenerator() {
             const modeSettings = settings[modeKey] as any;
             return modeSettings?.playback?.bpm || 120;
           })()}
-          isAnyModePlayingBack={(() => {
-            const randomPlaying = settings.randomMode.playback.isPlaying;
-            const progressionsPlaying = settings.progressionsMode.playback.isPlaying;
-            const patternsPlaying = settings.patternsMode.playback.isPlaying;
-            return randomPlaying || progressionsPlaying || patternsPlaying;
+          isCurrentModePlayingBack={(() => {
+            const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+            const modeSettings = settings[modeKey] as any;
+            return modeSettings?.playback?.isPlaying || false;
           })()}
         />
       </header>

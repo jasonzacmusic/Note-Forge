@@ -11,10 +11,10 @@ interface GlobalMetronomeProps {
   onSettingsChange: (settings: AppSettings['globalMetronome']) => void;
   audioContext: AudioContext | null;
   currentBpm: number;
-  isAnyModePlayingBack: boolean;
+  isCurrentModePlayingBack: boolean;
 }
 
-export function GlobalMetronome({ settings, onSettingsChange, audioContext, currentBpm, isAnyModePlayingBack }: GlobalMetronomeProps) {
+export function GlobalMetronome({ settings, onSettingsChange, audioContext, currentBpm, isCurrentModePlayingBack }: GlobalMetronomeProps) {
   const [currentBeat, setCurrentBeat] = useState(0);
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -26,8 +26,8 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     }
   }, [audioContext]);
 
-  // Only play metronome when it's active AND there's actual playback happening
-  const shouldPlayMetronome = settings.isActive && isAnyModePlayingBack;
+  // Only play metronome when it's active AND the current mode is playing
+  const shouldPlayMetronome = settings.isActive && isCurrentModePlayingBack;
   
   useEffect(() => {
     if (shouldPlayMetronome) {
@@ -35,7 +35,17 @@ export function GlobalMetronome({ settings, onSettingsChange, audioContext, curr
     } else {
       stopMetronomeBeats();
     }
-  }, [shouldPlayMetronome, currentBpm, isAnyModePlayingBack]);
+  }, [shouldPlayMetronome, currentBpm, isCurrentModePlayingBack]);
+
+  // Listen for global stop event and stop metronome
+  useEffect(() => {
+    const handleStopAllAudio = () => {
+      stopMetronomeBeats();
+    };
+
+    window.addEventListener('stopAllAudio', handleStopAllAudio);
+    return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
+  }, []);
 
   const startMetronomeBeats = () => {
     if (!audioContext) return;

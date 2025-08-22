@@ -23,6 +23,19 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
     if (audioContext) {
       audioEngine.initialize();
     }
+
+    // Listen for global stop event
+    const handleStopAllAudio = () => {
+      audioEngine.stop();
+      if (playbackTimeoutRef.current) {
+        clearTimeout(playbackTimeoutRef.current);
+        playbackTimeoutRef.current = null;
+      }
+      setCurrentChordIndex(0);
+    };
+
+    window.addEventListener('stopAllAudio', handleStopAllAudio);
+    return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
   }, [audioContext, audioEngine]);
 
   useEffect(() => {
@@ -105,14 +118,6 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext }: P
     }
     audioEngine.stop();
     setCurrentChordIndex(0);
-    
-    // Force update playback state to stop
-    if (settings.playback.isPlaying) {
-      onSettingsChange({
-        ...settings,
-        playback: { ...settings.playback, isPlaying: false }
-      });
-    }
   };
 
   const togglePlayback = () => {

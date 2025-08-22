@@ -25,6 +25,19 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     if (audioContext) {
       audioEngine.initialize();
     }
+
+    // Listen for global stop event
+    const handleStopAllAudio = () => {
+      audioEngine.stop();
+      if (playbackTimeoutRef.current) {
+        clearTimeout(playbackTimeoutRef.current);
+        playbackTimeoutRef.current = null;
+      }
+      setCurrentNoteIndex(0);
+    };
+
+    window.addEventListener('stopAllAudio', handleStopAllAudio);
+    return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
   }, [audioContext, audioEngine]);
 
   useEffect(() => {
@@ -165,14 +178,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     }
     audioEngine.stop();
     setCurrentNoteIndex(0);
-    
-    // Force update playback state to stop
-    if (settings.playback.isPlaying) {
-      onSettingsChange({
-        ...settings,
-        playback: { ...settings.playback, isPlaying: false }
-      });
-    }
   };
 
   const togglePlayback = () => {
