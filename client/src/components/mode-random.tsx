@@ -99,8 +99,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     // Always generate random notes - intervals are selected separately
     const newNotes = MusicTheory.generateRandomSequence('all', 4);
     
-    // Stop current playback and update notes immediately
-    stopPlayback();
+    // Update notes and start playback
     onSettingsChange({
       ...settings,
       generatedNotes: newNotes,
@@ -201,12 +200,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     // Force stop audio engine
     audioEngine.stop();
     setCurrentNoteIndex(0);
-    
-    // Update state to ensure playback stops
-    onSettingsChange({
-      ...settings,
-      playback: { ...settings.playback, isPlaying: false }
-    });
   };
 
   const togglePlayback = () => {

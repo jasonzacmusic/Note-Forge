@@ -143,12 +143,6 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
     // Force stop audio engine
     audioEngine.stop();
     setCurrentChordIndex(0);
-    
-    // Update state to ensure playback stops
-    onSettingsChange({
-      ...settings,
-      playback: { ...settings.playback, isPlaying: false }
-    });
   };
 
   const togglePlayback = () => {

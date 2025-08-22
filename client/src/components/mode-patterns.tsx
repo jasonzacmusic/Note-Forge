@@ -178,12 +178,6 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
     // Force stop audio engine
     audioEngine.stop();
     setCurrentNoteIndex(0);
-    
-    // Update state to ensure playback stops
-    onSettingsChange({
-      ...settings,
-      playback: { ...settings.playback, isPlaying: false }
-    });
   };
 
   const togglePlayback = () => {
