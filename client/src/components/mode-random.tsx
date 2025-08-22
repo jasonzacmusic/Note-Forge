@@ -13,9 +13,10 @@ interface RandomModeProps {
   settings: RandomModeSettings;
   onSettingsChange: (settings: RandomModeSettings) => void;
   audioContext: AudioContext | null;
+  globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
 }
 
-export function RandomMode({ settings, onSettingsChange, audioContext }: RandomModeProps) {
+export function RandomMode({ settings, onSettingsChange, audioContext, globalAudioSettings }: RandomModeProps) {
   const [audioEngine] = useState(() => new AudioEngine());
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [intervalAnalysis, setIntervalAnalysis] = useState<Interval[]>([]);
@@ -160,17 +161,17 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
       if (settings.difficulty === 'beginner') {
         for (let octave = 3; octave <= 6; octave++) {
           const frequency = AudioEngine.midiToFrequency(note.midi + (octave - 4) * 12);
-          audioEngine.playNote(frequency, 0.2, playTime, settings.playback.waveType);
+          audioEngine.playNote(frequency, 0.2, playTime, globalAudioSettings.waveType);
         }
       } else {
         // Intermediate mode: play note + selected interval simultaneously
         const frequency = AudioEngine.midiToFrequency(note.midi);
-        audioEngine.playNote(frequency, 0.3, playTime, settings.playback.waveType);
+        audioEngine.playNote(frequency, 0.3, playTime, globalAudioSettings.waveType);
         
         // Play the selected interval with the note
         if (settings.selectedInterval !== undefined) {
           const intervalFreq = AudioEngine.midiToFrequency(note.midi + settings.selectedInterval);
-          audioEngine.playNote(intervalFreq, 0.2, playTime, settings.playback.waveType);
+          audioEngine.playNote(intervalFreq, 0.2, playTime, globalAudioSettings.waveType);
         }
       }
 
@@ -251,12 +252,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
     });
   };
 
-  const updateWaveType = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
-    onSettingsChange({
-      ...settings,
-      playback: { ...settings.playback, waveType }
-    });
-  };
 
   return (
     <section className="space-y-6">
@@ -415,37 +410,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext }: RandomM
                 </div>
               </div>
             )}
-            
-            {/* Audio Sample Selection */}
-            <div className="mb-6">
-              <Label className="block app-text-secondary font-medium mb-3">Audio Sample</Label>
-              <RadioGroup
-                value={settings.playback.waveType || 'piano'}
-                onValueChange={updateWaveType}
-                className="space-y-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="piano" id="piano" />
-                  <Label htmlFor="piano" className="app-text-primary text-sm">🎹 Piano</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="sine" id="sine" />
-                  <Label htmlFor="sine" className="app-text-primary text-sm">🌊 Sine Wave</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="triangle" id="triangle" />
-                  <Label htmlFor="triangle" className="app-text-primary text-sm">📐 Triangle Wave</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="sawtooth" id="sawtooth" />
-                  <Label htmlFor="sawtooth" className="app-text-primary text-sm">🔺 Sawtooth Wave</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="square" id="square" />
-                  <Label htmlFor="square" className="app-text-primary text-sm">🔲 Square Wave</Label>
-                </div>
-              </RadioGroup>
-            </div>
             
             {/* Generate Button */}
             <Button

@@ -13,9 +13,10 @@ interface PatternsModeProps {
   settings: PatternsModeSettings;
   onSettingsChange: (settings: PatternsModeSettings) => void;
   audioContext: AudioContext | null;
+  globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
 }
 
-export function PatternsMode({ settings, onSettingsChange, audioContext }: PatternsModeProps) {
+export function PatternsMode({ settings, onSettingsChange, audioContext, globalAudioSettings }: PatternsModeProps) {
   const [audioEngine] = useState(() => new AudioEngine());
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -146,7 +147,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext }: Patte
       const playTime = nextNoteTime;
       
       const frequency = AudioEngine.midiToFrequency(note.midi);
-      audioEngine.playNote(frequency, 0.3, playTime, settings.playback.waveType);
+      audioEngine.playNote(frequency, 0.3, playTime, globalAudioSettings.waveType);
 
       playbackRepetition++;
       

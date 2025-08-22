@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Music, Download, Upload, Keyboard } from "lucide-react";
+import { AudioEngine } from "./audio-engine";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { GlobalMetronome } from "./metronome";
@@ -17,6 +18,9 @@ const defaultSettings: AppSettings = {
     isActive: false,
     volume: 75
   },
+  globalAudio: {
+    waveType: "piano"
+  },
   currentMode: "random",
   randomMode: {
     difficulty: "beginner",
@@ -27,8 +31,7 @@ const defaultSettings: AppSettings = {
       bpm: 120,
       subdivision: "1",
       swing: 50,
-      volume: 75,
-      waveType: "piano"
+      volume: 75
     }
   },
   progressionsMode: {
@@ -40,8 +43,7 @@ const defaultSettings: AppSettings = {
       bpm: 100,
       subdivision: "1",
       swing: 50,
-      volume: 75,
-      waveType: "piano"
+      volume: 75
     }
   },
   patternsMode: {
@@ -53,8 +55,7 @@ const defaultSettings: AppSettings = {
       bpm: 80,
       subdivision: "1",
       swing: 50,
-      volume: 75,
-      waveType: "piano"
+      volume: 75
     }
   },
   history: []
@@ -64,6 +65,7 @@ export function MusicalNoteGenerator() {
   const [settings, setSettings] = useLocalStorage<AppSettings>("musical-note-generator", defaultSettings);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const { initializeAudio, audioContext } = useAudio();
+  const [audioEngine] = useState(() => new AudioEngine());
 
   // Initialize audio on first user interaction
   useEffect(() => {
@@ -81,6 +83,21 @@ export function MusicalNoteGenerator() {
       document.removeEventListener('keydown', handleFirstInteraction);
     };
   }, [initializeAudio]);
+
+  // Initialize audio engine with context
+  useEffect(() => {
+    if (audioContext) {
+      audioEngine.initialize(audioContext);
+    }
+  }, [audioContext, audioEngine]);
+
+  // Preview audio sample function
+  const previewAudioSample = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
+    if (audioContext && audioEngine.isInitialized()) {
+      // Play middle C (261.63 Hz) for half a second as preview
+      audioEngine.playNote(261.63, 0.5, undefined, waveType);
+    }
+  };
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -217,22 +234,60 @@ export function MusicalNoteGenerator() {
           </div>
         </div>
 
-        {/* Global Metronome */}
-        <GlobalMetronome
-          settings={settings.globalMetronome}
-          onSettingsChange={(metronome) => setSettings(prev => ({ ...prev, globalMetronome: metronome }))}
-          audioContext={audioContext}
-          currentBpm={(() => {
-            const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-            const modeSettings = settings[modeKey] as any;
-            return modeSettings?.playback?.bpm || 120;
-          })()}
-          isCurrentModePlayingBack={(() => {
-            const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-            const modeSettings = settings[modeKey] as any;
-            return modeSettings?.playback?.isPlaying || false;
-          })()}
-        />
+        {/* Global Controls Row */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+          <GlobalMetronome
+            settings={settings.globalMetronome}
+            onSettingsChange={(metronome) => setSettings(prev => ({ ...prev, globalMetronome: metronome }))}
+            audioContext={audioContext}
+            currentBpm={(() => {
+              const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+              const modeSettings = settings[modeKey] as any;
+              return modeSettings?.playback?.bpm || 120;
+            })()}
+            isCurrentModePlayingBack={(() => {
+              const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+              const modeSettings = settings[modeKey] as any;
+              return modeSettings?.playback?.isPlaying || false;
+            })()}
+          />
+          
+          {/* Global Audio Sample Selection */}
+          <div className="flex items-center gap-4">
+            <h3 className="text-sm font-medium app-text-secondary">Audio Sample:</h3>
+            <div className="flex gap-2">
+              {[
+                { value: 'piano', label: '🎹 Piano', testId: 'audio-piano' },
+                { value: 'sine', label: '🌊 Sine', testId: 'audio-sine' },
+                { value: 'triangle', label: '📐 Triangle', testId: 'audio-triangle' },
+                { value: 'sawtooth', label: '🔺 Sawtooth', testId: 'audio-sawtooth' },
+                { value: 'square', label: '🔲 Square', testId: 'audio-square' }
+              ].map(({ value, label, testId }) => (
+                <Button
+                  key={value}
+                  variant={settings.globalAudio?.waveType === value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
+                    setSettings(prev => ({ 
+                      ...prev, 
+                      globalAudio: { waveType }
+                    }));
+                    previewAudioSample(waveType);
+                  }}
+                  className={`text-xs ${
+                    settings.globalAudio?.waveType === value 
+                      ? 'app-primary text-white' 
+                      : 'app-text-secondary border-[var(--app-elevated)] hover:app-text-primary'
+                  }`}
+                  data-testid={testId}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* Tab Navigation */}
@@ -269,6 +324,7 @@ export function MusicalNoteGenerator() {
             settings={settings.randomMode}
             onSettingsChange={(randomMode) => setSettings(prev => ({ ...prev, randomMode }))}
             audioContext={audioContext}
+            globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
           />
         )}
         {settings.currentMode === 'progressions' && (
@@ -276,6 +332,7 @@ export function MusicalNoteGenerator() {
             settings={settings.progressionsMode}
             onSettingsChange={(progressionsMode) => setSettings(prev => ({ ...prev, progressionsMode }))}
             audioContext={audioContext}
+            globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
           />
         )}
         {settings.currentMode === 'patterns' && (
@@ -283,6 +340,7 @@ export function MusicalNoteGenerator() {
             settings={settings.patternsMode}
             onSettingsChange={(patternsMode) => setSettings(prev => ({ ...prev, patternsMode }))}
             audioContext={audioContext}
+            globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
           />
         )}
         {settings.currentMode === 'glossary' && <GlossaryMode />}

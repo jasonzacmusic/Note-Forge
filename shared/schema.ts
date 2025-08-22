@@ -34,8 +34,7 @@ export const playbackStateSchema = z.object({
   bpm: z.number().min(20).max(240),
   subdivision: z.enum(["1", "2", "3", "4"]),
   swing: z.number().min(0).max(100),
-  volume: z.number().min(0).max(100),
-  waveType: z.enum(["sine", "triangle", "sawtooth", "square", "piano"]).optional()
+  volume: z.number().min(0).max(100)
 });
 
 export const randomModeSettingsSchema = z.object({
@@ -70,6 +69,9 @@ export const appSettingsSchema = z.object({
   globalMetronome: z.object({
     isActive: z.boolean(),
     volume: z.number().min(0).max(100)
+  }),
+  globalAudio: z.object({
+    waveType: z.enum(["sine", "triangle", "sawtooth", "square", "piano"])
   }),
   currentMode: z.enum(["random", "progressions", "patterns", "glossary"]),
   randomMode: randomModeSettingsSchema,
