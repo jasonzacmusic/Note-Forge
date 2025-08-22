@@ -22,7 +22,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
 
   useEffect(() => {
     if (audioContext) {
-      audioEngine.initialize();
+      audioEngine.initialize(audioContext);
     }
 
     // Listen for global stop event

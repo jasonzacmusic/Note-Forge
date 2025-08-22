@@ -24,7 +24,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
 
   useEffect(() => {
     if (audioContext) {
-      audioEngine.initialize();
+      audioEngine.initialize(audioContext);
     }
 
     // Listen for global stop event
@@ -96,8 +96,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   }, [settings.generatedNotes, settings.difficulty]);
 
   const generateRandomNotes = () => {
-    // Always generate random notes - intervals are selected separately
-    const newNotes = MusicTheory.generateRandomSequence('all', 4);
+    // Generate random notes using selected note type (white/black/all)
+    const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
     
     // Update notes and start playback
     onSettingsChange({

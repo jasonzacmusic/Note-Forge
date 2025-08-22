@@ -23,7 +23,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
 
   useEffect(() => {
     if (audioContext) {
-      audioEngine.initialize();
+      audioEngine.initialize(audioContext);
     }
 
     // Listen for global stop event
