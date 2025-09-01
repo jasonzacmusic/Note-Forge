@@ -171,7 +171,7 @@ export function GlossaryMode() {
                   <div className="font-medium mb-1 app-text-primary flex items-center justify-between">
                     {subdivision.name}
                     {subdivision.swingApplicable && (
-                      <span className="text-xs app-accent bg-[var(--app-surface)] px-2 py-1 rounded">
+                      <span className="text-xs app-accent font-bold px-2 py-1 rounded">
                         Swing
                       </span>
                     )}

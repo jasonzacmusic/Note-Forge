@@ -165,13 +165,13 @@
   }
 
   .app-accent {
-    background-color: var(--app-accent);
-    color: white;
+    color: var(--app-accent);
+    font-weight: bold;
   }
 
   .app-accent-light {
-    background-color: var(--app-accent-light);
     color: var(--app-accent);
+    font-weight: bold;
   }
 
   .app-warning {
@@ -251,7 +251,8 @@
 }
 
 .metronome-beat.accent {
-  background-color: var(--app-accent);
+  color: var(--app-accent);
+  font-weight: bold;
 }
 
 .metronome-beat.subdivision {
