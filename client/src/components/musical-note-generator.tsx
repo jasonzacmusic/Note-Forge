@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
-import { Music, Download, Upload } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Music, Download, Upload, Play, Pause, Volume2 } from "lucide-react";
 import { AudioEngine } from "./audio-engine";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { GlobalMetronome } from "./metronome";
 import { RandomMode } from "./mode-random";
 import { ProgressionsMode } from "./mode-progressions";
@@ -63,6 +66,9 @@ export function MusicalNoteGenerator() {
   const [settings, setSettings] = useLocalStorage<AppSettings>("musical-note-generator", defaultSettings);
   const { initializeAudio, audioContext } = useAudio();
   const [audioEngine] = useState(() => new AudioEngine());
+  const [metronomeAudioEngine] = useState(() => new AudioEngine());
+  const [currentBeat, setCurrentBeat] = useState(0);
+  const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize audio on first user interaction
   useEffect(() => {
@@ -87,6 +93,101 @@ export function MusicalNoteGenerator() {
       audioEngine.initialize();
     }
   }, [audioContext, audioEngine]);
+
+  // Initialize metronome audio engine
+  useEffect(() => {
+    if (audioContext && !metronomeAudioEngine.isInitialized) {
+      metronomeAudioEngine.initialize();
+    }
+  }, [audioContext, metronomeAudioEngine]);
+
+  // Get current BPM for metronome
+  const getCurrentBpm = () => {
+    const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+    const modeSettings = settings[modeKey] as any;
+    return modeSettings?.playback?.bpm || 120;
+  };
+
+  // Check if current mode is playing
+  const isCurrentModePlayingBack = () => {
+    const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+    const modeSettings = settings[modeKey] as any;
+    return modeSettings?.playback?.isPlaying || false;
+  };
+
+  // Metronome functionality
+  const shouldPlayMetronome = settings.globalMetronome.isActive && isCurrentModePlayingBack();
+  
+  useEffect(() => {
+    if (shouldPlayMetronome) {
+      startMetronomeBeats();
+    } else {
+      stopMetronomeBeats();
+    }
+  }, [shouldPlayMetronome, getCurrentBpm(), isCurrentModePlayingBack()]);
+
+  const startMetronomeBeats = () => {
+    if (!audioContext) return;
+    
+    stopMetronomeBeats();
+    
+    const currentBpm = getCurrentBpm();
+    const beatInterval = 60 / currentBpm;
+    let beatCount = 0;
+    let nextBeatTime = audioContext.currentTime + 0.1;
+    
+    const playBeat = () => {
+      if (!settings.globalMetronome.isActive || !audioContext) return;
+      
+      const frequency = 1000;
+      const duration = 0.08;
+      const playTime = nextBeatTime;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(frequency, playTime);
+      oscillator.type = 'square';
+      
+      const volume = (settings.globalMetronome.volume / 100) * 0.3;
+      gainNode.gain.setValueAtTime(0, playTime);
+      gainNode.gain.linearRampToValueAtTime(volume, playTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, playTime + duration);
+      
+      oscillator.start(playTime);
+      oscillator.stop(playTime + duration);
+      
+      setCurrentBeat(beatCount % 4);
+      beatCount++;
+      
+      nextBeatTime += beatInterval;
+      const timeUntilNext = Math.max(0, (nextBeatTime - audioContext.currentTime) * 1000 - 25);
+      metronomeIntervalRef.current = setTimeout(playBeat, timeUntilNext);
+    };
+    
+    playBeat();
+  };
+
+  const stopMetronomeBeats = () => {
+    if (metronomeIntervalRef.current) {
+      clearTimeout(metronomeIntervalRef.current);
+      metronomeIntervalRef.current = null;
+    }
+    setCurrentBeat(0);
+  };
+
+  // Listen for global stop event
+  useEffect(() => {
+    const handleStopAllAudio = () => {
+      stopMetronomeBeats();
+    };
+
+    window.addEventListener('stopAllAudio', handleStopAllAudio);
+    return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
+  }, []);
 
   // Preview audio sample function
   const previewAudioSample = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
@@ -167,7 +268,34 @@ export function MusicalNoteGenerator() {
             </div>
 
             {/* Global Controls */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
+              {/* Audio Sample Dropdown */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium app-text-primary">🎵 Audio:</span>
+                <Select
+                  value={settings.globalAudio?.waveType || 'piano'}
+                  onValueChange={(value) => {
+                    const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
+                    setSettings(prev => ({ 
+                      ...prev, 
+                      globalAudio: { waveType }
+                    }));
+                    previewAudioSample(waveType);
+                  }}
+                >
+                  <SelectTrigger className="w-32 app-elevated border-[var(--app-border)]" data-testid="select-audio-sample">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="piano" data-testid="audio-piano">🎹 Piano</SelectItem>
+                    <SelectItem value="sine" data-testid="audio-sine">🌊 Sine</SelectItem>
+                    <SelectItem value="triangle" data-testid="audio-triangle">📐 Triangle</SelectItem>
+                    <SelectItem value="sawtooth" data-testid="audio-sawtooth">🔺 Sawtooth</SelectItem>
+                    <SelectItem value="square" data-testid="audio-square">🔲 Square</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <Button
                 variant="outline"
                 size="sm"
@@ -191,64 +319,6 @@ export function MusicalNoteGenerator() {
             </div>
           </div>
 
-          {/* Global Controls Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <GlobalMetronome
-              settings={settings.globalMetronome}
-              onSettingsChange={(metronome) => setSettings(prev => ({ ...prev, globalMetronome: metronome }))}
-              audioContext={audioContext}
-              currentBpm={(() => {
-                const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-                const modeSettings = settings[modeKey] as any;
-                return modeSettings?.playback?.bpm || 120;
-              })()}
-              isCurrentModePlayingBack={(() => {
-                const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-                const modeSettings = settings[modeKey] as any;
-                return modeSettings?.playback?.isPlaying || false;
-              })()}
-            />
-            
-            {/* Global Audio Sample Selection */}
-            <div className="app-elevated rounded-xl p-4">
-              <h3 className="text-sm font-semibold app-text-primary mb-3 flex items-center">
-                <span className="w-4 h-4 mr-2 text-xl">🎵</span>
-                Audio Sample
-              </h3>
-              <div className="grid grid-cols-5 gap-2">
-                {[
-                  { value: 'piano', label: '🎹', name: 'Piano', testId: 'audio-piano' },
-                  { value: 'sine', label: '🌊', name: 'Sine', testId: 'audio-sine' },
-                  { value: 'triangle', label: '📐', name: 'Triangle', testId: 'audio-triangle' },
-                  { value: 'sawtooth', label: '🔺', name: 'Sawtooth', testId: 'audio-sawtooth' },
-                  { value: 'square', label: '🔲', name: 'Square', testId: 'audio-square' }
-                ].map(({ value, label, name, testId }) => (
-                  <Button
-                    key={value}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
-                      setSettings(prev => ({ 
-                        ...prev, 
-                        globalAudio: { waveType }
-                      }));
-                      previewAudioSample(waveType);
-                    }}
-                    className={`flex flex-col items-center p-3 rounded-lg transition-all ${
-                      settings.globalAudio?.waveType === value 
-                        ? 'app-primary text-white shadow-md' 
-                        : 'hover:border-[var(--app-primary)] app-text-secondary border border-[var(--app-border)]'
-                    }`}
-                    data-testid={testId}
-                  >
-                    <span className="text-lg mb-1">{label}</span>
-                    <span className="text-xs font-medium">{name}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </header>
 
@@ -309,6 +379,88 @@ export function MusicalNoteGenerator() {
           )}
           {settings.currentMode === 'glossary' && <GlossaryMode />}
         </main>
+
+        {/* Floating Metronome Button */}
+        <div className="fixed top-6 right-6 z-50">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`app-elevated hover:app-primary-light rounded-full shadow-lg transition-all ${
+                  settings.globalMetronome.isActive 
+                    ? 'app-primary text-white shadow-lg' 
+                    : 'app-text-secondary hover:app-text-primary'
+                }`}
+                data-testid="button-floating-metronome"
+              >
+                {settings.globalMetronome.isActive ? (
+                  <Pause className="h-5 w-5" />
+                ) : (
+                  <Play className="h-5 w-5" />
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 app-surface border-[var(--app-border)]" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium app-text-primary">🥁 Global Metronome</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const newIsActive = !settings.globalMetronome.isActive;
+                      setSettings(prev => ({
+                        ...prev,
+                        globalMetronome: {
+                          ...prev.globalMetronome,
+                          isActive: newIsActive
+                        }
+                      }));
+                    }}
+                    className={`text-xs ${
+                      settings.globalMetronome.isActive 
+                        ? 'app-primary text-white' 
+                        : 'app-text-secondary hover:app-text-primary'
+                    }`}
+                    data-testid="button-toggle-metronome"
+                  >
+                    {settings.globalMetronome.isActive ? 'Stop' : 'Start'}
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium app-text-secondary mb-2 block">
+                      Volume: {settings.globalMetronome.volume}%
+                    </label>
+                    <Slider
+                      value={[settings.globalMetronome.volume]}
+                      onValueChange={([value]) => {
+                        setSettings(prev => ({
+                          ...prev,
+                          globalMetronome: {
+                            ...prev.globalMetronome,
+                            volume: value
+                          }
+                        }));
+                      }}
+                      max={100}
+                      min={0}
+                      step={5}
+                      className="w-full"
+                      data-testid="slider-metronome-volume"
+                    />
+                  </div>
+                  
+                  <div className="text-xs app-text-light">
+                    Plays quarter notes at current mode BPM
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
 
       </div>
     </div>
