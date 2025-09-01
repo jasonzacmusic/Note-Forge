@@ -212,7 +212,7 @@ export function MusicalNoteGenerator() {
             {/* Global Audio Sample Selection */}
             <div className="app-elevated rounded-xl p-4">
               <h3 className="text-sm font-semibold app-text-primary mb-3 flex items-center">
-                <Keyboard className="w-4 h-4 mr-2 text-[var(--app-accent)]" />
+                <span className="w-4 h-4 mr-2 text-xl">🎵</span>
                 Audio Sample
               </h3>
               <div className="grid grid-cols-5 gap-2">

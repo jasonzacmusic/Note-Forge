@@ -24,7 +24,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
 
   useEffect(() => {
     if (audioContext) {
-      audioEngine.initialize(audioContext);
+      audioEngine.initialize();
     }
 
     // Listen for global stop event
