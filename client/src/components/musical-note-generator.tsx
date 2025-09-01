@@ -87,7 +87,7 @@ export function MusicalNoteGenerator() {
   // Initialize audio engine with context
   useEffect(() => {
     if (audioContext) {
-      audioEngine.initialize(audioContext);
+      audioEngine.initialize();
     }
   }, [audioContext, audioEngine]);
 
@@ -199,191 +199,207 @@ export function MusicalNoteGenerator() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <Music className="text-[var(--app-primary)] text-3xl" />
-            <h1 className="text-2xl md:text-3xl font-bold app-text-primary">Musical Note Generator</h1>
+      <header className="app-surface border-b-2 border-[var(--app-border)] mb-8">
+        <div className="container mx-auto px-6 py-8 max-w-7xl">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
+                <Music className="text-white text-2xl" />
+              </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
+                <p className="text-lg app-text-secondary">Professional practice tool for music students</p>
+              </div>
+            </div>
+
+            {/* Global Controls */}
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportSettings}
+                className="app-elevated border-[var(--app-border)] hover:app-primary-light"
+                data-testid="button-export-settings"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={importSettings}
+                className="app-elevated border-[var(--app-border)] hover:app-primary-light"
+                data-testid="button-import-settings"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+            </div>
           </div>
 
-          {/* Global Controls */}
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={exportSettings}
-              className="app-surface hover:app-elevated"
-              data-testid="button-export-settings"
-            >
-              <Download className="h-4 w-4 app-text-secondary" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={importSettings}
-              className="app-surface hover:app-elevated"
-              data-testid="button-import-settings"
-            >
-              <Upload className="h-4 w-4 app-text-secondary" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Global Controls Row */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
-          <GlobalMetronome
-            settings={settings.globalMetronome}
-            onSettingsChange={(metronome) => setSettings(prev => ({ ...prev, globalMetronome: metronome }))}
-            audioContext={audioContext}
-            currentBpm={(() => {
-              const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-              const modeSettings = settings[modeKey] as any;
-              return modeSettings?.playback?.bpm || 120;
-            })()}
-            isCurrentModePlayingBack={(() => {
-              const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-              const modeSettings = settings[modeKey] as any;
-              return modeSettings?.playback?.isPlaying || false;
-            })()}
-          />
-          
-          {/* Global Audio Sample Selection */}
-          <div className="flex items-center gap-4">
-            <h3 className="text-sm font-medium app-text-secondary">Audio Sample:</h3>
-            <div className="flex gap-2">
-              {[
-                { value: 'piano', label: '🎹 Piano', testId: 'audio-piano' },
-                { value: 'sine', label: '🌊 Sine', testId: 'audio-sine' },
-                { value: 'triangle', label: '📐 Triangle', testId: 'audio-triangle' },
-                { value: 'sawtooth', label: '🔺 Sawtooth', testId: 'audio-sawtooth' },
-                { value: 'square', label: '🔲 Square', testId: 'audio-square' }
-              ].map(({ value, label, testId }) => (
-                <Button
-                  key={value}
-                  variant={settings.globalAudio?.waveType === value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
-                    setSettings(prev => ({ 
-                      ...prev, 
-                      globalAudio: { waveType }
-                    }));
-                    previewAudioSample(waveType);
-                  }}
-                  className={`text-xs ${
-                    settings.globalAudio?.waveType === value 
-                      ? 'app-primary text-white' 
-                      : 'app-text-secondary border-[var(--app-elevated)] hover:app-text-primary'
-                  }`}
-                  data-testid={testId}
-                >
-                  {label}
-                </Button>
-              ))}
+          {/* Global Controls Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <GlobalMetronome
+              settings={settings.globalMetronome}
+              onSettingsChange={(metronome) => setSettings(prev => ({ ...prev, globalMetronome: metronome }))}
+              audioContext={audioContext}
+              currentBpm={(() => {
+                const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+                const modeSettings = settings[modeKey] as any;
+                return modeSettings?.playback?.bpm || 120;
+              })()}
+              isCurrentModePlayingBack={(() => {
+                const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
+                const modeSettings = settings[modeKey] as any;
+                return modeSettings?.playback?.isPlaying || false;
+              })()}
+            />
+            
+            {/* Global Audio Sample Selection */}
+            <div className="app-elevated rounded-xl p-4">
+              <h3 className="text-sm font-semibold app-text-primary mb-3 flex items-center">
+                <Keyboard className="w-4 h-4 mr-2 text-[var(--app-accent)]" />
+                Audio Sample
+              </h3>
+              <div className="grid grid-cols-5 gap-2">
+                {[
+                  { value: 'piano', label: '🎹', name: 'Piano', testId: 'audio-piano' },
+                  { value: 'sine', label: '🌊', name: 'Sine', testId: 'audio-sine' },
+                  { value: 'triangle', label: '📐', name: 'Triangle', testId: 'audio-triangle' },
+                  { value: 'sawtooth', label: '🔺', name: 'Sawtooth', testId: 'audio-sawtooth' },
+                  { value: 'square', label: '🔲', name: 'Square', testId: 'audio-square' }
+                ].map(({ value, label, name, testId }) => (
+                  <Button
+                    key={value}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
+                      setSettings(prev => ({ 
+                        ...prev, 
+                        globalAudio: { waveType }
+                      }));
+                      previewAudioSample(waveType);
+                    }}
+                    className={`flex flex-col items-center p-3 rounded-lg transition-all ${
+                      settings.globalAudio?.waveType === value 
+                        ? 'app-primary text-white shadow-md' 
+                        : 'hover:app-primary-light app-text-secondary border border-[var(--app-border)]'
+                    }`}
+                    data-testid={testId}
+                  >
+                    <span className="text-lg mb-1">{label}</span>
+                    <span className="text-xs font-medium">{name}</span>
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* Tab Navigation */}
-      <nav className="mb-8">
-        <div className="flex flex-wrap border-b border-[var(--app-elevated)]">
-          {[
-            { key: 'random', label: 'Random', icon: '🎲' },
-            { key: 'progressions', label: 'Progressions', icon: '🎵' },
-            { key: 'patterns', label: 'Patterns', icon: '🔄' },
-            { key: 'glossary', label: 'Glossary', icon: '📚' }
-          ].map(({ key, label, icon }) => (
-            <Button
-              key={key}
-              variant="ghost"
-              className={`px-6 py-3 border-b-2 ${
-                settings.currentMode === key
-                  ? 'text-[var(--app-primary)] border-[var(--app-primary)]'
-                  : 'app-text-secondary border-transparent hover:app-text-primary'
-              }`}
-              onClick={() => switchTab(key as AppSettings['currentMode'])}
-              data-testid={`tab-${key}`}
-            >
-              <span className="mr-2">{icon}</span>
-              {label}
-            </Button>
-          ))}
+      <div className="container mx-auto px-6 max-w-7xl">
+        <nav className="mb-8">
+          <div className="flex flex-wrap gap-3 p-2 app-elevated rounded-xl">
+            {[
+              { key: 'random', label: 'Random Notes', icon: '🎲', color: 'app-primary' },
+              { key: 'progressions', label: 'Chord Progressions', icon: '🎵', color: 'app-secondary' },
+              { key: 'patterns', label: 'Circle Patterns', icon: '🔄', color: 'app-accent' },
+              { key: 'glossary', label: 'Music Glossary', icon: '📚', color: 'app-warning' }
+            ].map(({ key, label, icon, color }) => (
+              <Button
+                key={key}
+                variant="ghost"
+                size="lg"
+                onClick={() => switchTab(key as AppSettings['currentMode'])}
+                className={`flex-1 min-w-fit px-6 py-4 rounded-lg transition-all duration-200 ${
+                  settings.currentMode === key
+                    ? `${color} text-white shadow-lg transform scale-105 font-semibold`
+                    : `hover:${color}-light app-text-secondary hover:app-text-primary border border-[var(--app-border)]`
+                }`}
+                data-testid={`tab-${key}`}
+              >
+                <span className="mr-3 text-xl">{icon}</span>
+                <span className="font-medium">{label}</span>
+              </Button>
+            ))}
+          </div>
+        </nav>
+
+        {/* Mode Content */}
+        <main className="container mx-auto px-6 max-w-7xl">
+          {settings.currentMode === 'random' && (
+            <RandomMode
+              settings={settings.randomMode}
+              onSettingsChange={(randomMode) => setSettings(prev => ({ ...prev, randomMode }))}
+              audioContext={audioContext}
+              globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
+            />
+          )}
+          {settings.currentMode === 'progressions' && (
+            <ProgressionsMode
+              settings={settings.progressionsMode}
+              onSettingsChange={(progressionsMode) => setSettings(prev => ({ ...prev, progressionsMode }))}
+              audioContext={audioContext}
+              globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
+            />
+          )}
+          {settings.currentMode === 'patterns' && (
+            <PatternsMode
+              settings={settings.patternsMode}
+              onSettingsChange={(patternsMode) => setSettings(prev => ({ ...prev, patternsMode }))}
+              audioContext={audioContext}
+              globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
+            />
+          )}
+          {settings.currentMode === 'glossary' && <GlossaryMode />}
+        </main>
+
+        {/* Keyboard Shortcuts Button */}
+        <div className="fixed bottom-6 right-6">
+          <Dialog open={showShortcuts} onOpenChange={setShowShortcuts}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="app-elevated hover:app-primary-light rounded-full shadow-lg"
+                data-testid="button-show-shortcuts"
+              >
+                <Keyboard className="h-4 w-4 app-text-secondary" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="app-surface border-[var(--app-border)]">
+              <DialogHeader>
+                <DialogTitle className="app-text-primary">Keyboard Shortcuts</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="app-text-primary">Play/Stop</span>
+                  <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">Space</kbd>
+                </div>
+                <div className="flex justify-between">
+                  <span className="app-text-primary">BPM Up/Down</span>
+                  <div className="space-x-1">
+                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">↑</kbd>
+                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">↓</kbd>
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span className="app-text-primary">Subdivisions</span>
+                  <div className="space-x-1">
+                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">1</kbd>
+                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">2</kbd>
+                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">3</kbd>
+                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">4</kbd>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
-      </nav>
-
-      {/* Mode Content */}
-      <main>
-        {settings.currentMode === 'random' && (
-          <RandomMode
-            settings={settings.randomMode}
-            onSettingsChange={(randomMode) => setSettings(prev => ({ ...prev, randomMode }))}
-            audioContext={audioContext}
-            globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
-          />
-        )}
-        {settings.currentMode === 'progressions' && (
-          <ProgressionsMode
-            settings={settings.progressionsMode}
-            onSettingsChange={(progressionsMode) => setSettings(prev => ({ ...prev, progressionsMode }))}
-            audioContext={audioContext}
-            globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
-          />
-        )}
-        {settings.currentMode === 'patterns' && (
-          <PatternsMode
-            settings={settings.patternsMode}
-            onSettingsChange={(patternsMode) => setSettings(prev => ({ ...prev, patternsMode }))}
-            audioContext={audioContext}
-            globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
-          />
-        )}
-        {settings.currentMode === 'glossary' && <GlossaryMode />}
-      </main>
-
-      {/* Keyboard Shortcuts Button */}
-      <div className="fixed bottom-6 right-6">
-        <Dialog open={showShortcuts} onOpenChange={setShowShortcuts}>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="app-surface hover:app-elevated rounded-full shadow-lg"
-              data-testid="button-show-shortcuts"
-            >
-              <Keyboard className="h-4 w-4 app-text-secondary" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="app-surface border-[var(--app-elevated)]">
-            <DialogHeader>
-              <DialogTitle className="app-text-primary">Keyboard Shortcuts</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="app-text-primary">Play/Stop</span>
-                <kbd className="app-bg px-2 py-1 rounded text-xs">Space</kbd>
-              </div>
-              <div className="flex justify-between">
-                <span className="app-text-primary">BPM Up/Down</span>
-                <div className="space-x-1">
-                  <kbd className="app-bg px-2 py-1 rounded text-xs">↑</kbd>
-                  <kbd className="app-bg px-2 py-1 rounded text-xs">↓</kbd>
-                </div>
-              </div>
-              <div className="flex justify-between">
-                <span className="app-text-primary">Subdivisions</span>
-                <div className="space-x-1">
-                  <kbd className="app-bg px-2 py-1 rounded text-xs">1</kbd>
-                  <kbd className="app-bg px-2 py-1 rounded text-xs">2</kbd>
-                  <kbd className="app-bg px-2 py-1 rounded text-xs">3</kbd>
-                  <kbd className="app-bg px-2 py-1 rounded text-xs">4</kbd>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

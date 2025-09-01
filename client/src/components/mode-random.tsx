@@ -247,54 +247,114 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
 
 
   return (
-    <section className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <section className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Controls Panel */}
         <div className="lg:col-span-1">
-          <div className="app-surface rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--app-primary)]">
-              🎲 Random Generation
-            </h3>
+          <div className="app-surface rounded-2xl p-8 shadow-lg">
+            <div className="flex items-center mb-6">
+              <div className="w-10 h-10 rounded-xl app-primary flex items-center justify-center mr-4">
+                <span className="text-white text-xl">🎲</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold app-text-primary">Random Notes</h3>
+                <p className="text-sm app-text-secondary">Generate random note sequences</p>
+              </div>
+            </div>
             
             {/* Difficulty Level */}
-            <div className="mb-6">
-              <Label className="block app-text-secondary font-medium mb-2">Difficulty Level</Label>
+            <div className="mb-8">
+              <Label className="block app-text-primary font-semibold mb-4 text-sm uppercase tracking-wide">
+                Difficulty Level
+              </Label>
               <RadioGroup
                 value={settings.difficulty}
                 onValueChange={updateDifficulty}
-                className="space-y-2"
+                className="grid grid-cols-2 gap-4"
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="beginner" id="beginner" />
-                  <Label htmlFor="beginner" className="app-text-primary">Beginner</Label>
+                <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                  settings.difficulty === 'beginner' 
+                    ? 'border-[var(--app-primary)] app-primary-light' 
+                    : 'border-[var(--app-border)] hover:border-[var(--app-primary)] app-elevated'
+                }`}>
+                  <RadioGroupItem value="beginner" id="beginner" className="sr-only" />
+                  <Label htmlFor="beginner" className="cursor-pointer block">
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">🌟</div>
+                      <div className="font-semibold app-text-primary">Beginner</div>
+                      <div className="text-xs app-text-secondary mt-1">Basic intervals</div>
+                    </div>
+                  </Label>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="intermediate" id="intermediate" />
-                  <Label htmlFor="intermediate" className="app-text-primary">Intermediate</Label>
+                <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                  settings.difficulty === 'intermediate' 
+                    ? 'border-[var(--app-secondary)] app-secondary-light' 
+                    : 'border-[var(--app-border)] hover:border-[var(--app-secondary)] app-elevated'
+                }`}>
+                  <RadioGroupItem value="intermediate" id="intermediate" className="sr-only" />
+                  <Label htmlFor="intermediate" className="cursor-pointer block">
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">🎯</div>
+                      <div className="font-semibold app-text-primary">Intermediate</div>
+                      <div className="text-xs app-text-secondary mt-1">Complex intervals</div>
+                    </div>
+                  </Label>
                 </div>
               </RadioGroup>
             </div>
             
             {/* Note Selection - Only for Beginner */}
             {settings.difficulty === 'beginner' && (
-              <div className="mb-6">
-                <Label className="block app-text-secondary font-medium mb-3">Note Selection</Label>
+              <div className="mb-8">
+                <Label className="block app-text-primary font-semibold mb-4 text-sm uppercase tracking-wide">
+                  Note Selection
+                </Label>
                 <RadioGroup
                   value={settings.noteSelection}
                   onValueChange={updateNoteSelection}
                   className="space-y-3"
                 >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="all" id="all-notes" />
-                    <Label htmlFor="all-notes" className="app-text-primary">All 12 Notes</Label>
+                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                    settings.noteSelection === 'all' 
+                      ? 'border-[var(--app-accent)] app-accent-light' 
+                      : 'border-[var(--app-border)] hover:border-[var(--app-accent)] app-elevated'
+                  }`}>
+                    <RadioGroupItem value="all" id="all-notes" className="sr-only" />
+                    <Label htmlFor="all-notes" className="cursor-pointer flex items-center">
+                      <span className="text-xl mr-3">🎹</span>
+                      <div>
+                        <div className="font-semibold app-text-primary">All 12 Notes</div>
+                        <div className="text-xs app-text-secondary">Chromatic scale</div>
+                      </div>
+                    </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="white" id="white-notes" />
-                    <Label htmlFor="white-notes" className="app-text-primary">White Notes Only</Label>
+                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                    settings.noteSelection === 'white' 
+                      ? 'border-[var(--app-secondary)] app-secondary-light' 
+                      : 'border-[var(--app-border)] hover:border-[var(--app-secondary)] app-elevated'
+                  }`}>
+                    <RadioGroupItem value="white" id="white-notes" className="sr-only" />
+                    <Label htmlFor="white-notes" className="cursor-pointer flex items-center">
+                      <span className="text-xl mr-3">⚪</span>
+                      <div>
+                        <div className="font-semibold app-text-primary">White Keys Only</div>
+                        <div className="text-xs app-text-secondary">Natural notes</div>
+                      </div>
+                    </Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="accidentals" id="black-notes" />
-                    <Label htmlFor="black-notes" className="app-text-primary">Black Notes Only</Label>
+                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                    settings.noteSelection === 'accidentals' 
+                      ? 'border-[var(--app-warning)] app-warning-light' 
+                      : 'border-[var(--app-border)] hover:border-[var(--app-warning)] app-elevated'
+                  }`}>
+                    <RadioGroupItem value="accidentals" id="black-notes" className="sr-only" />
+                    <Label htmlFor="black-notes" className="cursor-pointer flex items-center">
+                      <span className="text-xl mr-3">⚫</span>
+                      <div>
+                        <div className="font-semibold app-text-primary">Black Keys Only</div>
+                        <div className="text-xs app-text-secondary">Sharps and flats</div>
+                      </div>
+                    </Label>
                   </div>
                 </RadioGroup>
               </div>
@@ -407,21 +467,25 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
             {/* Generate Button */}
             <Button
               onClick={generateRandomNotes}
-              className="w-full app-primary hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors mb-6"
+              className="w-full app-primary text-white hover:opacity-90 transition-all hover:scale-105 shadow-lg py-4 text-lg font-semibold rounded-xl mb-8"
               data-testid="button-generate-random"
             >
-              <Shuffle className="mr-2 h-4 w-4" />
-              Generate Random
+              <span className="text-xl mr-3">🎲</span>
+              Generate New Notes
             </Button>
             
             {/* Playback Controls */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium app-text-secondary">Playback</h4>
+            <div className="space-y-6 app-elevated rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold app-text-primary text-lg">Playback Controls</h4>
                 <Button
                   onClick={togglePlayback}
                   disabled={settings.generatedNotes.length === 0}
-                  className="px-4 py-2 app-success hover:bg-green-600 rounded-lg font-medium transition-colors text-white"
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${
+                    settings.playback.isPlaying 
+                      ? 'app-danger text-white hover:opacity-90' 
+                      : 'app-secondary text-white hover:opacity-90 hover:scale-105'
+                  }`}
                   data-testid="button-toggle-playback-random"
                 >
                   {settings.playback.isPlaying ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
