@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
-import { Music, Download, Upload, Keyboard } from "lucide-react";
+import { Music, Download, Upload } from "lucide-react";
 import { AudioEngine } from "./audio-engine";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { GlobalMetronome } from "./metronome";
 import { RandomMode } from "./mode-random";
 import { ProgressionsMode } from "./mode-progressions";
 import { PatternsMode } from "./mode-patterns";
 import { GlossaryMode } from "./mode-glossary";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
 
@@ -63,7 +61,6 @@ const defaultSettings: AppSettings = {
 
 export function MusicalNoteGenerator() {
   const [settings, setSettings] = useLocalStorage<AppSettings>("musical-note-generator", defaultSettings);
-  const [showShortcuts, setShowShortcuts] = useState(false);
   const { initializeAudio, audioContext } = useAudio();
   const [audioEngine] = useState(() => new AudioEngine());
 
@@ -99,51 +96,6 @@ export function MusicalNoteGenerator() {
     }
   };
 
-  // Keyboard shortcuts
-  useKeyboardShortcuts({
-    currentMode: settings.currentMode,
-    onModeChange: (mode) => setSettings(prev => ({ ...prev, currentMode: mode })),
-    onBpmChange: (delta) => {
-      const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-      const modeSettings = settings[modeKey] as any;
-      if (modeSettings?.playback) {
-        const newBpm = Math.max(20, Math.min(240, modeSettings.playback.bpm + delta));
-        setSettings(prev => ({
-          ...prev,
-          [modeKey]: {
-            ...modeSettings,
-            playback: { ...modeSettings.playback, bpm: newBpm }
-          }
-        }));
-      }
-    },
-    onSubdivisionChange: (subdivision) => {
-      const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-      const modeSettings = settings[modeKey] as any;
-      if (modeSettings?.playback) {
-        setSettings(prev => ({
-          ...prev,
-          [modeKey]: {
-            ...modeSettings,
-            playback: { ...modeSettings.playback, subdivision }
-          }
-        }));
-      }
-    },
-    onTogglePlayback: () => {
-      const modeKey = `${settings.currentMode}Mode` as keyof AppSettings;
-      const modeSettings = settings[modeKey] as any;
-      if (modeSettings?.playback) {
-        setSettings(prev => ({
-          ...prev,
-          [modeKey]: {
-            ...modeSettings,
-            playback: { ...modeSettings.playback, isPlaying: !modeSettings.playback.isPlaying }
-          }
-        }));
-      }
-    }
-  });
 
   const exportSettings = () => {
     const dataStr = JSON.stringify(settings, null, 2);
@@ -358,48 +310,6 @@ export function MusicalNoteGenerator() {
           {settings.currentMode === 'glossary' && <GlossaryMode />}
         </main>
 
-        {/* Keyboard Shortcuts Button */}
-        <div className="fixed bottom-6 right-6">
-          <Dialog open={showShortcuts} onOpenChange={setShowShortcuts}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="app-elevated hover:app-primary-light rounded-full shadow-lg"
-                data-testid="button-show-shortcuts"
-              >
-                <Keyboard className="h-4 w-4 app-text-secondary" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="app-surface border-[var(--app-border)]">
-              <DialogHeader>
-                <DialogTitle className="app-text-primary">Keyboard Shortcuts</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="app-text-primary">Play/Stop</span>
-                  <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">Space</kbd>
-                </div>
-                <div className="flex justify-between">
-                  <span className="app-text-primary">BPM Up/Down</span>
-                  <div className="space-x-1">
-                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">↑</kbd>
-                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">↓</kbd>
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <span className="app-text-primary">Subdivisions</span>
-                  <div className="space-x-1">
-                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">1</kbd>
-                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">2</kbd>
-                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">3</kbd>
-                    <kbd className="app-elevated px-3 py-1 rounded text-xs font-mono">4</kbd>
-                  </div>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
       </div>
     </div>
   );
