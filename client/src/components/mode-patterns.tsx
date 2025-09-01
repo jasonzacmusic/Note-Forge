@@ -14,31 +14,23 @@ interface PatternsModeProps {
   onSettingsChange: (settings: PatternsModeSettings) => void;
   audioContext: AudioContext | null;
   globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
+  sharedAudioEngine: AudioEngine;
 }
 
-export function PatternsMode({ settings, onSettingsChange, audioContext, globalAudioSettings }: PatternsModeProps) {
-  const [audioEngine] = useState(() => new AudioEngine());
+export function PatternsMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine }: PatternsModeProps) {
+  const audioEngine = sharedAudioEngine;
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (audioContext) {
-      audioEngine.initialize(audioContext);
-    }
-
     // Listen for global stop event
     const handleStopAllAudio = () => {
-      audioEngine.stop();
-      if (playbackTimeoutRef.current) {
-        clearTimeout(playbackTimeoutRef.current);
-        playbackTimeoutRef.current = null;
-      }
-      setCurrentNoteIndex(0);
+      stopPlayback();
     };
 
     window.addEventListener('stopAllAudio', handleStopAllAudio);
     return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
-  }, [audioContext, audioEngine]);
+  }, []);
 
   useEffect(() => {
     // Generate pattern when type or starting note changes
@@ -121,7 +113,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
 
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
-    let nextNoteTime = audioContext.currentTime;
+    let nextNoteTime = audioContext.currentTime + 0.05;
     
     const scheduleNote = () => {
       if (!settings.playback.isPlaying) return;
@@ -143,8 +135,8 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
       const note = settings.currentPattern[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
       
-      // Schedule note at precise Web Audio time
-      const playTime = nextNoteTime;
+      // Schedule note immediately with no delay
+      const playTime = Math.max(nextNoteTime, audioContext.currentTime);
       
       const frequency = AudioEngine.midiToFrequency(note.midi);
       audioEngine.playNote(frequency, 0.3, playTime, globalAudioSettings.waveType);
@@ -160,8 +152,8 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
       // Schedule next note using Web Audio precision
       nextNoteTime += noteInterval;
       
-      // Schedule callback slightly before next note time
-      const timeUntilNext = Math.max(0, (nextNoteTime - audioContext.currentTime) * 1000 - 25);
+      // Use immediate callback for better timing
+      const timeUntilNext = Math.max(10, (nextNoteTime - audioContext.currentTime) * 1000 - 10);
       playbackTimeoutRef.current = setTimeout(scheduleNote, timeUntilNext);
     };
 

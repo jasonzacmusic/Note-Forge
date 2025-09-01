@@ -43,8 +43,10 @@ export class AudioEngine {
     };
   }
 
-  async initialize(): Promise<AudioContext> {
-    if (!this.audioContext) {
+  async initialize(providedContext?: AudioContext): Promise<AudioContext> {
+    if (providedContext) {
+      this.audioContext = providedContext;
+    } else if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       
       // Resume context if suspended (mobile requirement)

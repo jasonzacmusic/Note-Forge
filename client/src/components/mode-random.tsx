@@ -14,32 +14,24 @@ interface RandomModeProps {
   onSettingsChange: (settings: RandomModeSettings) => void;
   audioContext: AudioContext | null;
   globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
+  sharedAudioEngine: AudioEngine;
 }
 
-export function RandomMode({ settings, onSettingsChange, audioContext, globalAudioSettings }: RandomModeProps) {
-  const [audioEngine] = useState(() => new AudioEngine());
+export function RandomMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine }: RandomModeProps) {
+  const audioEngine = sharedAudioEngine;
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [intervalAnalysis, setIntervalAnalysis] = useState<Interval[]>([]);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (audioContext) {
-      audioEngine.initialize();
-    }
-
     // Listen for global stop event
     const handleStopAllAudio = () => {
-      audioEngine.stop();
-      if (playbackTimeoutRef.current) {
-        clearTimeout(playbackTimeoutRef.current);
-        playbackTimeoutRef.current = null;
-      }
-      setCurrentNoteIndex(0);
+      stopPlayback();
     };
 
     window.addEventListener('stopAllAudio', handleStopAllAudio);
     return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
-  }, [audioContext, audioEngine]);
+  }, []);
 
   useEffect(() => {
     if (settings.playback.isPlaying) {
@@ -141,8 +133,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       const note = currentNotes[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
       
-      // Schedule note at precise Web Audio time (with swing already applied)
-      const playTime = nextNoteTime;
+      // Schedule note immediately with no delay  
+      const playTime = Math.max(nextNoteTime, audioContext.currentTime);
       
       // Play note across multiple octaves for beginner mode
       if (settings.difficulty === 'beginner') {
@@ -181,8 +173,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       
       // Only continue if still playing
       if (settings.playback.isPlaying) {
-        // Schedule callback slightly before next note time
-        const timeUntilNext = Math.max(50, (nextNoteTime - audioContext.currentTime) * 1000 - 25);
+        // Use immediate callback for better timing  
+        const timeUntilNext = Math.max(10, (nextNoteTime - audioContext.currentTime) * 1000 - 10);
         playbackTimeoutRef.current = setTimeout(scheduleNote, timeUntilNext);
       }
     };

@@ -90,14 +90,14 @@ export function MusicalNoteGenerator() {
   // Initialize audio engine with context
   useEffect(() => {
     if (audioContext) {
-      audioEngine.initialize();
+      audioEngine.initialize(audioContext);
     }
   }, [audioContext, audioEngine]);
 
   // Initialize metronome audio engine
   useEffect(() => {
-    if (audioContext && !metronomeAudioEngine.isInitialized) {
-      metronomeAudioEngine.initialize();
+    if (audioContext) {
+      metronomeAudioEngine.initialize(audioContext);
     }
   }, [audioContext, metronomeAudioEngine]);
 
@@ -359,6 +359,7 @@ export function MusicalNoteGenerator() {
               onSettingsChange={(randomMode) => setSettings(prev => ({ ...prev, randomMode }))}
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
+              sharedAudioEngine={audioEngine}
             />
           )}
           {settings.currentMode === 'progressions' && (
@@ -367,6 +368,7 @@ export function MusicalNoteGenerator() {
               onSettingsChange={(progressionsMode) => setSettings(prev => ({ ...prev, progressionsMode }))}
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
+              sharedAudioEngine={audioEngine}
             />
           )}
           {settings.currentMode === 'patterns' && (
@@ -375,6 +377,7 @@ export function MusicalNoteGenerator() {
               onSettingsChange={(patternsMode) => setSettings(prev => ({ ...prev, patternsMode }))}
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
+              sharedAudioEngine={audioEngine}
             />
           )}
           {settings.currentMode === 'glossary' && <GlossaryMode />}

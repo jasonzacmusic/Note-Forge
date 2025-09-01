@@ -13,31 +13,23 @@ interface ProgressionsModeProps {
   onSettingsChange: (settings: ProgressionsModeSettings) => void;
   audioContext: AudioContext | null;
   globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
+  sharedAudioEngine: AudioEngine;
 }
 
-export function ProgressionsMode({ settings, onSettingsChange, audioContext, globalAudioSettings }: ProgressionsModeProps) {
-  const [audioEngine] = useState(() => new AudioEngine());
+export function ProgressionsMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine }: ProgressionsModeProps) {
+  const audioEngine = sharedAudioEngine;
   const [currentChordIndex, setCurrentChordIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (audioContext) {
-      audioEngine.initialize(audioContext);
-    }
-
     // Listen for global stop event
     const handleStopAllAudio = () => {
-      audioEngine.stop();
-      if (playbackTimeoutRef.current) {
-        clearTimeout(playbackTimeoutRef.current);
-        playbackTimeoutRef.current = null;
-      }
-      setCurrentChordIndex(0);
+      stopPlayback();
     };
 
     window.addEventListener('stopAllAudio', handleStopAllAudio);
     return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
-  }, [audioContext, audioEngine]);
+  }, []);
 
   useEffect(() => {
     // Generate progression when key or progression type changes
@@ -104,8 +96,8 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
       const chord = settings.currentProgression.chords[currentChordIndex];
       setCurrentChordIndex(currentChordIndex);
       
-      // Schedule chord at precise Web Audio time
-      const playTime = nextChordTime;
+      // Schedule chord immediately with no delay
+      const playTime = Math.max(nextChordTime, audioContext.currentTime);
       
       // Play chord notes simultaneously  
       chord.notes.forEach((noteName, noteIndex) => {
