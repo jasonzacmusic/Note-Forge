@@ -69,6 +69,7 @@ export function MusicalNoteGenerator() {
   const [metronomeAudioEngine] = useState(() => new AudioEngine());
   const [currentBeat, setCurrentBeat] = useState(0);
   const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [showMetronomePopover, setShowMetronomePopover] = useState(false);
 
   // Initialize audio on first user interaction
   useEffect(() => {
@@ -96,7 +97,7 @@ export function MusicalNoteGenerator() {
 
   // Initialize metronome audio engine
   useEffect(() => {
-    if (audioContext && !metronomeAudioEngine.isInitialized) {
+    if (audioContext) {
       metronomeAudioEngine.initialize();
     }
   }, [audioContext, metronomeAudioEngine]);
@@ -381,52 +382,47 @@ export function MusicalNoteGenerator() {
         </main>
 
         {/* Floating Metronome Button */}
-        <div className="fixed top-6 right-6 z-50">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`app-elevated hover:app-primary-light rounded-full shadow-lg transition-all ${
-                  settings.globalMetronome.isActive 
-                    ? 'app-primary text-white shadow-lg' 
-                    : 'app-text-secondary hover:app-text-primary'
-                }`}
-                data-testid="button-floating-metronome"
-              >
-                {settings.globalMetronome.isActive ? (
-                  <Pause className="h-5 w-5" />
-                ) : (
-                  <Play className="h-5 w-5" />
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 app-surface border-[var(--app-border)]" align="end">
+        <div 
+          className="fixed top-6 right-6 z-50"
+          onMouseEnter={() => setShowMetronomePopover(true)}
+          onMouseLeave={() => setShowMetronomePopover(false)}
+        >
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`app-elevated hover:app-primary-light rounded-full shadow-lg transition-all ${
+              settings.globalMetronome.isActive 
+                ? 'app-primary text-white shadow-lg' 
+                : 'app-text-secondary hover:app-text-primary'
+            }`}
+            data-testid="button-floating-metronome"
+            onClick={() => {
+              setSettings(prev => ({
+                ...prev,
+                globalMetronome: {
+                  ...prev.globalMetronome,
+                  isActive: !prev.globalMetronome.isActive
+                }
+              }));
+            }}
+          >
+            {settings.globalMetronome.isActive ? (
+              <Pause className="h-5 w-5" />
+            ) : (
+              <Play className="h-5 w-5" />
+            )}
+          </Button>
+          
+          {showMetronomePopover && (
+            <div className="absolute top-14 right-0 w-64 app-surface border-[var(--app-border)] rounded-lg shadow-lg p-4 z-50">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium app-text-primary">🥁 Global Metronome</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const newIsActive = !settings.globalMetronome.isActive;
-                      setSettings(prev => ({
-                        ...prev,
-                        globalMetronome: {
-                          ...prev.globalMetronome,
-                          isActive: newIsActive
-                        }
-                      }));
-                    }}
-                    className={`text-xs ${
-                      settings.globalMetronome.isActive 
-                        ? 'app-primary text-white' 
-                        : 'app-text-secondary hover:app-text-primary'
-                    }`}
-                    data-testid="button-toggle-metronome"
-                  >
-                    {settings.globalMetronome.isActive ? 'Stop' : 'Start'}
-                  </Button>
+                  <span className={`text-xs font-semibold ${
+                    settings.globalMetronome.isActive ? 'app-accent' : 'app-text-secondary'
+                  }`}>
+                    {settings.globalMetronome.isActive ? 'ON' : 'OFF'}
+                  </span>
                 </div>
                 
                 <div className="space-y-3">
@@ -454,12 +450,12 @@ export function MusicalNoteGenerator() {
                   </div>
                   
                   <div className="text-xs app-text-light">
-                    Plays quarter notes at current mode BPM
+                    Plays quarter notes at current mode BPM. Click button to toggle.
                   </div>
                 </div>
               </div>
-            </PopoverContent>
-          </Popover>
+            </div>
+          )}
         </div>
 
       </div>
