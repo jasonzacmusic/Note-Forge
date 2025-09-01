@@ -274,28 +274,28 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
               >
                 <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
                   settings.difficulty === 'beginner' 
-                    ? 'border-[var(--app-primary)] app-primary-light' 
+                    ? 'border-[var(--app-primary)] app-elevated shadow-md' 
                     : 'border-[var(--app-border)] hover:border-[var(--app-primary)] app-elevated'
                 }`}>
                   <RadioGroupItem value="beginner" id="beginner" className="sr-only" />
                   <Label htmlFor="beginner" className="cursor-pointer block">
                     <div className="text-center">
                       <div className="text-2xl mb-2">🌟</div>
-                      <div className="font-semibold app-text-primary">Beginner</div>
+                      <div className={`font-bold ${settings.difficulty === 'beginner' ? 'text-[var(--app-primary)]' : 'app-text-primary'}`}>Beginner</div>
                       <div className="text-xs app-text-secondary mt-1">Basic intervals</div>
                     </div>
                   </Label>
                 </div>
                 <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
                   settings.difficulty === 'intermediate' 
-                    ? 'border-[var(--app-secondary)] app-secondary-light' 
+                    ? 'border-[var(--app-secondary)] app-elevated shadow-md' 
                     : 'border-[var(--app-border)] hover:border-[var(--app-secondary)] app-elevated'
                 }`}>
                   <RadioGroupItem value="intermediate" id="intermediate" className="sr-only" />
                   <Label htmlFor="intermediate" className="cursor-pointer block">
                     <div className="text-center">
                       <div className="text-2xl mb-2">🎯</div>
-                      <div className="font-semibold app-text-primary">Intermediate</div>
+                      <div className={`font-bold ${settings.difficulty === 'intermediate' ? 'text-[var(--app-secondary)]' : 'app-text-primary'}`}>Intermediate</div>
                       <div className="text-xs app-text-secondary mt-1">Complex intervals</div>
                     </div>
                   </Label>
@@ -316,42 +316,42 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 >
                   <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
                     settings.noteSelection === 'all' 
-                      ? 'border-[var(--app-accent)] app-accent-light' 
+                      ? 'border-[var(--app-accent)] app-elevated shadow-md' 
                       : 'border-[var(--app-border)] hover:border-[var(--app-accent)] app-elevated'
                   }`}>
                     <RadioGroupItem value="all" id="all-notes" className="sr-only" />
                     <Label htmlFor="all-notes" className="cursor-pointer flex items-center">
                       <span className="text-xl mr-3">🎹</span>
                       <div>
-                        <div className="font-semibold app-text-primary">All 12 Notes</div>
+                        <div className={`font-bold ${settings.noteSelection === 'all' ? 'text-[var(--app-accent)]' : 'app-text-primary'}`}>All 12 Notes</div>
                         <div className="text-xs app-text-secondary">Chromatic scale</div>
                       </div>
                     </Label>
                   </div>
                   <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
                     settings.noteSelection === 'white' 
-                      ? 'border-[var(--app-secondary)] app-secondary-light' 
+                      ? 'border-[var(--app-secondary)] app-elevated shadow-md' 
                       : 'border-[var(--app-border)] hover:border-[var(--app-secondary)] app-elevated'
                   }`}>
                     <RadioGroupItem value="white" id="white-notes" className="sr-only" />
                     <Label htmlFor="white-notes" className="cursor-pointer flex items-center">
                       <span className="text-xl mr-3">⚪</span>
                       <div>
-                        <div className="font-semibold app-text-primary">White Keys Only</div>
+                        <div className={`font-bold ${settings.noteSelection === 'white' ? 'text-[var(--app-secondary)]' : 'app-text-primary'}`}>White Keys Only</div>
                         <div className="text-xs app-text-secondary">Natural notes</div>
                       </div>
                     </Label>
                   </div>
                   <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
                     settings.noteSelection === 'accidentals' 
-                      ? 'border-[var(--app-warning)] app-warning-light' 
+                      ? 'border-[var(--app-warning)] app-elevated shadow-md' 
                       : 'border-[var(--app-border)] hover:border-[var(--app-warning)] app-elevated'
                   }`}>
                     <RadioGroupItem value="accidentals" id="black-notes" className="sr-only" />
                     <Label htmlFor="black-notes" className="cursor-pointer flex items-center">
                       <span className="text-xl mr-3">⚫</span>
                       <div>
-                        <div className="font-semibold app-text-primary">Black Keys Only</div>
+                        <div className={`font-bold ${settings.noteSelection === 'accidentals' ? 'text-[var(--app-warning)]' : 'app-text-primary'}`}>Black Keys Only</div>
                         <div className="text-xs app-text-secondary">Sharps and flats</div>
                       </div>
                     </Label>

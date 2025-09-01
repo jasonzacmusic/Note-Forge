@@ -220,7 +220,7 @@ export function MusicalNoteGenerator() {
                 variant="outline"
                 size="sm"
                 onClick={exportSettings}
-                className="app-elevated border-[var(--app-border)] hover:app-primary-light"
+                className="app-elevated border-[var(--app-border)] hover:border-[var(--app-primary)] hover:font-semibold"
                 data-testid="button-export-settings"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -230,7 +230,7 @@ export function MusicalNoteGenerator() {
                 variant="outline"
                 size="sm"
                 onClick={importSettings}
-                className="app-elevated border-[var(--app-border)] hover:app-primary-light"
+                className="app-elevated border-[var(--app-border)] hover:border-[var(--app-primary)] hover:font-semibold"
                 data-testid="button-import-settings"
               >
                 <Upload className="h-4 w-4 mr-2" />
@@ -286,7 +286,7 @@ export function MusicalNoteGenerator() {
                     className={`flex flex-col items-center p-3 rounded-lg transition-all ${
                       settings.globalAudio?.waveType === value 
                         ? 'app-primary text-white shadow-md' 
-                        : 'hover:app-primary-light app-text-secondary border border-[var(--app-border)]'
+                        : 'hover:border-[var(--app-primary)] app-text-secondary border border-[var(--app-border)]'
                     }`}
                     data-testid={testId}
                   >
@@ -318,7 +318,7 @@ export function MusicalNoteGenerator() {
                 className={`flex-1 min-w-fit px-6 py-4 rounded-lg transition-all duration-200 ${
                   settings.currentMode === key
                     ? `${color} text-white shadow-lg transform scale-105 font-semibold`
-                    : `hover:${color}-light app-text-secondary hover:app-text-primary border border-[var(--app-border)]`
+                    : `hover:border-2 hover:border-[var(--${color.replace('app-', 'app-')})] app-text-secondary hover:app-text-primary border border-[var(--app-border)] hover:font-semibold`
                 }`}
                 data-testid={`tab-${key}`}
               >
