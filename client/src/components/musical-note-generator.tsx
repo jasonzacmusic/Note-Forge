@@ -326,12 +326,12 @@ export function MusicalNoteGenerator() {
               {/* NSM Logo */}
               <div className="flex items-center space-x-3">
                 <img 
-                  src="/attached_assets/NSM White_1758990083060.png"
+                  src="/attached_assets/NSM%20White_1758990083060.png"
                   alt="Nathaniel School of Music"
                   className="h-16 w-auto object-contain hidden dark:block"
                 />
                 <img 
-                  src="/attached_assets/NSM Black_1758990083060.png"
+                  src="/attached_assets/NSM%20Black_1758990083060.png"
                   alt="Nathaniel School of Music"
                   className="h-16 w-auto object-contain block dark:hidden"
                 />
@@ -343,7 +343,7 @@ export function MusicalNoteGenerator() {
                 </div>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
-                  <p className="text-lg app-text-secondary">Professional practice tool for music students</p>
+                  <p className="text-lg app-text-secondary">4 notes with many creative possibilities</p>
                   <div className="mt-2 app-bg rounded-lg px-3 py-1 text-sm app-text-secondary border border-[var(--app-border)] inline-block">
                     <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
                   </div>

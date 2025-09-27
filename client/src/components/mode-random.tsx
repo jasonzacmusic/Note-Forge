@@ -299,7 +299,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                     <div className="text-center">
                       <div className="text-2xl mb-2">🌟</div>
                       <div className={`font-bold ${settings.difficulty === 'beginner' ? 'text-[var(--app-primary)]' : 'app-text-primary'}`}>Beginner</div>
-                      <div className="text-xs app-text-secondary mt-1">Basic intervals</div>
+                      <div className="text-xs app-text-secondary mt-1">Note Recognition</div>
                     </div>
                   </Label>
                 </div>
@@ -313,7 +313,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                     <div className="text-center">
                       <div className="text-2xl mb-2">🎯</div>
                       <div className={`font-bold ${settings.difficulty === 'intermediate' ? 'text-[var(--app-secondary)]' : 'app-text-primary'}`}>Intermediate</div>
-                      <div className="text-xs app-text-secondary mt-1">Complex intervals</div>
+                      <div className="text-xs app-text-secondary mt-1">Interval Practice</div>
                     </div>
                   </Label>
                 </div>
