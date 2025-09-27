@@ -208,7 +208,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     onSettingsChange({ ...settings, difficulty });
   };
 
-  const updateNoteSelection = (noteSelection: 'all' | 'white' | 'accidentals') => {
+  const updateNoteSelection = (noteSelection: 'all' | 'white' | 'accidentals' | 'enharmonics') => {
     onSettingsChange({ ...settings, noteSelection });
   };
 
@@ -345,6 +345,20 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       <div>
                         <div className={`font-bold ${settings.noteSelection === 'accidentals' ? 'text-[var(--app-warning)]' : 'app-text-primary'}`}>Black Keys Only</div>
                         <div className="text-xs app-text-secondary">Sharps and flats</div>
+                      </div>
+                    </Label>
+                  </div>
+                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                    settings.noteSelection === 'enharmonics' 
+                      ? 'border-[var(--app-primary)] app-elevated shadow-md' 
+                      : 'border-[var(--app-border)] hover:border-[var(--app-primary)] app-elevated'
+                  }`}>
+                    <RadioGroupItem value="enharmonics" id="enharmonic-notes" className="sr-only" />
+                    <Label htmlFor="enharmonic-notes" className="cursor-pointer flex items-center">
+                      <span className="text-xl mr-3">🎭</span>
+                      <div>
+                        <div className={`font-bold ${settings.noteSelection === 'enharmonics' ? 'text-[var(--app-primary)]' : 'app-text-primary'}`}>Include Enharmonics</div>
+                        <div className="text-xs app-text-secondary">E#, Fb, B#, Cb</div>
                       </div>
                     </Label>
                   </div>

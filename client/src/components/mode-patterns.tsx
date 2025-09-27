@@ -230,7 +230,20 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
     { value: 'chromatic-down', label: 'Chromatic (↓)' }
   ];
 
-  const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const notes = [
+    { value: 'C', label: 'C' },
+    { value: 'C#', label: 'C#/Db' },
+    { value: 'D', label: 'D' },
+    { value: 'D#', label: 'D#/Eb' },
+    { value: 'E', label: 'E' },
+    { value: 'F', label: 'F' },
+    { value: 'F#', label: 'F#/Gb' },
+    { value: 'G', label: 'G' },
+    { value: 'G#', label: 'G#/Ab' },
+    { value: 'A', label: 'A' },
+    { value: 'A#', label: 'A#/Bb' },
+    { value: 'B', label: 'B' }
+  ];
 
   const isCirclePattern = ['circle-cw', 'circle-ccw', 'triangles', 'squares'].includes(settings.patternType);
   const isDiminishedPattern = ['dim-up', 'dim-down'].includes(settings.patternType);
@@ -242,7 +255,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
         <div className="lg:col-span-1">
           <div className="app-surface rounded-xl p-6">
             <h3 className="text-lg font-semibold mb-4 text-[var(--app-primary)]">
-              🔄 Patterns
+              🔄 Cyclic Patterns
             </h3>
             
             {/* Pattern Selection */}
@@ -271,8 +284,8 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
                 </SelectTrigger>
                 <SelectContent className="app-surface border-[var(--app-elevated)]">
                   {notes.map((note) => (
-                    <SelectItem key={note} value={note}>
-                      {note}
+                    <SelectItem key={note.value} value={note.value}>
+                      {note.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

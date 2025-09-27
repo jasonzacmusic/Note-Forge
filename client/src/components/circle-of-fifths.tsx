@@ -8,8 +8,8 @@ interface CircleOfFifthsProps {
 }
 
 export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternType }: CircleOfFifthsProps) {
-  // Circle of Fifths note positions (clockwise from C at top)
-  const notes = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
+  // Circle of Fifths note positions (clockwise from C at top) with enharmonic equivalents
+  const notes = ['C', 'G', 'D', 'A', 'E', 'B', 'F#/Gb', 'Db/C#', 'Ab/G#', 'Eb/D#', 'Bb/A#', 'F'];
   
   // Calculate positions around the circle
   const notePositions = useMemo(() => {
@@ -119,13 +119,28 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
       
       {/* Note positions */}
       {notePositions.map(({ note, x, y }) => {
-        const isActive = activeNotes.includes(note);
-        const isCurrent = currentNote === note;
+        // Check for enharmonic equivalents in activeNotes
+        const noteVariants = note.includes('/') ? note.split('/') : [note];
+        const isActive = activeNotes.some(activeNote => 
+          noteVariants.includes(activeNote) || 
+          noteVariants.some(variant => {
+            // Check enharmonic equivalents
+            const enharmonicMap: Record<string, string> = {
+              'F#': 'Gb', 'Gb': 'F#',
+              'C#': 'Db', 'Db': 'C#', 
+              'G#': 'Ab', 'Ab': 'G#',
+              'D#': 'Eb', 'Eb': 'D#',
+              'A#': 'Bb', 'Bb': 'A#'
+            };
+            return enharmonicMap[activeNote] === variant;
+          })
+        );
+        const isCurrent = noteVariants.includes(currentNote || '');
         
         return (
           <div
             key={note}
-            className={`absolute w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
+            className={`absolute w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ${
               isCurrent && isPlaying
                 ? 'circle-note active'
                 : isActive

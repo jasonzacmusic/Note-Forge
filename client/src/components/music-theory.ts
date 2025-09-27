@@ -62,6 +62,7 @@ export class MusicTheory {
           case 'Cb': return (octave + 1) * 12 + 11; // Cb = B
           case 'E#': return (octave + 1) * 12 + 5;  // E# = F  
           case 'Fb': return (octave + 1) * 12 + 4;  // Fb = E
+          case 'B#': return (octave + 1) * 12 + 0;  // B# = C
           default: throw new Error(`Invalid note name: ${noteName}`);
         }
       }
@@ -87,7 +88,7 @@ export class MusicTheory {
   }
 
   static generateRandomSequence(
-    noteSelection: 'all' | 'white' | 'accidentals' = 'all',
+    noteSelection: 'all' | 'white' | 'accidentals' | 'enharmonics' = 'all',
     length: number = 4
   ): Note[] {
     let availableNotes: string[];
@@ -105,6 +106,10 @@ export class MusicTheory {
         blackKeyPairs.forEach(([sharp, flat]) => {
           availableNotes.push(Math.random() < 0.5 ? sharp : flat);
         });
+        break;
+      case 'enharmonics':
+        // Include rare enharmonic equivalents
+        availableNotes = ['E#', 'Fb', 'B#', 'Cb'];
         break;
       default:
         // For 'all', randomly mix sharps and flats for all chromatic notes
@@ -402,9 +407,26 @@ export class MusicTheory {
     const pattern: Note[] = [];
     let currentMidi = this.getMidiFromNote(startNote, 4);
     
+    // Determine if we should use sharps or flats based on starting note
+    const useFlats = this.enharmonicFlats.includes(startNote) || ['Fb', 'Cb', 'E#', 'B#'].includes(startNote);
+    
     for (let i = 0; i < length; i++) {
-      const note = this.getNoteFromMidi(currentMidi);
-      pattern.push({ ...note, octave: 4 });
+      const noteFromMidi = this.getNoteFromMidi(currentMidi);
+      let noteName = noteFromMidi.name;
+      
+      // Convert to appropriate enharmonic spelling if needed
+      if (useFlats) {
+        const enharmonicMap: Record<string, string> = {
+          'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
+        };
+        noteName = enharmonicMap[noteName] || noteName;
+      }
+      
+      pattern.push({ 
+        name: noteName, 
+        midi: currentMidi, 
+        octave: 4 
+      });
       currentMidi = (currentMidi + 4) % 12 + 60; // Keep in 5th octave
     }
 
@@ -416,9 +438,26 @@ export class MusicTheory {
     const pattern: Note[] = [];
     let currentMidi = this.getMidiFromNote(startNote, 4);
     
+    // Determine if we should use sharps or flats based on starting note
+    const useFlats = this.enharmonicFlats.includes(startNote) || ['Fb', 'Cb', 'E#', 'B#'].includes(startNote);
+    
     for (let i = 0; i < length; i++) {
-      const note = this.getNoteFromMidi(currentMidi);
-      pattern.push({ ...note, octave: 4 });
+      const noteFromMidi = this.getNoteFromMidi(currentMidi);
+      let noteName = noteFromMidi.name;
+      
+      // Convert to appropriate enharmonic spelling if needed
+      if (useFlats) {
+        const enharmonicMap: Record<string, string> = {
+          'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
+        };
+        noteName = enharmonicMap[noteName] || noteName;
+      }
+      
+      pattern.push({ 
+        name: noteName, 
+        midi: currentMidi, 
+        octave: 4 
+      });
       currentMidi = (currentMidi + 3) % 12 + 60; // Keep in 5th octave
     }
 

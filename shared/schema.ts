@@ -40,7 +40,7 @@ export const playbackStateSchema = z.object({
 
 export const randomModeSettingsSchema = z.object({
   difficulty: z.enum(["beginner", "intermediate"]),
-  noteSelection: z.enum(["all", "white", "accidentals"]),
+  noteSelection: z.enum(["all", "white", "accidentals", "enharmonics"]),
   intervalCategory: z.enum(["resolutions", "tensions", "anticipations", "mystery"]).optional(),
   selectedInterval: z.number().optional(),
   generatedNotes: z.array(noteSchema),

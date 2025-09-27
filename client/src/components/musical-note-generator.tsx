@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Music, Download, Upload, Play, Pause, Volume2 } from "lucide-react";
 import { AudioEngine } from "./audio-engine";
+import { MusicTheory } from "./music-theory";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
@@ -192,6 +193,94 @@ export function MusicalNoteGenerator() {
     window.addEventListener('stopAllAudio', handleStopAllAudio);
     return () => window.removeEventListener('stopAllAudio', handleStopAllAudio);
   }, []);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ignore if user is typing in an input field
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (event.code) {
+        case 'Space':
+          event.preventDefault(); // Prevent page scroll
+          // Toggle playback for current mode
+          if (settings.currentMode === 'random') {
+            setSettings(prev => ({
+              ...prev,
+              randomMode: {
+                ...prev.randomMode,
+                playback: { ...prev.randomMode.playback, isPlaying: !prev.randomMode.playback.isPlaying }
+              }
+            }));
+          } else if (settings.currentMode === 'progressions') {
+            setSettings(prev => ({
+              ...prev,
+              progressionsMode: {
+                ...prev.progressionsMode,
+                playback: { ...prev.progressionsMode.playback, isPlaying: !prev.progressionsMode.playback.isPlaying }
+              }
+            }));
+          } else if (settings.currentMode === 'patterns') {
+            setSettings(prev => ({
+              ...prev,
+              patternsMode: {
+                ...prev.patternsMode,
+                playback: { ...prev.patternsMode.playback, isPlaying: !prev.patternsMode.playback.isPlaying }
+              }
+            }));
+          }
+          break;
+        
+        case 'KeyR':
+          // Randomize for current mode
+          if (settings.currentMode === 'random') {
+            // Generate new random notes and start playback
+            const newNotes = MusicTheory.generateRandomSequence(settings.randomMode.noteSelection, 4);
+            setSettings(prev => ({
+              ...prev,
+              randomMode: {
+                ...prev.randomMode,
+                generatedNotes: newNotes,
+                playback: { ...prev.randomMode.playback, isPlaying: true }
+              }
+            }));
+          } else if (settings.currentMode === 'progressions') {
+            // Randomize progression
+            const progressionNames = ['pop', 'dorian', 'jazz'];
+            const randomProgression = progressionNames[Math.floor(Math.random() * progressionNames.length)] as 'pop' | 'dorian' | 'jazz';
+            setSettings(prev => ({
+              ...prev,
+              progressionsMode: {
+                ...prev.progressionsMode,
+                selectedProgression: randomProgression,
+                playback: { ...prev.progressionsMode.playback, isPlaying: true }
+              }
+            }));
+          } else if (settings.currentMode === 'patterns') {
+            // Randomize pattern type and starting note
+            const patternTypes = ['circle-cw', 'circle-ccw', 'triangles', 'squares', 'whole-up', 'whole-down', 'dim-up', 'dim-down', 'chromatic-up', 'chromatic-down'];
+            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const randomPattern = patternTypes[Math.floor(Math.random() * patternTypes.length)];
+            const randomNote = notes[Math.floor(Math.random() * notes.length)];
+            setSettings(prev => ({
+              ...prev,
+              patternsMode: {
+                ...prev.patternsMode,
+                patternType: randomPattern as any,
+                startingNote: randomNote,
+                playback: { ...prev.patternsMode.playback, isPlaying: true }
+              }
+            }));
+          }
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [settings]);
 
   // Preview audio sample function
   const previewAudioSample = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
