@@ -211,11 +211,30 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   };
 
   const updateDifficulty = (difficulty: 'beginner' | 'intermediate') => {
-    onSettingsChange({ ...settings, difficulty });
+    // Stop playback when level changes
+    onSettingsChange({ 
+      ...settings, 
+      difficulty,
+      playback: { ...settings.playback, isPlaying: false }
+    });
   };
 
   const updateNoteSelection = (noteSelection: 'all' | 'white' | 'accidentals' | 'enharmonics') => {
-    onSettingsChange({ ...settings, noteSelection });
+    // Stop current playback, generate new notes, and start playback automatically
+    // For intermediate mode, don't use rare enharmonics unless explicitly selecting "enharmonics"
+    let noteSelectionForGeneration = noteSelection;
+    if (settings.difficulty === 'intermediate' && noteSelection === 'enharmonics') {
+      // In intermediate mode, treat enharmonics as 'all' to exclude rare enharmonics
+      noteSelectionForGeneration = 'all';
+    }
+    const newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
+    
+    onSettingsChange({ 
+      ...settings, 
+      noteSelection,
+      generatedNotes: newNotes,
+      playback: { ...settings.playback, isPlaying: true }
+    });
   };
 
   const updateSelectedInterval = (selectedInterval: number) => {

@@ -189,11 +189,37 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
   };
 
   const updatePatternType = (patternType: PatternsModeSettings['patternType']) => {
-    onSettingsChange({ ...settings, patternType });
+    // Stop playback and restart when pattern type changes
+    const wasPlaying = settings.playback.isPlaying;
+    const newSettings = { ...settings, patternType, playback: { ...settings.playback, isPlaying: false } };
+    onSettingsChange(newSettings);
+    
+    // Restart playback after a brief delay if it was playing
+    if (wasPlaying) {
+      setTimeout(() => {
+        onSettingsChange({ 
+          ...newSettings, 
+          playback: { ...newSettings.playback, isPlaying: true }
+        });
+      }, 100);
+    }
   };
 
   const updateStartingNote = (startingNote: string) => {
-    onSettingsChange({ ...settings, startingNote });
+    // Stop playback and restart when starting note changes
+    const wasPlaying = settings.playback.isPlaying;
+    const newSettings = { ...settings, startingNote, playback: { ...settings.playback, isPlaying: false } };
+    onSettingsChange(newSettings);
+    
+    // Restart playback after a brief delay if it was playing
+    if (wasPlaying) {
+      setTimeout(() => {
+        onSettingsChange({ 
+          ...newSettings, 
+          playback: { ...newSettings.playback, isPlaying: true }
+        });
+      }, 100);
+    }
   };
 
   const updateBPM = (bpm: number[]) => {

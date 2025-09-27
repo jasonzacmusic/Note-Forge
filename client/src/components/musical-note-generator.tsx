@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Music, Download, Upload, Play, Pause, Volume2 } from "lucide-react";
+import { Music } from "lucide-react";
 import { AudioEngine } from "./audio-engine";
 import { MusicTheory } from "./music-theory";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { GlobalMetronome } from "./metronome";
 import { ThemeToggle } from "./theme-toggle";
 import { RandomMode } from "./mode-random";
 import { ProgressionsMode } from "./mode-progressions";
@@ -324,15 +322,31 @@ export function MusicalNoteGenerator() {
       <header className="app-surface border-b-2 border-[var(--app-border)] mb-8">
         <div className="container mx-auto px-6 py-8 max-w-7xl">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
-                <Music className="text-white text-2xl" />
+            <div className="flex items-center space-x-6">
+              {/* NSM Logo */}
+              <div className="flex items-center space-x-3">
+                <img 
+                  src="/attached_assets/NSM White_1758990083060.png"
+                  alt="Nathaniel School of Music"
+                  className="h-16 w-auto object-contain hidden dark:block"
+                />
+                <img 
+                  src="/attached_assets/NSM Black_1758990083060.png"
+                  alt="Nathaniel School of Music"
+                  className="h-16 w-auto object-contain block dark:hidden"
+                />
               </div>
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
-                <p className="text-lg app-text-secondary">Professional practice tool for music students</p>
-                <div className="mt-2 app-bg rounded-lg px-3 py-1 text-sm app-text-secondary border border-[var(--app-border)] inline-block">
-                  <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
+              
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
+                  <Music className="text-white text-2xl" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
+                  <p className="text-lg app-text-secondary">Professional practice tool for music students</p>
+                  <div className="mt-2 app-bg rounded-lg px-3 py-1 text-sm app-text-secondary border border-[var(--app-border)] inline-block">
+                    <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
+                  </div>
                 </div>
               </div>
             </div>
@@ -435,87 +449,6 @@ export function MusicalNoteGenerator() {
           {settings.currentMode === 'glossary' && <GlossaryMode />}
         </main>
 
-        {/* Floating Metronome Button */}
-        <div className="fixed top-6 right-6 z-50">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className={`app-elevated hover:app-primary-light rounded-full shadow-lg transition-all ${
-                  settings.globalMetronome.isActive 
-                    ? 'app-primary text-white shadow-lg' 
-                    : 'app-text-secondary hover:app-text-primary'
-                }`}
-                data-testid="button-floating-metronome"
-              >
-                {settings.globalMetronome.isActive ? (
-                  <Pause className="h-5 w-5" />
-                ) : (
-                  <Play className="h-5 w-5" />
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 app-surface border-[var(--app-border)]" align="end">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium app-text-primary">🥁 Global Metronome</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const newIsActive = !settings.globalMetronome.isActive;
-                      setSettings(prev => ({
-                        ...prev,
-                        globalMetronome: {
-                          ...prev.globalMetronome,
-                          isActive: newIsActive
-                        }
-                      }));
-                    }}
-                    className={`text-xs ${
-                      settings.globalMetronome.isActive 
-                        ? 'app-primary text-white' 
-                        : 'app-text-secondary hover:app-text-primary'
-                    }`}
-                    data-testid="button-toggle-metronome"
-                  >
-                    {settings.globalMetronome.isActive ? 'Stop' : 'Start'}
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-xs font-medium app-text-secondary mb-2 block">
-                      Volume: {settings.globalMetronome.volume}%
-                    </label>
-                    <Slider
-                      value={[settings.globalMetronome.volume]}
-                      onValueChange={([value]) => {
-                        setSettings(prev => ({
-                          ...prev,
-                          globalMetronome: {
-                            ...prev.globalMetronome,
-                            volume: value
-                          }
-                        }));
-                      }}
-                      max={100}
-                      min={0}
-                      step={5}
-                      className="w-full"
-                      data-testid="slider-metronome-volume"
-                    />
-                  </div>
-                  
-                  <div className="text-xs app-text-light">
-                    Plays quarter notes at current mode BPM
-                  </div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
 
       </div>
     </div>

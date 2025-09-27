@@ -154,15 +154,47 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   };
 
   const updateKey = (selectedKey: string) => {
-    onSettingsChange({ ...settings, selectedKey });
+    // Stop current playback and restart to play new displayed chords
+    const wasPlaying = settings.playback.isPlaying;
+    const newSettings = { 
+      ...settings, 
+      selectedKey,
+      cycleStart: 0, // Always start from first chord
+      playback: { ...settings.playback, isPlaying: false }
+    };
+    onSettingsChange(newSettings);
+    
+    // Restart playback after a brief delay if it was playing
+    if (wasPlaying) {
+      setTimeout(() => {
+        onSettingsChange({ 
+          ...newSettings, 
+          playback: { ...newSettings.playback, isPlaying: true }
+        });
+      }, 100);
+    }
   };
 
   const updateProgression = (selectedProgression: 'dorian' | 'pop' | 'jazz') => {
-    onSettingsChange({ ...settings, selectedProgression });
-  };
-
-  const updateCycleStart = (cycleStart: number) => {
-    onSettingsChange({ ...settings, cycleStart });
+    // Stop playback then restart playback
+    const wasPlaying = settings.playback.isPlaying;
+    const newSettings = { 
+      ...settings, 
+      selectedProgression,
+      cycleStart: 0, // Always start from first chord
+      playback: { ...settings.playback, isPlaying: false }
+    };
+    onSettingsChange(newSettings);
+    
+    // Restart playback after a brief delay if it was playing
+    if (wasPlaying) {
+      setTimeout(() => {
+        onSettingsChange({ 
+          ...newSettings, 
+          playback: { ...newSettings.playback, isPlaying: true }
+        });
+      }, 100);
+    }
   };
 
   const updateBPM = (bpm: number[]) => {
@@ -240,28 +272,6 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
               </Select>
             </div>
             
-            {/* Cycle Start */}
-            {(settings.selectedProgression === 'pop' || settings.selectedProgression === 'jazz') && (
-              <div className="mb-6">
-                <Label className="block app-text-secondary font-medium mb-2">Start From</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[0, 1, 2, 3].map((start) => (
-                    <Button
-                      key={start}
-                      onClick={() => updateCycleStart(start)}
-                      className={`p-2 rounded font-medium ${
-                        settings.cycleStart === start
-                          ? 'app-primary text-white'
-                          : 'app-bg app-text-secondary hover:app-elevated'
-                      }`}
-                      data-testid={`button-cycle-start-${start}`}
-                    >
-                      Chord {start + 1}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
             
             {/* Playback Controls */}
             <div className="space-y-4">
