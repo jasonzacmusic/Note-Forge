@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { GlobalMetronome } from "./metronome";
+import { ThemeToggle } from "./theme-toggle";
 import { RandomMode } from "./mode-random";
 import { ProgressionsMode } from "./mode-progressions";
 import { PatternsMode } from "./mode-patterns";
@@ -295,6 +296,8 @@ export function MusicalNoteGenerator() {
                   </SelectContent>
                 </Select>
               </div>
+              
+              <ThemeToggle />
               
               <Button
                 variant="outline"

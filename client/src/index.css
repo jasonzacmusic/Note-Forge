@@ -115,6 +115,25 @@
   --shadow-lg: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
+
+  /* Dark mode app-specific colors */
+  --app-bg: hsl(220 13% 8%);
+  --app-surface: hsl(220 13% 10%);
+  --app-elevated: hsl(220 13% 12%);
+  --app-border: hsl(220 13% 18%);
+  --app-primary: hsl(217 91% 65%);
+  --app-primary-light: hsl(217 91% 15%);
+  --app-secondary: hsl(142 76% 45%);
+  --app-secondary-light: hsl(142 76% 15%);
+  --app-accent: hsl(174 62% 55%);
+  --app-accent-light: hsl(174 62% 15%);
+  --app-warning: hsl(38 92% 60%);
+  --app-warning-light: hsl(38 92% 15%);
+  --app-danger: hsl(0 84% 65%);
+  --app-danger-light: hsl(0 84% 15%);
+  --app-text-primary: hsl(220 9% 92%);
+  --app-text-secondary: hsl(220 9% 70%);
+  --app-text-light: hsl(220 9% 50%);
 }
 
 @layer base {
@@ -127,6 +146,10 @@
     background: linear-gradient(135deg, hsl(217 91% 98%) 0%, hsl(220 14% 98%) 100%);
     color: var(--app-text-primary);
     min-height: 100vh;
+  }
+
+  .dark body {
+    background: linear-gradient(135deg, hsl(220 13% 6%) 0%, hsl(220 13% 8%) 100%);
   }
 
   .app-bg {
