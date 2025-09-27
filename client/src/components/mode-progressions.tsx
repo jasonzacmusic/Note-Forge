@@ -67,7 +67,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
       
       return () => clearTimeout(timer);
     }
-  }, [settings.playback.subdivision, settings.playback.swing]);
+  }, [settings.playback.subdivision, settings.playback.swingEnabled]);
 
   const startPlayback = () => {
     if (!settings.currentProgression || !audioContext) return;
@@ -96,8 +96,14 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
       const chord = settings.currentProgression.chords[currentChordIndex];
       setCurrentChordIndex(currentChordIndex);
       
-      // Schedule chord immediately with no delay
-      const playTime = Math.max(nextChordTime, audioContext.currentTime);
+      // Apply swing only to quavers (eighth notes) when enabled
+      let swingDelay = 0;
+      if (settings.playback.subdivision === "2" && settings.playback.swingEnabled) {
+        swingDelay = AudioEngine.getSwingDelay(playbackRepetition, settings.playback.swingEnabled, chordInterval);
+      }
+      
+      // Schedule chord with swing delay
+      const playTime = Math.max(nextChordTime + swingDelay, audioContext.currentTime);
       
       // Play chord notes simultaneously  
       chord.notes.forEach((noteName, noteIndex) => {
@@ -170,6 +176,13 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
     onSettingsChange({
       ...settings,
       playback: { ...settings.playback, subdivision }
+    });
+  };
+
+  const updateSwing = (swingEnabled: boolean) => {
+    onSettingsChange({
+      ...settings,
+      playback: { ...settings.playback, swingEnabled }
     });
   };
 
@@ -307,6 +320,29 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
                   ))}
                 </div>
               </div>
+              
+              {/* Swing - Only for Quavers */}
+              {settings.playback.subdivision === "2" && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="app-text-secondary font-medium">Swing Feel</Label>
+                    <Button
+                      onClick={() => updateSwing(!settings.playback.swingEnabled)}
+                      className={`px-3 py-1 rounded font-medium text-sm ${
+                        settings.playback.swingEnabled
+                          ? 'app-accent-light text-[var(--app-accent)]'
+                          : 'app-elevated border-[var(--app-border)]'
+                      }`}
+                      data-testid="button-progressions-swing"
+                    >
+                      {settings.playback.swingEnabled ? 'ON' : 'OFF'}
+                    </Button>
+                  </div>
+                  {settings.playback.swingEnabled && (
+                    <div className="text-xs app-text-secondary">8th notes at 2/3 timing</div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -90,28 +90,32 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
         {/* Pattern-specific shapes */}
         {patternType === 'triangles' && activeNotes.length >= 3 && (
           <polygon
-            points={activeNotes.slice(0, 3).map(note => {
+            points={[0, 1, 2].map(index => {
+              const note = activeNotes[index];
               const pos = notePositions.find(p => p.note === note);
               return pos ? `${pos.x},${pos.y}` : '';
-            }).join(' ')}
-            fill="none"
+            }).filter(p => p).join(' ')}
+            fill="var(--app-accent)"
+            fillOpacity="0.1"
             stroke="var(--app-accent)"
-            strokeWidth="2"
-            opacity="0.7"
+            strokeWidth="3"
+            opacity="0.8"
             data-testid="triangle-shape"
           />
         )}
         
         {patternType === 'squares' && activeNotes.length >= 4 && (
           <polygon
-            points={activeNotes.slice(0, 4).map(note => {
+            points={[0, 1, 2, 3].map(index => {
+              const note = activeNotes[index];
               const pos = notePositions.find(p => p.note === note);
               return pos ? `${pos.x},${pos.y}` : '';
-            }).join(' ')}
-            fill="none"
+            }).filter(p => p).join(' ')}
+            fill="var(--app-accent)"
+            fillOpacity="0.1"
             stroke="var(--app-accent)"
-            strokeWidth="2"
-            opacity="0.7"
+            strokeWidth="3"
+            opacity="0.8"
             data-testid="square-shape"
           />
         )}

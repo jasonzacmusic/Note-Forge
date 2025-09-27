@@ -34,6 +34,7 @@ export const playbackStateSchema = z.object({
   bpm: z.number().min(20).max(240),
   subdivision: z.enum(["1", "2", "3", "4"]),
   swing: z.number().min(0).max(100),
+  swingEnabled: z.boolean(),
   volume: z.number().min(0).max(100)
 });
 

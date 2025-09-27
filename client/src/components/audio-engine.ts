@@ -204,17 +204,15 @@ export class AudioEngine {
     return 440 * Math.pow(2, (midiNote - 69) / 12);
   }
 
-  // Apply swing to eighth note timing (only affects off-beat placement)
-  static getSwingDelay(noteIndex: number, swingPercent: number, eighthNoteInterval: number): number {
-    if (swingPercent === 50) return 0; // No swing delay
+  // Apply swing to eighth note timing (simple ON/OFF for 2/3 timing)
+  static getSwingDelay(noteIndex: number, swingEnabled: boolean, eighthNoteInterval: number): number {
+    if (!swingEnabled) return 0; // No swing delay when OFF
     
     const isOffBeatEighth = noteIndex % 2 === 1;
     
     if (isOffBeatEighth) {
-      // Convert swing percentage to delay/advance ratio
-      // 50% = no swing, 67% = triplet swing, 75% = dotted swing
-      const swingFactor = (swingPercent - 50) / 100; // -0.5 to +0.5 range
-      return eighthNoteInterval * swingFactor * 0.5; // Delay/advance by up to 25% of eighth note
+      // Move eighth notes (off beats) to the 66.67% (2/3rd) mark of the beat
+      return eighthNoteInterval / 3; // Delay by 1/3 of eighth interval to reach 2/3 of beat
     }
     
     return 0; // On-beat notes stay exactly on beat

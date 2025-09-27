@@ -59,7 +59,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       stopPlayback();
       startPlayback();
     }
-  }, [settings.playback.subdivision, settings.playback.swing]);
+  }, [settings.playback.subdivision, settings.playback.swingEnabled]);
 
   useEffect(() => {
     if (settings.generatedNotes.length > 1 && settings.difficulty === 'intermediate') {
@@ -162,10 +162,10 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
         playbackRepetition = 0;
       }
       
-      // Apply swing only to quavers (eighth notes) - affects timing placement, not tempo
+      // Apply swing only to quavers (eighth notes) when enabled
       let swingDelay = 0;
-      if (settings.playback.subdivision === "2" && settings.playback.swing !== 50) {
-        swingDelay = AudioEngine.getSwingDelay(playbackRepetition, settings.playback.swing, noteInterval);
+      if (settings.playback.subdivision === "2" && settings.playback.swingEnabled) {
+        swingDelay = AudioEngine.getSwingDelay(playbackRepetition, settings.playback.swingEnabled, noteInterval);
       }
       
       // Schedule next note using Web Audio precision with swing delay
@@ -230,10 +230,10 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     });
   };
 
-  const updateSwing = (swing: number[]) => {
+  const updateSwing = (swingEnabled: boolean) => {
     onSettingsChange({
       ...settings,
-      playback: { ...settings.playback, swing: swing[0] }
+      playback: { ...settings.playback, swingEnabled }
     });
   };
 
@@ -532,18 +532,22 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
               {settings.playback.subdivision === "2" && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <Label className="app-text-secondary font-medium">Swing %</Label>
-                    <span className="text-lg font-mono" data-testid="text-random-swing">{settings.playback.swing}</span>
+                    <Label className="app-text-secondary font-medium">Swing Feel</Label>
+                    <Button
+                      onClick={() => updateSwing(!settings.playback.swingEnabled)}
+                      className={`px-3 py-1 rounded font-medium text-sm ${
+                        settings.playback.swingEnabled
+                          ? 'app-accent-light text-[var(--app-accent)]'
+                          : 'app-elevated border-[var(--app-border)]'
+                      }`}
+                      data-testid="button-random-swing"
+                    >
+                      {settings.playback.swingEnabled ? 'ON' : 'OFF'}
+                    </Button>
                   </div>
-                  <Slider
-                    value={[settings.playback.swing]}
-                    onValueChange={updateSwing}
-                    min={0}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                    data-testid="slider-random-swing"
-                  />
+                  {settings.playback.swingEnabled && (
+                    <div className="text-xs app-text-secondary">8th notes at 2/3 timing</div>
+                  )}
                 </div>
               )}
             </div>

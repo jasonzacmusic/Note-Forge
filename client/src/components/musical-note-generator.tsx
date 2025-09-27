@@ -33,6 +33,7 @@ const defaultSettings: AppSettings = {
       bpm: 120,
       subdivision: "1",
       swing: 50,
+      swingEnabled: false,
       volume: 75
     }
   },
@@ -45,6 +46,7 @@ const defaultSettings: AppSettings = {
       bpm: 100,
       subdivision: "1",
       swing: 50,
+      swingEnabled: false,
       volume: 75
     }
   },
@@ -57,6 +59,7 @@ const defaultSettings: AppSettings = {
       bpm: 80,
       subdivision: "1",
       swing: 50,
+      swingEnabled: false,
       volume: 75
     }
   },

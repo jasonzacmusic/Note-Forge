@@ -67,7 +67,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
       
       return () => clearTimeout(timer);
     }
-  }, [settings.playback.subdivision, settings.playback.swing]);
+  }, [settings.playback.subdivision, settings.playback.swingEnabled]);
 
   const generatePattern = () => {
     let pattern: Note[] = [];
@@ -135,8 +135,14 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
       const note = settings.currentPattern[currentNoteIndex];
       setCurrentNoteIndex(currentNoteIndex);
       
-      // Schedule note immediately with no delay
-      const playTime = Math.max(nextNoteTime, audioContext.currentTime);
+      // Apply swing only to quavers (eighth notes) when enabled
+      let swingDelay = 0;
+      if (settings.playback.subdivision === "2" && settings.playback.swingEnabled) {
+        swingDelay = AudioEngine.getSwingDelay(playbackRepetition, settings.playback.swingEnabled, noteInterval);
+      }
+      
+      // Schedule note with swing delay
+      const playTime = Math.max(nextNoteTime + swingDelay, audioContext.currentTime);
       
       const frequency = AudioEngine.midiToFrequency(note.midi);
       audioEngine.playNote(frequency, 0.3, playTime, globalAudioSettings.waveType);
@@ -201,6 +207,13 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
     onSettingsChange({
       ...settings,
       playback: { ...settings.playback, subdivision }
+    });
+  };
+
+  const updateSwing = (swingEnabled: boolean) => {
+    onSettingsChange({
+      ...settings,
+      playback: { ...settings.playback, swingEnabled }
     });
   };
 
@@ -335,6 +348,29 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
                   ))}
                 </div>
               </div>
+              
+              {/* Swing - Only for Quavers */}
+              {settings.playback.subdivision === "2" && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="app-text-secondary font-medium">Swing Feel</Label>
+                    <Button
+                      onClick={() => updateSwing(!settings.playback.swingEnabled)}
+                      className={`px-3 py-1 rounded font-medium text-sm ${
+                        settings.playback.swingEnabled
+                          ? 'app-accent-light text-[var(--app-accent)]'
+                          : 'app-elevated border-[var(--app-border)]'
+                      }`}
+                      data-testid="button-patterns-swing"
+                    >
+                      {settings.playback.swingEnabled ? 'ON' : 'OFF'}
+                    </Button>
+                  </div>
+                  {settings.playback.swingEnabled && (
+                    <div className="text-xs app-text-secondary">8th notes at 2/3 timing</div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
