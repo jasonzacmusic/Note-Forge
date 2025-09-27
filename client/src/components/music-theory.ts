@@ -54,9 +54,17 @@ export class MusicTheory {
   static getMidiFromNote(noteName: string, octave: number = 4): number {
     const noteIndex = this.noteNames.indexOf(noteName);
     if (noteIndex === -1) {
-      // Try flats
+      // Try flats and rare enharmonic equivalents
       const flatIndex = this.enharmonicFlats.indexOf(noteName);
-      if (flatIndex === -1) throw new Error(`Invalid note name: ${noteName}`);
+      if (flatIndex === -1) {
+        // Handle special enharmonic cases
+        switch (noteName) {
+          case 'Cb': return (octave + 1) * 12 + 11; // Cb = B
+          case 'E#': return (octave + 1) * 12 + 5;  // E# = F  
+          case 'Fb': return (octave + 1) * 12 + 4;  // Fb = E
+          default: throw new Error(`Invalid note name: ${noteName}`);
+        }
+      }
       return (octave + 1) * 12 + flatIndex;
     }
     return (octave + 1) * 12 + noteIndex;
