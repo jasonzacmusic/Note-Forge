@@ -71,8 +71,37 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
       {/* Inner circle */}
       <div className="absolute inset-4 rounded-full border-2 border-[var(--app-elevated)] opacity-50"></div>
       
-      {/* SVG for connection lines */}
+      {/* SVG for shapes and connection lines */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 320 320">
+        {/* Pattern-specific shapes - render FIRST so they're behind connection lines */}
+        {patternType === 'triangles' && activeNotes.length >= 3 && (
+          <polygon
+            points={[0, 1, 2].map(index => {
+              const note = activeNotes[index];
+              const pos = notePositions.find(p => p.note === note);
+              return pos ? `${pos.x},${pos.y}` : '';
+            }).filter(p => p).join(' ')}
+            fill="rgba(99, 102, 241, 0.5)"
+            stroke="rgb(99, 102, 241)"
+            strokeWidth="6"
+            data-testid="triangle-shape"
+          />
+        )}
+        
+        {patternType === 'squares' && activeNotes.length >= 4 && (
+          <polygon
+            points={[0, 1, 2, 3].map(index => {
+              const note = activeNotes[index];
+              const pos = notePositions.find(p => p.note === note);
+              return pos ? `${pos.x},${pos.y}` : '';
+            }).filter(p => p).join(' ')}
+            fill="rgba(236, 72, 153, 0.5)"
+            stroke="rgb(236, 72, 153)"
+            strokeWidth="6"
+            data-testid="square-shape"
+          />
+        )}
+        
         {connectionLines.map((line, index) => (
           <line
             key={index}
@@ -86,37 +115,6 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
             data-testid={`connection-line-${index}`}
           />
         ))}
-        
-        {/* Pattern-specific shapes - render behind connection lines */}
-        {patternType === 'triangles' && activeNotes.length >= 3 && (
-          <polygon
-            points={[0, 1, 2].map(index => {
-              const note = activeNotes[index];
-              const pos = notePositions.find(p => p.note === note);
-              return pos ? `${pos.x},${pos.y}` : '';
-            }).filter(p => p).join(' ')}
-            fill="rgba(99, 102, 241, 0.3)"
-            stroke="rgb(99, 102, 241)"
-            strokeWidth="4"
-            strokeDasharray="none"
-            data-testid="triangle-shape"
-          />
-        )}
-        
-        {patternType === 'squares' && activeNotes.length >= 4 && (
-          <polygon
-            points={[0, 1, 2, 3].map(index => {
-              const note = activeNotes[index];
-              const pos = notePositions.find(p => p.note === note);
-              return pos ? `${pos.x},${pos.y}` : '';
-            }).filter(p => p).join(' ')}
-            fill="rgba(236, 72, 153, 0.3)"
-            stroke="rgb(236, 72, 153)"
-            strokeWidth="4"
-            strokeDasharray="none"
-            data-testid="square-shape"
-          />
-        )}
       </svg>
       
       {/* Note positions */}
