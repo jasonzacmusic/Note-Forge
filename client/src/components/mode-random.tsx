@@ -588,7 +588,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       {MusicTheory.formatNoteForDisplay(note)}
                     </div>
                     <div className="app-text-secondary text-sm">
-                      {settings.difficulty === 'beginner' ? '4 octaves' : '2 octaves + interval'}
+                      {settings.difficulty === 'beginner' ? '' : '2 octaves + interval'}
                     </div>
                     {settings.difficulty === 'intermediate' && index < settings.generatedNotes.length - 1 && (
                       <div className="app-accent text-xs mt-2" data-testid={`interval-${index}`}>
@@ -610,7 +610,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 <h4 className="font-medium mb-2 app-accent">Music Theory Analysis</h4>
                 <div className="app-text-secondary text-sm space-y-1">
                   <p>• No more than 2 consecutive seconds (M2/m2)</p>
-                  <p>• Preferred intervals: P5, P4, M3, m3, M6, m6</p>
                   {intervalAnalysis.length > 0 && settings.difficulty === 'intermediate' && (
                     <div>
                       <p>• All possible intervals:</p>

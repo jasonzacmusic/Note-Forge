@@ -108,16 +108,24 @@ export class MusicTheory {
         });
         break;
       case 'enharmonics':
-        // Include rare enharmonic equivalents
-        availableNotes = ['E#', 'Fb', 'B#', 'Cb'];
+        // Include all 16 notes: 12 standard chromatic + 4 rare enharmonics
+        availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const enharmonicPairs = [
+          ['C#', 'Db'], ['D#', 'Eb'], ['F#', 'Gb'], ['G#', 'Ab'], ['A#', 'Bb']
+        ];
+        enharmonicPairs.forEach(([sharp, flat]) => {
+          availableNotes.push(Math.random() < 0.5 ? sharp : flat);
+        });
+        // Add the 4 rare enharmonic equivalents
+        availableNotes.push('E#', 'Fb', 'B#', 'Cb');
         break;
       default:
         // For 'all', randomly mix sharps and flats for all chromatic notes
         availableNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-        const chromaticPairs = [
+        const allChromaticPairs = [
           ['C#', 'Db'], ['D#', 'Eb'], ['F#', 'Gb'], ['G#', 'Ab'], ['A#', 'Bb']
         ];
-        chromaticPairs.forEach(([sharp, flat]) => {
+        allChromaticPairs.forEach(([sharp, flat]) => {
           availableNotes.push(Math.random() < 0.5 ? sharp : flat);
         });
     }
