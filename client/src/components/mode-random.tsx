@@ -89,7 +89,13 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
 
   const generateRandomNotes = () => {
     // Generate random notes using selected note type (white/black/all)
-    const newNotes = MusicTheory.generateRandomSequence(settings.noteSelection, 4);
+    // For intermediate mode, don't use rare enharmonics unless explicitly selecting "enharmonics"
+    let noteSelectionForGeneration = settings.noteSelection;
+    if (settings.difficulty === 'intermediate' && settings.noteSelection === 'enharmonics') {
+      // In intermediate mode, treat enharmonics as 'all' to exclude rare enharmonics
+      noteSelectionForGeneration = 'all';
+    }
+    const newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
     
     // Update notes and start playback
     onSettingsChange({
@@ -610,6 +616,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 <h4 className="font-medium mb-2 app-accent">Music Theory Analysis</h4>
                 <div className="app-text-secondary text-sm space-y-1">
                   <p>• No more than 2 consecutive seconds (M2/m2)</p>
+                  <p>• Preferred intervals: P5, P4, M3, m3, M6, m6</p>
                   {intervalAnalysis.length > 0 && settings.difficulty === 'intermediate' && (
                     <div>
                       <p>• All possible intervals:</p>
@@ -621,9 +628,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                         ))}
                       </div>
                     </div>
-                  )}
-                  {intervalAnalysis.length > 0 && settings.difficulty === 'beginner' && (
-                    <p>• Intervals: {intervalAnalysis.map(interval => interval.abbreviation).join(', ')}</p>
                   )}
                 </div>
               </div>

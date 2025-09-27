@@ -116,8 +116,16 @@ export class MusicTheory {
         enharmonicPairs.forEach(([sharp, flat]) => {
           availableNotes.push(Math.random() < 0.5 ? sharp : flat);
         });
-        // Add the 4 rare enharmonic equivalents
-        availableNotes.push('E#', 'Fb', 'B#', 'Cb');
+        // Guarantee at least one rare enharmonic is included
+        const rareEnharmonics = ['E#', 'Fb', 'B#', 'Cb'];
+        const guaranteedRare = rareEnharmonics[Math.floor(Math.random() * rareEnharmonics.length)];
+        availableNotes.push(guaranteedRare);
+        // Add remaining rare enharmonics with chance
+        rareEnharmonics.forEach(rare => {
+          if (rare !== guaranteedRare && Math.random() < 0.3) {
+            availableNotes.push(rare);
+          }
+        });
         break;
       default:
         // For 'all', randomly mix sharps and flats for all chromatic notes
@@ -201,6 +209,24 @@ export class MusicTheory {
         const newNote = this.getNoteFromMidi(newMidi + 60); // Keep in 5th octave
         sequence.push({ ...newNote, octave: 4 });
         usedSemitones.add(newMidi);
+      }
+    }
+
+    // For enharmonics mode, guarantee at least one rare enharmonic appears in final sequence
+    if (noteSelection === 'enharmonics') {
+      const rareEnharmonics = ['E#', 'Fb', 'B#', 'Cb'];
+      const hasRareEnharmonic = sequence.some(note => rareEnharmonics.includes(note.name));
+      
+      if (!hasRareEnharmonic && sequence.length > 0) {
+        // Replace a random note with a random rare enharmonic
+        const randomIndex = Math.floor(Math.random() * sequence.length);
+        const randomRareNote = rareEnharmonics[Math.floor(Math.random() * rareEnharmonics.length)];
+        const rareMidi = this.getMidiFromNote(randomRareNote, 4);
+        sequence[randomIndex] = {
+          name: randomRareNote,
+          midi: rareMidi,
+          octave: 4
+        };
       }
     }
 

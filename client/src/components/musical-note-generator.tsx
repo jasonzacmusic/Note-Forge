@@ -237,7 +237,13 @@ export function MusicalNoteGenerator() {
           // Randomize for current mode
           if (settings.currentMode === 'random') {
             // Generate new random notes and start playback
-            const newNotes = MusicTheory.generateRandomSequence(settings.randomMode.noteSelection, 4);
+            // For intermediate mode, don't use rare enharmonics unless explicitly selecting "enharmonics"
+            let noteSelectionForGeneration = settings.randomMode.noteSelection;
+            if (settings.randomMode.difficulty === 'intermediate' && settings.randomMode.noteSelection === 'enharmonics') {
+              // In intermediate mode, treat enharmonics as 'all' to exclude rare enharmonics
+              noteSelectionForGeneration = 'all';
+            }
+            const newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
             setSettings(prev => ({
               ...prev,
               randomMode: {
@@ -291,38 +297,6 @@ export function MusicalNoteGenerator() {
   };
 
 
-  const exportSettings = () => {
-    const dataStr = JSON.stringify(settings, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'musical-note-generator-settings.json';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const importSettings = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const imported = JSON.parse(e.target?.result as string);
-            setSettings({ ...defaultSettings, ...imported });
-          } catch (error) {
-            console.error('Failed to import settings:', error);
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  };
 
   const switchTab = (mode: AppSettings['currentMode']) => {
     // Immediately stop ALL playback in all modes
@@ -357,6 +331,9 @@ export function MusicalNoteGenerator() {
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
                 <p className="text-lg app-text-secondary">Professional practice tool for music students</p>
+                <div className="mt-2 app-bg rounded-lg px-3 py-1 text-sm app-text-secondary border border-[var(--app-border)] inline-block">
+                  <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
+                </div>
               </div>
             </div>
 
@@ -391,26 +368,6 @@ export function MusicalNoteGenerator() {
               
               <ThemeToggle />
               
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exportSettings}
-                className="app-elevated border-[var(--app-border)] hover:border-[var(--app-primary)] hover:font-semibold"
-                data-testid="button-export-settings"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={importSettings}
-                className="app-elevated border-[var(--app-border)] hover:border-[var(--app-primary)] hover:font-semibold"
-                data-testid="button-import-settings"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </Button>
             </div>
           </div>
 
