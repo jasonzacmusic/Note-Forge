@@ -27,14 +27,32 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
     });
   }, []);
 
+  // Helper function to find note position with enharmonic matching
+  const findNotePosition = useMemo(() => (searchNote: string) => {
+    return notePositions.find(pos => {
+      const noteVariants = pos.note.includes('/') ? pos.note.split('/') : [pos.note];
+      return noteVariants.includes(searchNote) || 
+        noteVariants.some(variant => {
+          const enharmonicMap: Record<string, string> = {
+            'F#': 'Gb', 'Gb': 'F#',
+            'C#': 'Db', 'Db': 'C#', 
+            'G#': 'Ab', 'Ab': 'G#',
+            'D#': 'Eb', 'Eb': 'D#',
+            'A#': 'Bb', 'Bb': 'A#'
+          };
+          return enharmonicMap[searchNote] === variant;
+        });
+    });
+  }, [notePositions]);
+
   // Generate connection lines for patterns
   const connectionLines = useMemo(() => {
     if (!isPlaying || activeNotes.length < 2) return [];
     
     const lines = [];
     for (let i = 0; i < activeNotes.length - 1; i++) {
-      const fromPos = notePositions.find(pos => pos.note === activeNotes[i]);
-      const toPos = notePositions.find(pos => pos.note === activeNotes[i + 1]);
+      const fromPos = findNotePosition(activeNotes[i]);
+      const toPos = findNotePosition(activeNotes[i + 1]);
       
       if (fromPos && toPos) {
         lines.push({
@@ -49,8 +67,8 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
     
     // Connect last to first for looping patterns
     if (activeNotes.length > 2) {
-      const fromPos = notePositions.find(pos => pos.note === activeNotes[activeNotes.length - 1]);
-      const toPos = notePositions.find(pos => pos.note === activeNotes[0]);
+      const fromPos = findNotePosition(activeNotes[activeNotes.length - 1]);
+      const toPos = findNotePosition(activeNotes[0]);
       
       if (fromPos && toPos) {
         lines.push({
@@ -78,7 +96,7 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
           <polygon
             points={[0, 1, 2].map(index => {
               const note = activeNotes[index];
-              const pos = notePositions.find(p => p.note === note);
+              const pos = findNotePosition(note);
               return pos ? `${pos.x},${pos.y}` : '';
             }).filter(p => p).join(' ')}
             fill="rgba(99, 102, 241, 0.5)"
@@ -92,7 +110,7 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
           <polygon
             points={[0, 1, 2, 3].map(index => {
               const note = activeNotes[index];
-              const pos = notePositions.find(p => p.note === note);
+              const pos = findNotePosition(note);
               return pos ? `${pos.x},${pos.y}` : '';
             }).filter(p => p).join(' ')}
             fill="rgba(236, 72, 153, 0.5)"
