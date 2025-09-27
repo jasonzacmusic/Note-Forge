@@ -174,8 +174,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   };
 
   const keys = [
-    'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F',
-    'Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'
+    'C', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'F#/Gb', 'B', 'E', 'A', 'D', 'G'
   ];
 
   const progressionOptions = [
@@ -204,7 +203,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
                 <SelectContent className="app-surface border-[var(--app-elevated)]">
                   {keys.map((key) => (
                     <SelectItem key={key} value={key}>
-                      {key.includes('m') ? `${key} Minor` : `${key} Major`}
+                      {key}
                     </SelectItem>
                   ))}
                 </SelectContent>

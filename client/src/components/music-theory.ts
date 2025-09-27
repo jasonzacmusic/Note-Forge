@@ -33,6 +33,7 @@ export class MusicTheory {
     'E': { sharps: 4, flats: 0, notes: ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'] },
     'B': { sharps: 5, flats: 0, notes: ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'] },
     'F#': { sharps: 6, flats: 0, notes: ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'] },
+    'Gb': { sharps: 0, flats: 6, notes: ['Gb', 'Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F'] },
     'F': { sharps: 0, flats: 1, notes: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'] },
     'Bb': { sharps: 0, flats: 2, notes: ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'] },
     'Eb': { sharps: 0, flats: 3, notes: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'] },
@@ -235,14 +236,17 @@ export class MusicTheory {
     return sequence;
   }
 
-  static getChordFromRomanNumeral(key: string, romanNumeral: string): Chord {
-    const keyNotes = this.keySignatures[key as keyof typeof this.keySignatures]?.notes || this.keySignatures['C'].notes;
+  static getChordFromRomanNumeral(key: string, romanNumeral: string, progressionType?: 'dorian' | 'pop' | 'jazz'): Chord {
+    // Handle F#/Gb key selection
+    const actualKey = key === 'F#/Gb' ? 'F#' : key;
+    const keyNotes = this.keySignatures[actualKey as keyof typeof this.keySignatures]?.notes || this.keySignatures['C'].notes;
     
     // Parse roman numeral
     const isMinor = romanNumeral === romanNumeral.toLowerCase();
     const isDiminished = romanNumeral.includes('°');
     const isAugmented = romanNumeral.includes('+');
     const has7th = romanNumeral.includes('7');
+    const isFlat = romanNumeral.includes('♭');
     
     // Get scale degree
     const numeralMap: Record<string, number> = {
@@ -251,25 +255,60 @@ export class MusicTheory {
     };
     
     const cleanNumeral = romanNumeral.replace(/[°+7♭]/g, '');
-    const scaleDegree = numeralMap[cleanNumeral] || 0;
-    const root = keyNotes[scaleDegree];
+    let scaleDegree = numeralMap[cleanNumeral] || 0;
+    
+    // Handle flat notation - get the root note based on major scale then flatten if needed
+    let root: string;
+    if (isFlat) {
+      // For flat chords, use the major scale degree and then flatten the note
+      const majorKeyNotes = this.keySignatures[actualKey as keyof typeof this.keySignatures]?.notes || this.keySignatures['C'].notes;
+      const naturalRoot = majorKeyNotes[scaleDegree];
+      
+      // Determine the correct flat enharmonic based on the natural note
+      const flatMap: Record<string, string> = {
+        'E': 'Eb', 'B': 'Bb', 'A': 'Ab', 'D': 'Db', 'G': 'Gb', 'C': 'Cb', 'F': 'Fb',
+        'F#': 'F', 'C#': 'C', 'G#': 'G', 'D#': 'D', 'A#': 'A', 'E#': 'E', 'B#': 'B'
+      };
+      
+      root = flatMap[naturalRoot] || naturalRoot;
+    } else {
+      root = keyNotes[scaleDegree];
+    }
 
-    // Build chord tones
+    // Build chord tones with proper enharmonic spelling
     const chordTones = [root];
     const rootMidi = this.getMidiFromNote(root, 4);
     
+    // Helper function to get enharmonically correct note based on key context
+    const getEnharmonicNote = (midi: number, preferFlats: boolean = false): string => {
+      const note = this.getNoteFromMidi(midi);
+      
+      // If we're in a flat key or dealing with flat chords, prefer flats
+      if (preferFlats || actualKey.includes('b') || isFlat) {
+        const sharpToFlat: Record<string, string> = {
+          'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb'
+        };
+        return sharpToFlat[note.name] || note.name;
+      }
+      
+      return note.name;
+    };
+    
+    // Determine if we should prefer flats based on key signature and context
+    const preferFlats = actualKey.includes('b') || isFlat || ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].includes(actualKey) || progressionType === 'dorian';
+    
     // Third
     let thirdInterval = isMinor || isDiminished ? 3 : 4; // m3 or M3
-    chordTones.push(this.getNoteFromMidi(rootMidi + thirdInterval).name);
+    chordTones.push(getEnharmonicNote(rootMidi + thirdInterval, preferFlats));
     
     // Fifth
     let fifthInterval = isDiminished ? 6 : isAugmented ? 8 : 7; // dim5, aug5, or P5
-    chordTones.push(this.getNoteFromMidi(rootMidi + fifthInterval).name);
+    chordTones.push(getEnharmonicNote(rootMidi + fifthInterval, preferFlats));
     
     // Seventh if specified
     if (has7th) {
       const seventhInterval = isMinor || romanNumeral.includes('7') ? 10 : 11; // m7 or M7
-      chordTones.push(this.getNoteFromMidi(rootMidi + seventhInterval).name);
+      chordTones.push(getEnharmonicNote(rootMidi + seventhInterval, preferFlats));
     }
 
     let quality = 'major';
@@ -304,7 +343,7 @@ export class MusicTheory {
 
     const prog = progressions[type];
     const chords = prog.numerals.map(numeral => 
-      this.getChordFromRomanNumeral(key, numeral)
+      this.getChordFromRomanNumeral(key, numeral, type)
     );
 
     return {
