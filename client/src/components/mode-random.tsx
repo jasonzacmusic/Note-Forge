@@ -409,16 +409,20 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                         <Label htmlFor="unison" className="app-text-primary text-sm">Unison</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="5" id="perfect-4th" />
-                        <Label htmlFor="perfect-4th" className="app-text-primary text-sm">Perfect 4th</Label>
+                        <RadioGroupItem value="12" id="octave" />
+                        <Label htmlFor="octave" className="app-text-primary text-sm">Octave</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="7" id="perfect-5th" />
                         <Label htmlFor="perfect-5th" className="app-text-primary text-sm">Perfect 5th</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="12" id="octave" />
-                        <Label htmlFor="octave" className="app-text-primary text-sm">Octave</Label>
+                        <RadioGroupItem value="4" id="major-3rd" />
+                        <Label htmlFor="major-3rd" className="app-text-primary text-sm">Major 3rd</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="3" id="minor-3rd" />
+                        <Label htmlFor="minor-3rd" className="app-text-primary text-sm">Minor 3rd</Label>
                       </div>
                     </RadioGroup>
                   </div>
@@ -440,10 +444,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                         <Label htmlFor="tritone" className="app-text-primary text-sm">Tritone</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="10" id="minor-7th" />
-                        <Label htmlFor="minor-7th" className="app-text-primary text-sm">Minor 7th</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
                         <RadioGroupItem value="11" id="major-7th" />
                         <Label htmlFor="major-7th" className="app-text-primary text-sm">Major 7th</Label>
                       </div>
@@ -459,16 +459,16 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="5" id="perfect-4th" />
+                        <Label htmlFor="perfect-4th" className="app-text-primary text-sm">Perfect 4th</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="10" id="minor-7th" />
+                        <Label htmlFor="minor-7th" className="app-text-primary text-sm">Minor 7th</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
                         <RadioGroupItem value="2" id="major-2nd" />
                         <Label htmlFor="major-2nd" className="app-text-primary text-sm">Major 2nd</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="4" id="major-3rd" />
-                        <Label htmlFor="major-3rd" className="app-text-primary text-sm">Major 3rd</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="9" id="major-6th" />
-                        <Label htmlFor="major-6th" className="app-text-primary text-sm">Major 6th</Label>
                       </div>
                     </RadioGroup>
                   </div>
@@ -482,12 +482,12 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="3" id="minor-3rd" />
-                        <Label htmlFor="minor-3rd" className="app-text-primary text-sm">Minor 3rd</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
                         <RadioGroupItem value="8" id="minor-6th" />
                         <Label htmlFor="minor-6th" className="app-text-primary text-sm">Minor 6th</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="9" id="major-6th" />
+                        <Label htmlFor="major-6th" className="app-text-primary text-sm">Major 6th</Label>
                       </div>
                     </RadioGroup>
                   </div>
