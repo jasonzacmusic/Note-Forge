@@ -68,8 +68,13 @@ const defaultSettings: AppSettings = {
 export function MusicalNoteGenerator() {
   const [settings, setSettings] = useLocalStorage<AppSettings>("musical-note-generator", defaultSettings);
   const { initializeAudio, audioContext } = useAudio();
-  const [audioEngine] = useState(() => new AudioEngine());
+  
+  // Create separate audio engines for each mode
+  const [randomAudioEngine] = useState(() => new AudioEngine());
+  const [progressionsAudioEngine] = useState(() => new AudioEngine());
+  const [patternsAudioEngine] = useState(() => new AudioEngine());
   const [metronomeAudioEngine] = useState(() => new AudioEngine());
+  
   const [currentBeat, setCurrentBeat] = useState(0);
   const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -90,19 +95,15 @@ export function MusicalNoteGenerator() {
     };
   }, [initializeAudio]);
 
-  // Initialize audio engine with context
+  // Initialize all audio engines with context
   useEffect(() => {
     if (audioContext) {
-      audioEngine.initialize(audioContext);
-    }
-  }, [audioContext, audioEngine]);
-
-  // Initialize metronome audio engine
-  useEffect(() => {
-    if (audioContext) {
+      randomAudioEngine.initialize(audioContext);
+      progressionsAudioEngine.initialize(audioContext);
+      patternsAudioEngine.initialize(audioContext);
       metronomeAudioEngine.initialize(audioContext);
     }
-  }, [audioContext, metronomeAudioEngine]);
+  }, [audioContext, randomAudioEngine, progressionsAudioEngine, patternsAudioEngine, metronomeAudioEngine]);
 
   // Get current BPM for metronome
   const getCurrentBpm = () => {
@@ -288,17 +289,19 @@ export function MusicalNoteGenerator() {
 
   // Preview audio sample function with seamless crossfading
   const previewAudioSample = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
-    if (audioContext && audioEngine.isInitialized()) {
+    if (audioContext && randomAudioEngine.isInitialized()) {
       // Use crossfade for seamless transition between wave types
-      audioEngine.crossfadeToWaveType(261.63, waveType, 0.3);
+      randomAudioEngine.crossfadeToWaveType(261.63, waveType, 0.3);
     }
   };
 
 
 
   const switchTab = (mode: AppSettings['currentMode']) => {
-    // Immediately stop ALL audio - both notes and metronome
-    audioEngine.stop();
+    // Stop ALL audio engines - each mode has its own independent engine
+    randomAudioEngine.stop();
+    progressionsAudioEngine.stop();
+    patternsAudioEngine.stop();
     stopMetronomeBeats();
     
     // Immediately stop ALL playback in all modes
@@ -429,7 +432,7 @@ export function MusicalNoteGenerator() {
               onSettingsChange={(randomMode) => setSettings(prev => ({ ...prev, randomMode }))}
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
-              sharedAudioEngine={audioEngine}
+              sharedAudioEngine={randomAudioEngine}
             />
           )}
           {settings.currentMode === 'progressions' && (
@@ -438,7 +441,7 @@ export function MusicalNoteGenerator() {
               onSettingsChange={(progressionsMode) => setSettings(prev => ({ ...prev, progressionsMode }))}
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
-              sharedAudioEngine={audioEngine}
+              sharedAudioEngine={progressionsAudioEngine}
             />
           )}
           {settings.currentMode === 'patterns' && (
@@ -447,7 +450,7 @@ export function MusicalNoteGenerator() {
               onSettingsChange={(patternsMode) => setSettings(prev => ({ ...prev, patternsMode }))}
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
-              sharedAudioEngine={audioEngine}
+              sharedAudioEngine={patternsAudioEngine}
             />
           )}
           {settings.currentMode === 'glossary' && <GlossaryMode />}
