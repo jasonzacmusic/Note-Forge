@@ -9,6 +9,7 @@ export class AudioEngine {
   private timerWorker: Worker | null = null;
   private scheduledNotes: Array<{ time: number; note: number; velocity: number }> = [];
   private activeOscillators: Map<string, { oscillators: OscillatorNode[], gains: GainNode[], masterGain: GainNode, cleanupTimeout?: number }> = new Map();
+  private masterGainNode: GainNode | null = null;
 
   constructor() {
     this.initializeWorker();
@@ -55,6 +56,14 @@ export class AudioEngine {
         await this.audioContext.resume();
       }
     }
+    
+    // Create master gain node if not already created
+    if (!this.masterGainNode && this.audioContext) {
+      this.masterGainNode = this.audioContext.createGain();
+      this.masterGainNode.gain.value = 1.0;
+      this.masterGainNode.connect(this.audioContext.destination);
+    }
+    
     return this.audioContext;
   }
 
@@ -99,7 +108,7 @@ export class AudioEngine {
     fundamentalGain.connect(masterGain);
     harmonic2Gain.connect(masterGain);
     harmonic3Gain.connect(masterGain);
-    masterGain.connect(this.audioContext.destination);
+    masterGain.connect(this.masterGainNode || this.audioContext.destination);
 
     // Set frequencies (fundamental + harmonics)
     fundamental.frequency.setValueAtTime(frequency, startTime);
@@ -155,7 +164,7 @@ export class AudioEngine {
     const gainNode = this.audioContext.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
+    gainNode.connect(this.masterGainNode || this.audioContext.destination);
 
     oscillator.frequency.setValueAtTime(frequency, startTime);
     oscillator.type = waveType as OscillatorType;
@@ -195,6 +204,9 @@ export class AudioEngine {
   playNote(frequency: number, duration: number = 0.5, startTime?: number, waveType: OscillatorType | 'piano' = 'sine', trackKey?: string): void {
     if (!this.audioContext) return;
 
+    // Restore master gain if it was muted (ensure audio can play)
+    this.restoreMasterGain();
+    
     const time = startTime || this.audioContext.currentTime;
     this.createOscillator(frequency, time, duration, waveType, trackKey);
   }
@@ -203,6 +215,9 @@ export class AudioEngine {
   crossfadeToWaveType(frequency: number, newWaveType: OscillatorType | 'piano', crossfadeDuration: number = 0.3): void {
     if (!this.audioContext) return;
 
+    // Restore master gain if it was muted (ensure audio can play)
+    this.restoreMasterGain();
+    
     const currentTime = this.audioContext.currentTime;
     const trackKey = 'preview';
     
@@ -254,7 +269,7 @@ export class AudioEngine {
     const gainNode = this.audioContext.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(this.audioContext.destination);
+    gainNode.connect(this.masterGainNode || this.audioContext.destination);
 
     oscillator.frequency.setValueAtTime(frequency, startTime);
     oscillator.type = waveType;
@@ -299,7 +314,7 @@ export class AudioEngine {
     fundamentalGain.connect(masterGain);
     harmonic2Gain.connect(masterGain);
     harmonic3Gain.connect(masterGain);
-    masterGain.connect(this.audioContext.destination);
+    masterGain.connect(this.masterGainNode || this.audioContext.destination);
 
     fundamental.frequency.setValueAtTime(frequency, startTime);
     harmonic2.frequency.setValueAtTime(frequency * 2, startTime);
@@ -352,6 +367,23 @@ export class AudioEngine {
     this.isPlaying = false;
     this.timerWorker?.postMessage("stop");
     this.scheduledNotes = [];
+    
+    // Immediately mute all audio by setting master gain to 0
+    if (this.masterGainNode && this.audioContext) {
+      const currentTime = this.audioContext.currentTime;
+      this.masterGainNode.gain.cancelScheduledValues(currentTime);
+      this.masterGainNode.gain.setValueAtTime(0, currentTime);
+      // Don't restore gain here - will be restored when playback starts
+    }
+  }
+  
+  // Restore master gain when starting playback
+  private restoreMasterGain() {
+    if (this.masterGainNode && this.audioContext) {
+      const currentTime = this.audioContext.currentTime;
+      this.masterGainNode.gain.cancelScheduledValues(currentTime);
+      this.masterGainNode.gain.setValueAtTime(1.0, currentTime);
+    }
   }
 
   setBPM(bpm: number) {
