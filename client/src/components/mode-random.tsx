@@ -15,9 +15,10 @@ interface RandomModeProps {
   audioContext: AudioContext | null;
   globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
   sharedAudioEngine: AudioEngine;
+  currentWaveTypeRef: React.MutableRefObject<'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano'>;
 }
 
-export function RandomMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine }: RandomModeProps) {
+export function RandomMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine, currentWaveTypeRef }: RandomModeProps) {
   const audioEngine = sharedAudioEngine;
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [intervalAnalysis, setIntervalAnalysis] = useState<Interval[]>([]);
@@ -153,17 +154,17 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       if (settings.difficulty === 'beginner') {
         for (let octave = 3; octave <= 6; octave++) {
           const frequency = AudioEngine.midiToFrequency(note.midi + (octave - 4) * 12);
-          audioEngine.playNote(frequency, 0.2, playTime, globalAudioSettings.waveType);
+          audioEngine.playNote(frequency, 0.2, playTime, currentWaveTypeRef.current);
         }
       } else {
         // Intermediate mode: play note + selected interval simultaneously
         const frequency = AudioEngine.midiToFrequency(note.midi);
-        audioEngine.playNote(frequency, 0.3, playTime, globalAudioSettings.waveType);
+        audioEngine.playNote(frequency, 0.3, playTime, currentWaveTypeRef.current);
         
         // Play the selected interval with the note
         if (settings.selectedInterval !== undefined) {
           const intervalFreq = AudioEngine.midiToFrequency(note.midi + settings.selectedInterval);
-          audioEngine.playNote(intervalFreq, 0.2, playTime, globalAudioSettings.waveType);
+          audioEngine.playNote(intervalFreq, 0.2, playTime, currentWaveTypeRef.current);
         }
       }
 

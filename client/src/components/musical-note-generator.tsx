@@ -77,6 +77,14 @@ export function MusicalNoteGenerator() {
   
   const [currentBeat, setCurrentBeat] = useState(0);
   const metronomeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Ref for current wave type so closures can access it dynamically
+  const currentWaveTypeRef = useRef<'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano'>('piano');
+
+  // Keep wave type ref in sync with settings
+  useEffect(() => {
+    currentWaveTypeRef.current = settings.globalAudio?.waveType || 'piano';
+  }, [settings.globalAudio?.waveType]);
 
   // Initialize audio on first user interaction
   useEffect(() => {
@@ -367,6 +375,8 @@ export function MusicalNoteGenerator() {
                   value={settings.globalAudio?.waveType || 'piano'}
                   onValueChange={(value) => {
                     const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
+                    // Update ref for seamless wave type switching during playback
+                    currentWaveTypeRef.current = waveType;
                     setSettings(prev => ({ 
                       ...prev, 
                       globalAudio: { waveType }
@@ -433,6 +443,7 @@ export function MusicalNoteGenerator() {
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
               sharedAudioEngine={randomAudioEngine}
+              currentWaveTypeRef={currentWaveTypeRef}
             />
           )}
           {settings.currentMode === 'progressions' && (
@@ -442,6 +453,7 @@ export function MusicalNoteGenerator() {
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
               sharedAudioEngine={progressionsAudioEngine}
+              currentWaveTypeRef={currentWaveTypeRef}
             />
           )}
           {settings.currentMode === 'patterns' && (
@@ -451,6 +463,7 @@ export function MusicalNoteGenerator() {
               audioContext={audioContext}
               globalAudioSettings={settings.globalAudio || { waveType: 'piano' }}
               sharedAudioEngine={patternsAudioEngine}
+              currentWaveTypeRef={currentWaveTypeRef}
             />
           )}
           {settings.currentMode === 'glossary' && <GlossaryMode />}

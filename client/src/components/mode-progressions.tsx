@@ -14,9 +14,10 @@ interface ProgressionsModeProps {
   audioContext: AudioContext | null;
   globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
   sharedAudioEngine: AudioEngine;
+  currentWaveTypeRef: React.MutableRefObject<'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano'>;
 }
 
-export function ProgressionsMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine }: ProgressionsModeProps) {
+export function ProgressionsMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine, currentWaveTypeRef }: ProgressionsModeProps) {
   const audioEngine = sharedAudioEngine;
   const [currentChordIndex, setCurrentChordIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -117,7 +118,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
       chord.notes.forEach((noteName, noteIndex) => {
         const frequency = AudioEngine.midiToFrequency(MusicTheory.getMidiFromNote(noteName, 4));
         const delay = noteIndex * 0.03; // Slight arpeggio effect
-        audioEngine.playNote(frequency, 0.8, playTime + delay, globalAudioSettings.waveType);
+        audioEngine.playNote(frequency, 0.8, playTime + delay, currentWaveTypeRef.current);
       });
 
       playbackRepetition++;

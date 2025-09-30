@@ -15,9 +15,10 @@ interface PatternsModeProps {
   audioContext: AudioContext | null;
   globalAudioSettings: { waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano' };
   sharedAudioEngine: AudioEngine;
+  currentWaveTypeRef: React.MutableRefObject<'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano'>;
 }
 
-export function PatternsMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine }: PatternsModeProps) {
+export function PatternsMode({ settings, onSettingsChange, audioContext, globalAudioSettings, sharedAudioEngine, currentWaveTypeRef }: PatternsModeProps) {
   const audioEngine = sharedAudioEngine;
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -153,7 +154,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
       const playTime = Math.max(nextNoteTime + swingDelay, audioContext.currentTime);
       
       const frequency = AudioEngine.midiToFrequency(note.midi);
-      audioEngine.playNote(frequency, 0.3, playTime, globalAudioSettings.waveType);
+      audioEngine.playNote(frequency, 0.3, playTime, currentWaveTypeRef.current);
 
       playbackRepetition++;
       
