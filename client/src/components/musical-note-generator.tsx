@@ -297,6 +297,10 @@ export function MusicalNoteGenerator() {
 
 
   const switchTab = (mode: AppSettings['currentMode']) => {
+    // Immediately stop ALL audio - both notes and metronome
+    audioEngine.stop();
+    stopMetronomeBeats();
+    
     // Immediately stop ALL playback in all modes
     setSettings(prev => ({
       ...prev,

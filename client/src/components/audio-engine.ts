@@ -108,7 +108,12 @@ export class AudioEngine {
     fundamentalGain.connect(masterGain);
     harmonic2Gain.connect(masterGain);
     harmonic3Gain.connect(masterGain);
-    masterGain.connect(this.masterGainNode || this.audioContext.destination);
+    
+    // Always connect through master gain - ensure it exists
+    if (!this.masterGainNode) {
+      throw new Error('Master gain node not initialized');
+    }
+    masterGain.connect(this.masterGainNode);
 
     // Set frequencies (fundamental + harmonics)
     fundamental.frequency.setValueAtTime(frequency, startTime);
@@ -164,7 +169,12 @@ export class AudioEngine {
     const gainNode = this.audioContext.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(this.masterGainNode || this.audioContext.destination);
+    
+    // Always connect through master gain - ensure it exists
+    if (!this.masterGainNode) {
+      throw new Error('Master gain node not initialized');
+    }
+    gainNode.connect(this.masterGainNode);
 
     oscillator.frequency.setValueAtTime(frequency, startTime);
     oscillator.type = waveType as OscillatorType;
@@ -269,7 +279,12 @@ export class AudioEngine {
     const gainNode = this.audioContext.createGain();
 
     oscillator.connect(gainNode);
-    gainNode.connect(this.masterGainNode || this.audioContext.destination);
+    
+    // Always connect through master gain - ensure it exists
+    if (!this.masterGainNode) {
+      throw new Error('Master gain node not initialized');
+    }
+    gainNode.connect(this.masterGainNode);
 
     oscillator.frequency.setValueAtTime(frequency, startTime);
     oscillator.type = waveType;
@@ -314,7 +329,12 @@ export class AudioEngine {
     fundamentalGain.connect(masterGain);
     harmonic2Gain.connect(masterGain);
     harmonic3Gain.connect(masterGain);
-    masterGain.connect(this.masterGainNode || this.audioContext.destination);
+    
+    // Always connect through master gain - ensure it exists
+    if (!this.masterGainNode) {
+      throw new Error('Master gain node not initialized');
+    }
+    masterGain.connect(this.masterGainNode);
 
     fundamental.frequency.setValueAtTime(frequency, startTime);
     harmonic2.frequency.setValueAtTime(frequency * 2, startTime);
@@ -375,6 +395,36 @@ export class AudioEngine {
       this.masterGainNode.gain.setValueAtTime(0, currentTime);
       // Don't restore gain here - will be restored when playback starts
     }
+    
+    // Hard stop: immediately stop and disconnect all active oscillators
+    this.activeOscillators.forEach((track) => {
+      // Clear cleanup timeout
+      if (track.cleanupTimeout) {
+        clearTimeout(track.cleanupTimeout);
+      }
+      
+      // Immediately mute all gains
+      track.gains.forEach(gain => {
+        if (this.audioContext) {
+          gain.gain.cancelScheduledValues(this.audioContext.currentTime);
+          gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+        }
+      });
+      
+      // Stop all oscillators
+      track.oscillators.forEach(osc => {
+        try {
+          if (this.audioContext) {
+            osc.stop(this.audioContext.currentTime);
+          }
+        } catch (e) {
+          // Oscillator might already be stopped, ignore error
+        }
+      });
+    });
+    
+    // Clear all active oscillators
+    this.activeOscillators.clear();
   }
   
   // Restore master gain when starting playback
