@@ -286,11 +286,11 @@ export function MusicalNoteGenerator() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [settings]);
 
-  // Preview audio sample function
+  // Preview audio sample function with seamless crossfading
   const previewAudioSample = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
     if (audioContext && audioEngine.isInitialized()) {
-      // Play middle C (261.63 Hz) for half a second as preview
-      audioEngine.playNote(261.63, 0.5, undefined, waveType);
+      // Use crossfade for seamless transition between wave types
+      audioEngine.crossfadeToWaveType(261.63, waveType, 0.3);
     }
   };
 

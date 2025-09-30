@@ -8,6 +8,7 @@ export class AudioEngine {
   private isPlaying = false;
   private timerWorker: Worker | null = null;
   private scheduledNotes: Array<{ time: number; note: number; velocity: number }> = [];
+  private activeOscillators: Map<string, { oscillators: OscillatorNode[], gains: GainNode[], masterGain: GainNode, cleanupTimeout?: number }> = new Map();
 
   constructor() {
     this.initializeWorker();
@@ -77,7 +78,7 @@ export class AudioEngine {
     this.currentBeat++;
   }
 
-  createPianoSound(frequency: number, startTime: number, duration: number = 0.5): void {
+  createPianoSound(frequency: number, startTime: number, duration: number = 0.5, trackKey?: string): void {
     if (!this.audioContext) return;
 
     // Create multiple oscillators for a richer piano-like sound
@@ -121,6 +122,20 @@ export class AudioEngine {
     masterGain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.1);
     masterGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
+    // Track active oscillators for crossfading
+    if (trackKey) {
+      this.activeOscillators.set(trackKey, {
+        oscillators: [fundamental, harmonic2, harmonic3],
+        gains: [fundamentalGain, harmonic2Gain, harmonic3Gain],
+        masterGain
+      });
+      
+      // Clean up after the note ends
+      setTimeout(() => {
+        this.activeOscillators.delete(trackKey);
+      }, (startTime - this.audioContext!.currentTime + duration) * 1000);
+    }
+
     // Start and stop all oscillators
     [fundamental, harmonic2, harmonic3].forEach(osc => {
       osc.start(startTime);
@@ -128,11 +143,11 @@ export class AudioEngine {
     });
   }
 
-  createOscillator(frequency: number, startTime: number, duration: number = 0.1, waveType: OscillatorType | 'piano' = 'sine'): void {
+  createOscillator(frequency: number, startTime: number, duration: number = 0.1, waveType: OscillatorType | 'piano' = 'sine', trackKey?: string): void {
     if (!this.audioContext) throw new Error('Audio context not initialized');
 
     if (waveType === 'piano') {
-      this.createPianoSound(frequency, startTime, duration);
+      this.createPianoSound(frequency, startTime, duration, trackKey);
       return;
     }
 
@@ -150,6 +165,20 @@ export class AudioEngine {
     gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
     gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
+    // Track active oscillators for crossfading
+    if (trackKey) {
+      this.activeOscillators.set(trackKey, {
+        oscillators: [oscillator],
+        gains: [gainNode],
+        masterGain: gainNode
+      });
+      
+      // Clean up after the note ends
+      setTimeout(() => {
+        this.activeOscillators.delete(trackKey);
+      }, (startTime - this.audioContext!.currentTime + duration) * 1000);
+    }
+
     oscillator.start(startTime);
     oscillator.stop(startTime + duration);
   }
@@ -163,11 +192,149 @@ export class AudioEngine {
     this.createOscillator(frequency, startTime, duration);
   }
 
-  playNote(frequency: number, duration: number = 0.5, startTime?: number, waveType: OscillatorType | 'piano' = 'sine'): void {
+  playNote(frequency: number, duration: number = 0.5, startTime?: number, waveType: OscillatorType | 'piano' = 'sine', trackKey?: string): void {
     if (!this.audioContext) return;
 
     const time = startTime || this.audioContext.currentTime;
-    this.createOscillator(frequency, time, duration, waveType);
+    this.createOscillator(frequency, time, duration, waveType, trackKey);
+  }
+
+  // Crossfade between wave types for seamless transition
+  crossfadeToWaveType(frequency: number, newWaveType: OscillatorType | 'piano', crossfadeDuration: number = 0.3): void {
+    if (!this.audioContext) return;
+
+    const currentTime = this.audioContext.currentTime;
+    const trackKey = 'preview';
+    
+    // Fade out existing preview if it exists
+    const existingPreview = this.activeOscillators.get(trackKey);
+    if (existingPreview) {
+      // Clear any existing cleanup timeout to prevent stale cleanup
+      if (existingPreview.cleanupTimeout !== undefined) {
+        clearTimeout(existingPreview.cleanupTimeout);
+      }
+      
+      // Fade out old wave type
+      existingPreview.masterGain.gain.cancelScheduledValues(currentTime);
+      const currentGain = existingPreview.masterGain.gain.value;
+      existingPreview.masterGain.gain.setValueAtTime(currentGain, currentTime);
+      
+      // Guard against exponential ramp from zero - use linear ramp if gain is too low
+      if (currentGain > 0.001) {
+        existingPreview.masterGain.gain.exponentialRampToValueAtTime(0.001, currentTime + crossfadeDuration);
+      } else {
+        existingPreview.masterGain.gain.linearRampToValueAtTime(0, currentTime + crossfadeDuration);
+      }
+      
+      // Stop old oscillators after fadeout
+      existingPreview.oscillators.forEach(osc => {
+        try {
+          osc.stop(currentTime + crossfadeDuration);
+        } catch (e) {
+          // Already stopped
+        }
+      });
+      
+      // Remove from tracking after fadeout - don't use setTimeout to avoid stale cleanup
+      this.activeOscillators.delete(trackKey);
+    }
+
+    // Create new wave type with fade in
+    if (newWaveType === 'piano') {
+      this.createPianoSoundWithCrossfade(frequency, currentTime, 1.0, crossfadeDuration, trackKey);
+    } else {
+      this.createOscillatorWithCrossfade(frequency, currentTime, 1.0, newWaveType, crossfadeDuration, trackKey);
+    }
+  }
+
+  private createOscillatorWithCrossfade(frequency: number, startTime: number, duration: number, waveType: OscillatorType, crossfadeDuration: number, trackKey: string): void {
+    if (!this.audioContext) return;
+
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+
+    oscillator.frequency.setValueAtTime(frequency, startTime);
+    oscillator.type = waveType;
+
+    // Crossfade in envelope
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, startTime + crossfadeDuration);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
+
+    // Track for future crossfading with cleanup timeout
+    const cleanupTimeout = setTimeout(() => {
+      this.activeOscillators.delete(trackKey);
+    }, (duration) * 1000) as unknown as number;
+
+    this.activeOscillators.set(trackKey, {
+      oscillators: [oscillator],
+      gains: [gainNode],
+      masterGain: gainNode,
+      cleanupTimeout
+    });
+  }
+
+  private createPianoSoundWithCrossfade(frequency: number, startTime: number, duration: number, crossfadeDuration: number, trackKey: string): void {
+    if (!this.audioContext) return;
+
+    const fundamental = this.audioContext.createOscillator();
+    const harmonic2 = this.audioContext.createOscillator();
+    const harmonic3 = this.audioContext.createOscillator();
+    
+    const fundamentalGain = this.audioContext.createGain();
+    const harmonic2Gain = this.audioContext.createGain();
+    const harmonic3Gain = this.audioContext.createGain();
+    const masterGain = this.audioContext.createGain();
+
+    fundamental.connect(fundamentalGain);
+    harmonic2.connect(harmonic2Gain);
+    harmonic3.connect(harmonic3Gain);
+    
+    fundamentalGain.connect(masterGain);
+    harmonic2Gain.connect(masterGain);
+    harmonic3Gain.connect(masterGain);
+    masterGain.connect(this.audioContext.destination);
+
+    fundamental.frequency.setValueAtTime(frequency, startTime);
+    harmonic2.frequency.setValueAtTime(frequency * 2, startTime);
+    harmonic3.frequency.setValueAtTime(frequency * 3, startTime);
+
+    fundamental.type = 'triangle';
+    harmonic2.type = 'sine';
+    harmonic3.type = 'sine';
+
+    fundamentalGain.gain.setValueAtTime(0.5, startTime);
+    harmonic2Gain.gain.setValueAtTime(0.2, startTime);
+    harmonic3Gain.gain.setValueAtTime(0.1, startTime);
+
+    // Crossfade in envelope
+    masterGain.gain.setValueAtTime(0, startTime);
+    masterGain.gain.linearRampToValueAtTime(0.4, startTime + crossfadeDuration);
+    masterGain.gain.exponentialRampToValueAtTime(0.2, startTime + 0.1 + crossfadeDuration);
+    masterGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    [fundamental, harmonic2, harmonic3].forEach(osc => {
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    });
+
+    // Track for future crossfading with cleanup timeout
+    const cleanupTimeout = setTimeout(() => {
+      this.activeOscillators.delete(trackKey);
+    }, (duration) * 1000) as unknown as number;
+
+    this.activeOscillators.set(trackKey, {
+      oscillators: [fundamental, harmonic2, harmonic3],
+      gains: [fundamentalGain, harmonic2Gain, harmonic3Gain],
+      masterGain,
+      cleanupTimeout
+    });
   }
 
   start(bpm: number = 120) {
