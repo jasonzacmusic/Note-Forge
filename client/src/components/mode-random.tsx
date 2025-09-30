@@ -22,6 +22,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const [intervalAnalysis, setIntervalAnalysis] = useState<Interval[]>([]);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldContinuePlaybackRef = useRef(false);
 
   useEffect(() => {
     // Listen for global stop event
@@ -111,13 +112,16 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     // Enable playback in audio engine
     audioEngine.enablePlayback();
     
+    // Set flag to allow playback continuation
+    shouldContinuePlaybackRef.current = true;
+    
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
     let nextNoteTime = audioContext.currentTime;
     
     const scheduleNote = () => {
-      // Always check current settings, don't cache
-      if (!settings.playback.isPlaying || settings.generatedNotes.length === 0) return;
+      // Check ref flag to prevent old closures from continuing
+      if (!shouldContinuePlaybackRef.current || settings.generatedNotes.length === 0) return;
 
       // Dynamically calculate repetitions per bar based on current subdivision
       const getRepetitionsPerBar = (subdivision: string) => {
@@ -192,6 +196,9 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   };
 
   const stopPlayback = () => {
+    // Immediately stop playback continuation flag
+    shouldContinuePlaybackRef.current = false;
+    
     // Clear any pending timeouts immediately
     if (playbackTimeoutRef.current) {
       clearTimeout(playbackTimeoutRef.current);

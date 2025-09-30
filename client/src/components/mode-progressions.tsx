@@ -20,6 +20,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   const audioEngine = sharedAudioEngine;
   const [currentChordIndex, setCurrentChordIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldContinuePlaybackRef = useRef(false);
 
   useEffect(() => {
     // Listen for global stop event
@@ -75,12 +76,16 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
     // Enable playback in audio engine
     audioEngine.enablePlayback();
     
+    // Set flag to allow playback continuation
+    shouldContinuePlaybackRef.current = true;
+    
     let currentChordIndex = settings.cycleStart;
     let playbackRepetition = 0;
     let nextChordTime = audioContext.currentTime;
     
     const scheduleChord = () => {
-      if (!settings.playback.isPlaying || !settings.currentProgression) return;
+      // Check ref flag to prevent old closures from continuing
+      if (!shouldContinuePlaybackRef.current || !settings.currentProgression) return;
 
       // Dynamically calculate repetitions per bar based on current subdivision  
       const getRepetitionsPerBar = (subdivision: string) => {
@@ -135,6 +140,9 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   };
 
   const stopPlayback = () => {
+    // Immediately stop playback continuation flag
+    shouldContinuePlaybackRef.current = false;
+    
     // Clear any pending timeouts immediately
     if (playbackTimeoutRef.current) {
       clearTimeout(playbackTimeoutRef.current);

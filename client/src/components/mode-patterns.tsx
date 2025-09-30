@@ -21,6 +21,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
   const audioEngine = sharedAudioEngine;
   const [currentNoteIndex, setCurrentNoteIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldContinuePlaybackRef = useRef(false);
 
   useEffect(() => {
     // Listen for global stop event
@@ -114,12 +115,16 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
     // Enable playback in audio engine
     audioEngine.enablePlayback();
     
+    // Set flag to allow playback continuation
+    shouldContinuePlaybackRef.current = true;
+    
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
     let nextNoteTime = audioContext.currentTime + 0.05;
     
     const scheduleNote = () => {
-      if (!settings.playback.isPlaying) return;
+      // Check ref flag to prevent old closures from continuing
+      if (!shouldContinuePlaybackRef.current) return;
 
       // Dynamically calculate repetitions per bar based on current subdivision
       const getRepetitionsPerBar = (subdivision: string) => {
@@ -170,6 +175,9 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
   };
 
   const stopPlayback = () => {
+    // Immediately stop playback continuation flag
+    shouldContinuePlaybackRef.current = false;
+    
     // Clear any pending timeouts immediately
     if (playbackTimeoutRef.current) {
       clearTimeout(playbackTimeoutRef.current);
