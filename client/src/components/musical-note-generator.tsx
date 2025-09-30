@@ -337,26 +337,15 @@ export function MusicalNoteGenerator() {
       <header className="app-surface border-b-2 border-[var(--app-border)] mb-8">
         <div className="container mx-auto px-6 py-8 max-w-7xl">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-6">
-              {/* NSM Logo */}
-              <div className="flex items-center space-x-3">
-                <img 
-                  src="/attached_assets/nsm-logo_1759219488423.png"
-                  alt="Nathaniel School of Music"
-                  className="h-16 w-auto object-contain"
-                />
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
+                <Music className="text-white text-2xl" />
               </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
-                  <Music className="text-white text-2xl" />
-                </div>
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
-                  <p className="text-lg app-text-secondary">4 notes with many creative possibilities</p>
-                  <div className="mt-2 app-bg rounded-lg px-3 py-1 text-sm app-text-secondary border border-[var(--app-border)] inline-block">
-                    <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
-                  </div>
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
+                <p className="text-lg app-text-secondary">4 notes with many creative possibilities</p>
+                <div className="mt-2 app-bg rounded-lg px-3 py-1 text-sm app-text-secondary border border-[var(--app-border)] inline-block">
+                  <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
                 </div>
               </div>
             </div>
@@ -403,29 +392,42 @@ export function MusicalNoteGenerator() {
       {/* Tab Navigation */}
       <div className="container mx-auto px-6 max-w-7xl">
         <nav className="mb-8">
-          <div className="flex flex-wrap gap-3 p-2 app-elevated rounded-xl">
-            {[
-              { key: 'random', label: 'Random Notes', icon: '🎲', color: 'app-primary' },
-              { key: 'progressions', label: 'Chord Progressions', icon: '🎵', color: 'app-secondary' },
-              { key: 'patterns', label: 'Circle Patterns', icon: '🔄', color: 'app-accent' },
-              { key: 'glossary', label: 'Music Glossary', icon: '📚', color: 'app-warning' }
-            ].map(({ key, label, icon, color }) => (
-              <Button
-                key={key}
-                variant="ghost"
-                size="lg"
-                onClick={() => switchTab(key as AppSettings['currentMode'])}
-                className={`flex-1 min-w-fit px-6 py-4 rounded-lg transition-all duration-200 ${
-                  settings.currentMode === key
-                    ? `${color} text-white shadow-lg transform scale-105 font-semibold`
-                    : `hover:border-2 hover:border-[var(--${color.replace('app-', 'app-')})] app-text-secondary hover:app-text-primary border border-[var(--app-border)] hover:font-semibold`
-                }`}
-                data-testid={`tab-${key}`}
-              >
-                <span className="mr-3 text-xl">{icon}</span>
-                <span className="font-medium">{label}</span>
-              </Button>
-            ))}
+          <div className="flex items-center gap-4 p-2 app-elevated rounded-xl">
+            {/* NSM Logo */}
+            <div className="flex-shrink-0">
+              <img 
+                src="/attached_assets/nsm-logo_1759219488423.png"
+                alt="Nathaniel School of Music"
+                className="h-12 w-auto object-contain"
+                data-testid="nsm-logo"
+              />
+            </div>
+            
+            {/* Tab Buttons */}
+            <div className="flex flex-wrap gap-3 flex-1">
+              {[
+                { key: 'random', label: 'Random Notes', icon: '🎲', color: 'app-primary' },
+                { key: 'progressions', label: 'Chord Progressions', icon: '🎵', color: 'app-secondary' },
+                { key: 'patterns', label: 'Circle Patterns', icon: '🔄', color: 'app-accent' },
+                { key: 'glossary', label: 'Music Glossary', icon: '📚', color: 'app-warning' }
+              ].map(({ key, label, icon, color }) => (
+                <Button
+                  key={key}
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => switchTab(key as AppSettings['currentMode'])}
+                  className={`flex-1 min-w-fit px-6 py-4 rounded-lg transition-all duration-200 ${
+                    settings.currentMode === key
+                      ? `${color} text-white shadow-lg transform scale-105 font-semibold`
+                      : `hover:border-2 hover:border-[var(--${color.replace('app-', 'app-')})] app-text-secondary hover:app-text-primary border border-[var(--app-border)] hover:font-semibold`
+                  }`}
+                  data-testid={`tab-${key}`}
+                >
+                  <span className="mr-3 text-xl">{icon}</span>
+                  <span className="font-medium">{label}</span>
+                </Button>
+              ))}
+            </div>
           </div>
         </nav>
 
