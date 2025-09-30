@@ -13,6 +13,7 @@ import { GlossaryMode } from "./mode-glossary";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
+import nsmLogo from "@assets/nsm-logo_1759219488423.png";
 
 const defaultSettings: AppSettings = {
   globalMetronome: {
@@ -338,6 +339,12 @@ export function MusicalNoteGenerator() {
         <div className="container mx-auto px-6 py-8 max-w-7xl">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
+              <img 
+                src={nsmLogo}
+                alt="Nathaniel School of Music"
+                className="h-16 w-auto object-contain"
+                data-testid="nsm-logo"
+              />
               <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
                 <Music className="text-white text-2xl" />
               </div>
@@ -392,42 +399,29 @@ export function MusicalNoteGenerator() {
       {/* Tab Navigation */}
       <div className="container mx-auto px-6 max-w-7xl">
         <nav className="mb-8">
-          <div className="flex items-center gap-4 p-2 app-elevated rounded-xl">
-            {/* NSM Logo */}
-            <div className="flex-shrink-0">
-              <img 
-                src="/attached_assets/nsm-logo_1759219488423.png"
-                alt="Nathaniel School of Music"
-                className="h-12 w-auto object-contain"
-                data-testid="nsm-logo"
-              />
-            </div>
-            
-            {/* Tab Buttons */}
-            <div className="flex flex-wrap gap-3 flex-1">
-              {[
-                { key: 'random', label: 'Random Notes', icon: '🎲', color: 'app-primary' },
-                { key: 'progressions', label: 'Chord Progressions', icon: '🎵', color: 'app-secondary' },
-                { key: 'patterns', label: 'Circle Patterns', icon: '🔄', color: 'app-accent' },
-                { key: 'glossary', label: 'Music Glossary', icon: '📚', color: 'app-warning' }
-              ].map(({ key, label, icon, color }) => (
-                <Button
-                  key={key}
-                  variant="ghost"
-                  size="lg"
-                  onClick={() => switchTab(key as AppSettings['currentMode'])}
-                  className={`flex-1 min-w-fit px-6 py-4 rounded-lg transition-all duration-200 ${
-                    settings.currentMode === key
-                      ? `${color} text-white shadow-lg transform scale-105 font-semibold`
-                      : `hover:border-2 hover:border-[var(--${color.replace('app-', 'app-')})] app-text-secondary hover:app-text-primary border border-[var(--app-border)] hover:font-semibold`
-                  }`}
-                  data-testid={`tab-${key}`}
-                >
-                  <span className="mr-3 text-xl">{icon}</span>
-                  <span className="font-medium">{label}</span>
-                </Button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-3 p-2 app-elevated rounded-xl">
+            {[
+              { key: 'random', label: 'Random Notes', icon: '🎲', color: 'app-primary' },
+              { key: 'progressions', label: 'Chord Progressions', icon: '🎵', color: 'app-secondary' },
+              { key: 'patterns', label: 'Circle Patterns', icon: '🔄', color: 'app-accent' },
+              { key: 'glossary', label: 'Music Glossary', icon: '📚', color: 'app-warning' }
+            ].map(({ key, label, icon, color }) => (
+              <Button
+                key={key}
+                variant="ghost"
+                size="lg"
+                onClick={() => switchTab(key as AppSettings['currentMode'])}
+                className={`flex-1 min-w-fit px-6 py-4 rounded-lg transition-all duration-200 ${
+                  settings.currentMode === key
+                    ? `${color} text-white shadow-lg transform scale-105 font-semibold`
+                    : `hover:border-2 hover:border-[var(--${color.replace('app-', 'app-')})] app-text-secondary hover:app-text-primary border border-[var(--app-border)] hover:font-semibold`
+                }`}
+                data-testid={`tab-${key}`}
+              >
+                <span className="mr-3 text-xl">{icon}</span>
+                <span className="font-medium">{label}</span>
+              </Button>
+            ))}
           </div>
         </nav>
 
