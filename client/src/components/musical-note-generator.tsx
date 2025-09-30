@@ -341,14 +341,9 @@ export function MusicalNoteGenerator() {
               {/* NSM Logo */}
               <div className="flex items-center space-x-3">
                 <img 
-                  src="/attached_assets/NSM%20White_1758990083060.png"
+                  src="/attached_assets/nsm-logo_1759219488423.png"
                   alt="Nathaniel School of Music"
-                  className="h-16 w-auto object-contain hidden dark:block"
-                />
-                <img 
-                  src="/attached_assets/NSM%20Black_1758990083060.png"
-                  alt="Nathaniel School of Music"
-                  className="h-16 w-auto object-contain block dark:hidden"
+                  className="h-16 w-auto object-contain"
                 />
               </div>
               
