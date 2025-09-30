@@ -111,6 +111,9 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
   const startPlayback = () => {
     if (settings.currentPattern.length === 0 || !audioContext) return;
 
+    // Enable playback in audio engine
+    audioEngine.enablePlayback();
+    
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
     let nextNoteTime = audioContext.currentTime + 0.05;

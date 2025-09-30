@@ -72,6 +72,9 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   const startPlayback = () => {
     if (!settings.currentProgression || !audioContext) return;
 
+    // Enable playback in audio engine
+    audioEngine.enablePlayback();
+    
     let currentChordIndex = settings.cycleStart;
     let playbackRepetition = 0;
     let nextChordTime = audioContext.currentTime;

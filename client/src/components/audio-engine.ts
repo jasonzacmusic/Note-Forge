@@ -10,6 +10,7 @@ export class AudioEngine {
   private scheduledNotes: Array<{ time: number; note: number; velocity: number }> = [];
   private activeOscillators: Map<string, { oscillators: OscillatorNode[], gains: GainNode[], masterGain: GainNode, cleanupTimeout?: number }> = new Map();
   private masterGainNode: GainNode | null = null;
+  private explicitlyStopped = false; // Track if stop() was explicitly called
 
   constructor() {
     this.initializeWorker();
@@ -385,6 +386,7 @@ export class AudioEngine {
 
   stop() {
     this.isPlaying = false;
+    this.explicitlyStopped = true; // Mark as explicitly stopped
     this.timerWorker?.postMessage("stop");
     this.scheduledNotes = [];
     
@@ -427,8 +429,17 @@ export class AudioEngine {
     this.activeOscillators.clear();
   }
   
-  // Restore master gain when starting playback
+  // Enable playback - must be called before starting playback to allow audio
+  enablePlayback() {
+    this.explicitlyStopped = false;
+    this.isPlaying = true;
+  }
+  
+  // Restore master gain when starting playback (only if not explicitly stopped)
   private restoreMasterGain() {
+    // Don't restore if we've been explicitly stopped - prevents delayed callbacks from unmuting
+    if (this.explicitlyStopped) return;
+    
     if (this.masterGainNode && this.audioContext) {
       const currentTime = this.audioContext.currentTime;
       this.masterGainNode.gain.cancelScheduledValues(currentTime);

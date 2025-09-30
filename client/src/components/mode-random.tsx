@@ -108,6 +108,9 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   const startPlayback = () => {
     if (settings.generatedNotes.length === 0 || !audioContext) return;
 
+    // Enable playback in audio engine
+    audioEngine.enablePlayback();
+    
     let currentNoteIndex = 0;
     let playbackRepetition = 0;
     let nextNoteTime = audioContext.currentTime;
