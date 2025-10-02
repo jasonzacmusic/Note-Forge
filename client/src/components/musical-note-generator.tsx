@@ -13,7 +13,8 @@ import { GlossaryMode } from "./mode-glossary";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
-import nsmLogo from "@assets/nsm-logo_1759219488423.png";
+import nathanielLight from "@assets/nathaniel-light_1759431050954.jpg";
+import nathanielDark from "@assets/nathaniel-dark_1759431050954.jpg";
 
 const defaultSettings: AppSettings = {
   globalMetronome: {
@@ -340,10 +341,16 @@ export function MusicalNoteGenerator() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
               <img 
-                src={nsmLogo}
+                src={nathanielLight}
                 alt="Nathaniel School of Music"
-                className="h-16 w-auto object-contain"
-                data-testid="nsm-logo"
+                className="h-16 w-auto object-contain block dark:hidden"
+                data-testid="nsm-logo-light"
+              />
+              <img 
+                src={nathanielDark}
+                alt="Nathaniel School of Music"
+                className="h-16 w-auto object-contain hidden dark:block"
+                data-testid="nsm-logo-dark"
               />
               <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
                 <Music className="text-white text-2xl" />
