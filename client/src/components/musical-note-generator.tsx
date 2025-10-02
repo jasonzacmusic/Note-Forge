@@ -14,7 +14,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
 import nathanielLight from "@assets/nathaniel-light_1759431050954.jpg";
-import nathanielDark from "@assets/nathaniel-dark_1759431050954.jpg";
+import nathanielDark from "@assets/nathaniel-dark_1759431429351.png";
 
 const defaultSettings: AppSettings = {
   globalMetronome: {
