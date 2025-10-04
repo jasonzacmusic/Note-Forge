@@ -270,7 +270,15 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   };
 
   const updateSelectedInterval = (selectedInterval: number) => {
-    onSettingsChange({ ...settings, selectedInterval });
+    // Generate new notes when interval is selected, but don't auto-play
+    const newNotes = MusicTheory.generateRandomSequence('all', 4);
+    
+    onSettingsChange({ 
+      ...settings, 
+      selectedInterval,
+      generatedNotes: newNotes,
+      playback: { ...settings.playback, isPlaying: false }
+    });
   };
 
   const updateBPM = (bpm: number[]) => {
@@ -451,6 +459,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
@@ -482,6 +491,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
@@ -505,6 +515,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
@@ -528,6 +539,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                     <RadioGroup
                       value={settings.selectedInterval?.toString()}
                       onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
