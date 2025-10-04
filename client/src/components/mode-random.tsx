@@ -361,9 +361,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 <RadioGroup
                   value={settings.noteSelection}
                   onValueChange={updateNoteSelection}
+                  disabled={settings.playback.isPlaying}
                   className="space-y-3"
                 >
-                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                    settings.playback.isPlaying 
+                      ? 'opacity-50 cursor-not-allowed pointer-events-none' 
+                      : 'cursor-pointer'
+                  } ${
                     settings.noteSelection === 'all' 
                       ? 'border-[var(--app-accent)] app-elevated shadow-md' 
                       : 'border-[var(--app-border)] hover:border-[var(--app-accent)] app-elevated'
@@ -377,7 +382,11 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       </div>
                     </Label>
                   </div>
-                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                    settings.playback.isPlaying 
+                      ? 'opacity-50 cursor-not-allowed pointer-events-none' 
+                      : 'cursor-pointer'
+                  } ${
                     settings.noteSelection === 'white' 
                       ? 'border-[var(--app-secondary)] app-elevated shadow-md' 
                       : 'border-[var(--app-border)] hover:border-[var(--app-secondary)] app-elevated'
@@ -391,7 +400,11 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       </div>
                     </Label>
                   </div>
-                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                    settings.playback.isPlaying 
+                      ? 'opacity-50 cursor-not-allowed pointer-events-none' 
+                      : 'cursor-pointer'
+                  } ${
                     settings.noteSelection === 'accidentals' 
                       ? 'border-[var(--app-warning)] app-elevated shadow-md' 
                       : 'border-[var(--app-border)] hover:border-[var(--app-warning)] app-elevated'
@@ -405,7 +418,11 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       </div>
                     </Label>
                   </div>
-                  <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                    settings.playback.isPlaying 
+                      ? 'opacity-50 cursor-not-allowed pointer-events-none' 
+                      : 'cursor-pointer'
+                  } ${
                     settings.noteSelection === 'enharmonics' 
                       ? 'border-[var(--app-primary)] app-elevated shadow-md' 
                       : 'border-[var(--app-border)] hover:border-[var(--app-primary)] app-elevated'
