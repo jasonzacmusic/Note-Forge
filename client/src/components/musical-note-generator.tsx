@@ -307,6 +307,27 @@ export function MusicalNoteGenerator() {
 
 
 
+  // Reset function for Random Mode settings
+  const resetRandomModeSettings = (prevSettings: AppSettings) => ({
+    ...prevSettings.randomMode,
+    generatedNotes: [],
+    playback: { ...prevSettings.randomMode.playback, isPlaying: false }
+  });
+
+  // Reset function for Progressions Mode settings
+  const resetProgressionsModeSettings = (prevSettings: AppSettings) => ({
+    ...prevSettings.progressionsMode,
+    currentProgression: undefined,
+    playback: { ...prevSettings.progressionsMode.playback, isPlaying: false }
+  });
+
+  // Reset function for Patterns Mode settings
+  const resetPatternsModeSettings = (prevSettings: AppSettings) => ({
+    ...prevSettings.patternsMode,
+    currentPattern: [],
+    playback: { ...prevSettings.patternsMode.playback, isPlaying: false }
+  });
+
   const switchTab = (mode: AppSettings['currentMode']) => {
     // Stop ALL audio engines - each mode has its own independent engine
     randomAudioEngine.stop();
@@ -314,22 +335,13 @@ export function MusicalNoteGenerator() {
     patternsAudioEngine.stop();
     stopMetronomeBeats();
     
-    // Immediately stop ALL playback in all modes
+    // Reset all modes using helper functions
     setSettings(prev => ({
       ...prev,
       currentMode: mode,
-      randomMode: {
-        ...prev.randomMode,
-        playback: { ...prev.randomMode.playback, isPlaying: false }
-      },
-      progressionsMode: {
-        ...prev.progressionsMode,
-        playback: { ...prev.progressionsMode.playback, isPlaying: false }
-      },
-      patternsMode: {
-        ...prev.patternsMode,
-        playback: { ...prev.patternsMode.playback, isPlaying: false }
-      }
+      randomMode: resetRandomModeSettings(prev),
+      progressionsMode: resetProgressionsModeSettings(prev),
+      patternsMode: resetPatternsModeSettings(prev)
     }));
   };
 
