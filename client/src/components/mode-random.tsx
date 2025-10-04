@@ -221,11 +221,32 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     });
   };
 
+  const resetRandomModeState = () => {
+    // Clear local state
+    setCurrentNoteIndex(0);
+    setIntervalAnalysis([]);
+    
+    // Clear playback timeouts
+    if (playbackTimeoutRef.current) {
+      clearTimeout(playbackTimeoutRef.current);
+      playbackTimeoutRef.current = null;
+    }
+    shouldContinuePlaybackRef.current = false;
+    
+    // Stop audio engine
+    audioEngine.stop();
+  };
+
   const updateDifficulty = (difficulty: 'beginner' | 'intermediate') => {
-    // Stop playback when level changes
+    // Reset all state when switching difficulty levels
+    resetRandomModeState();
+    
+    // Update difficulty and clear generated notes
     onSettingsChange({ 
       ...settings, 
       difficulty,
+      generatedNotes: [],
+      selectedInterval: undefined,
       playback: { ...settings.playback, isPlaying: false }
     });
   };
