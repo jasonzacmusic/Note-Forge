@@ -14,7 +14,6 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
 import nathanielLight from "@assets/nathaniel-light_1759431050954.jpg";
-import nathanielDark from "@assets/nathaniel-dark_1759431429351.png";
 
 const defaultSettings: AppSettings = {
   globalMetronome: {
@@ -362,14 +361,8 @@ export function MusicalNoteGenerator() {
               <img 
                 src={nathanielLight}
                 alt="Nathaniel School of Music"
-                className="h-16 w-auto object-contain block dark:hidden"
-                data-testid="nsm-logo-light"
-              />
-              <img 
-                src={nathanielDark}
-                alt="Nathaniel School of Music"
-                className="h-16 w-auto object-contain hidden dark:block"
-                data-testid="nsm-logo-dark"
+                className="h-16 w-auto object-contain"
+                data-testid="nsm-logo"
               />
               <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
                 <Music className="text-white text-2xl" />
