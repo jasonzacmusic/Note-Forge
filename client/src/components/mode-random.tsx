@@ -99,11 +99,11 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     }
     const newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
     
-    // Update notes and start playback
+    // Update notes but don't auto-play (user must press Play button)
     onSettingsChange({
       ...settings,
       generatedNotes: newNotes,
-      playback: { ...settings.playback, isPlaying: true }
+      playback: { ...settings.playback, isPlaying: false }
     });
   };
 
@@ -252,7 +252,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   };
 
   const updateNoteSelection = (noteSelection: 'all' | 'white' | 'accidentals' | 'enharmonics') => {
-    // Stop current playback, generate new notes, and start playback automatically
+    // Generate new notes when note selection changes, but don't auto-play
     // For intermediate mode, don't use rare enharmonics unless explicitly selecting "enharmonics"
     let noteSelectionForGeneration = noteSelection;
     if (settings.difficulty === 'intermediate' && noteSelection === 'enharmonics') {
@@ -265,7 +265,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       ...settings, 
       noteSelection,
       generatedNotes: newNotes,
-      playback: { ...settings.playback, isPlaying: true }
+      playback: { ...settings.playback, isPlaying: false }
     });
   };
 
@@ -530,7 +530,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
             {/* Generate Button */}
             <Button
               onClick={generateRandomNotes}
-              className="w-full app-primary text-white hover:opacity-90 transition-all hover:scale-105 shadow-lg py-4 text-lg font-semibold rounded-xl mb-8"
+              disabled={settings.playback.isPlaying}
+              className="w-full app-primary text-white hover:opacity-90 transition-all hover:scale-105 shadow-lg py-4 text-lg font-semibold rounded-xl mb-8 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-generate-random"
             >
               <span className="text-xl mr-3">🎲</span>

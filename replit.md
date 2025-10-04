@@ -53,6 +53,7 @@ Preferred communication style: Simple, everyday language.
 - **Responsive Design**: Mobile-first approach with touch-friendly controls
 - **Branding**: NSM (Nathaniel School of Music) logo prominently displayed in header
 - **Wave Type Switching**: Seamless audio wave type changes during playback using ref-based dynamic value system
+- **Random Mode Playback Control**: Manual playback activation only - Generate Notes button creates sequences without auto-play; Generate button disabled during playback to prevent mid-playback changes
 
 ## External Dependencies
 
