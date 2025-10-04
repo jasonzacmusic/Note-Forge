@@ -329,13 +329,20 @@ export function MusicalNoteGenerator() {
   });
 
   const switchTab = (mode: AppSettings['currentMode']) => {
-    // Stop ALL audio engines - each mode has its own independent engine
+    // FIRST: Dispatch global stop event to immediately stop all mode components' timeouts
+    // This ensures stopPlayback() is called synchronously in each mode component
+    // Each mode listens for 'stopAllAudio' and clears its timeouts and refs
+    window.dispatchEvent(new Event('stopAllAudio'));
+    
+    // SECOND: Immediately stop ALL audio engines - each mode has its own independent engine
+    // The global event above has already cleared timeouts, so this is safe
     randomAudioEngine.stop();
     progressionsAudioEngine.stop();
     patternsAudioEngine.stop();
     stopMetronomeBeats();
     
-    // Reset all modes using helper functions
+    // THIRD: Reset all modes using helper functions
+    // This sets isPlaying: false and clears generated sequences
     setSettings(prev => ({
       ...prev,
       currentMode: mode,
