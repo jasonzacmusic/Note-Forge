@@ -43,6 +43,7 @@ export const randomModeSettingsSchema = z.object({
   noteSelection: z.enum(["all", "white", "accidentals", "enharmonics"]),
   intervalCategory: z.enum(["resolutions", "tensions", "anticipations", "mystery"]).optional(),
   selectedInterval: z.number().optional(),
+  selectedIntervalKey: z.string().optional(),
   generatedNotes: z.array(noteSchema),
   playback: playbackStateSchema
 });

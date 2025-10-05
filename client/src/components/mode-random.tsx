@@ -247,6 +247,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       difficulty,
       generatedNotes: [],
       selectedInterval: undefined,
+      selectedIntervalKey: undefined,
       playback: { ...settings.playback, isPlaying: false }
     });
   };
@@ -269,13 +270,34 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     });
   };
 
-  const updateSelectedInterval = (selectedInterval: number) => {
-    // Generate new notes when interval is selected, but don't auto-play
-    const newNotes = MusicTheory.generateRandomSequence('all', 4);
+  const updateSelectedInterval = (selectedInterval: number, intervalKey?: string) => {
+    // Generate notes with proper enharmonic spelling when intervalKey is provided
+    let newNotes: Note[];
+    
+    if (intervalKey) {
+      // Generate first note randomly
+      const firstNote = MusicTheory.generateRandomSequence('all', 1)[0];
+      newNotes = [firstNote];
+      
+      // Generate remaining notes using the specific interval with correct enharmonic spelling
+      for (let i = 1; i < 4; i++) {
+        const prevNote = newNotes[i - 1];
+        const targetNoteName = MusicTheory.generateNoteWithInterval(prevNote.name, intervalKey);
+        const targetMidi = MusicTheory.getMidiFromNote(targetNoteName, 4);
+        newNotes.push({
+          name: targetNoteName,
+          midi: targetMidi,
+          octave: 4
+        });
+      }
+    } else {
+      newNotes = MusicTheory.generateRandomSequence('all', 4);
+    }
     
     onSettingsChange({ 
       ...settings, 
       selectedInterval,
+      selectedIntervalKey: intervalKey,
       generatedNotes: newNotes,
       playback: { ...settings.playback, isPlaying: false }
     });
@@ -537,22 +559,33 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Mystery</h4>
                     <RadioGroup
-                      value={settings.selectedInterval?.toString()}
-                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      value={settings.selectedIntervalKey || settings.selectedInterval?.toString()}
+                      onValueChange={(value) => {
+                        // Check if it's an interval key (like 'A5', 'm6') or a number
+                        if (value === 'A5') {
+                          updateSelectedInterval(8, 'A5');
+                        } else if (value === 'm6') {
+                          updateSelectedInterval(8, 'm6');
+                        } else if (value === 'M6') {
+                          updateSelectedInterval(9, 'M6');
+                        } else {
+                          updateSelectedInterval(parseInt(value));
+                        }
+                      }}
                       disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="8" id="minor-6th" />
+                        <RadioGroupItem value="A5" id="aug-5th" />
+                        <Label htmlFor="aug-5th" className="app-text-primary text-sm">Augmented 5th</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="m6" id="minor-6th" />
                         <Label htmlFor="minor-6th" className="app-text-primary text-sm">Minor 6th</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="9" id="major-6th" />
+                        <RadioGroupItem value="M6" id="major-6th" />
                         <Label htmlFor="major-6th" className="app-text-primary text-sm">Major 6th</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="8" id="aug-5th" />
-                        <Label htmlFor="aug-5th" className="app-text-primary text-sm">Augmented 5th</Label>
                       </div>
                     </RadioGroup>
                   </div>
@@ -671,13 +704,22 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   // Calculate interval to next note for intermediate mode
                   let intervalInfo = null;
                   if (settings.difficulty === 'intermediate' && index < settings.generatedNotes.length - 1) {
-                    const interval = MusicTheory.getInterval(
-                      settings.generatedNotes[index].name,
-                      settings.generatedNotes[index + 1].name
-                    );
+                    // Use the selected interval if available, otherwise calculate
+                    let intervalName;
+                    if (settings.selectedIntervalKey) {
+                      const interval = MusicTheory.getIntervalByKey(settings.selectedIntervalKey);
+                      intervalName = interval?.name || '';
+                    } else {
+                      const interval = MusicTheory.getInterval(
+                        settings.generatedNotes[index].name,
+                        settings.generatedNotes[index + 1].name
+                      );
+                      intervalName = interval.name;
+                    }
+                    
                     intervalInfo = {
                       targetNote: settings.generatedNotes[index + 1].name,
-                      intervalName: interval.name
+                      intervalName
                     };
                   }
                   

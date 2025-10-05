@@ -14,6 +14,7 @@ export class MusicTheory {
     'P4': { name: 'Perfect Fourth', abbreviation: 'P4', semitones: 5 },
     'TT': { name: 'Tritone', abbreviation: 'TT', semitones: 6 },
     'P5': { name: 'Perfect Fifth', abbreviation: 'P5', semitones: 7 },
+    'A5': { name: 'Augmented Fifth', abbreviation: 'A5', semitones: 8 },
     'm6': { name: 'Minor Sixth', abbreviation: 'm6', semitones: 8 },
     'M6': { name: 'Major Sixth', abbreviation: 'M6', semitones: 9 },
     'm7': { name: 'Minor Seventh', abbreviation: 'm7', semitones: 10 },
@@ -85,6 +86,60 @@ export class MusicTheory {
       abbreviation: `${semitones}st`,
       semitones
     };
+  }
+
+  static getIntervalByKey(intervalKey: string): Interval | null {
+    return this.intervals[intervalKey] || null;
+  }
+
+  static generateNoteWithInterval(fromNote: string, intervalKey: string): string {
+    const interval = this.intervals[intervalKey];
+    if (!interval) return fromNote;
+
+    const noteLetters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    const fromLetter = fromNote.charAt(0);
+    const fromLetterIndex = noteLetters.indexOf(fromLetter);
+    
+    // Calculate letter interval (e.g., 5th = 4 letter steps, 6th = 5 letter steps)
+    const letterSteps: Record<string, number> = {
+      'm2': 1, 'M2': 1,
+      'm3': 2, 'M3': 2,
+      'P4': 3,
+      'TT': 4,
+      'A5': 4, // Augmented 5th = 5th letter (4 steps)
+      'P5': 4,
+      'm6': 5, // Minor 6th = 6th letter (5 steps)
+      'M6': 5,
+      'm7': 6, 'M7': 6,
+      'P8': 7
+    };
+
+    const steps = letterSteps[intervalKey] || 0;
+    const targetLetterIndex = (fromLetterIndex + steps) % 7;
+    const targetLetter = noteLetters[targetLetterIndex];
+
+    // Calculate target note with accidentals
+    const fromMidi = this.getMidiFromNote(fromNote, 4);
+    const targetMidi = fromMidi + interval.semitones;
+    
+    // Get the natural note midi value
+    const naturalTargetMidi = this.getMidiFromNote(targetLetter, 4);
+    const accidentalDiff = (targetMidi - naturalTargetMidi + 12) % 12;
+
+    // Apply accidentals
+    if (accidentalDiff === 0) {
+      return targetLetter;
+    } else if (accidentalDiff === 1) {
+      return targetLetter + '#';
+    } else if (accidentalDiff === 11) {
+      return targetLetter + 'b';
+    } else if (accidentalDiff === 2) {
+      return targetLetter + '##';
+    } else if (accidentalDiff === 10) {
+      return targetLetter + 'bb';
+    }
+
+    return targetLetter;
   }
 
   static generateRandomSequence(
