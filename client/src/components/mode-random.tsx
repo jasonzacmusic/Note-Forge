@@ -309,24 +309,9 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     // Reset all state when switching difficulty levels
     resetRandomModeState();
     
-    // For intermediate mode, default to Perfect 5th
+    // For intermediate mode, generate random notes
     if (difficulty === 'intermediate') {
-      const firstNote = MusicTheory.generateRandomSequence('all', 1)[0];
-      const newNotes = [firstNote];
-      
-      // Generate remaining notes using Perfect 5th interval
-      const interval = MusicTheory.getIntervalByKey('P5');
-      for (let i = 1; i < 4; i++) {
-        const prevNote = newNotes[i - 1];
-        const targetNoteName = MusicTheory.generateNoteWithInterval(prevNote.name, 'P5');
-        const targetMidi = prevNote.midi + (interval?.semitones || 7);
-        const targetOctave = Math.floor(targetMidi / 12) - 1;
-        newNotes.push({
-          name: targetNoteName,
-          midi: targetMidi,
-          octave: targetOctave
-        });
-      }
+      const newNotes = MusicTheory.generateRandomSequence('all', 4);
       
       onSettingsChange({ 
         ...settings, 
