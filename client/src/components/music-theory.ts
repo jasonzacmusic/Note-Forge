@@ -230,6 +230,13 @@ export class MusicTheory {
           const lastNote = sequence[sequence.length - 1];
           const interval = this.getInterval(lastNote.name, note.name);
           
+          // Ensure pitch distance is always <= 1 octave (12 semitones)
+          const pitchDistance = Math.abs(note.midi - lastNote.midi);
+          if (pitchDistance > 12) {
+            attempts++;
+            continue;
+          }
+          
           // Rule: No more than 2 consecutive seconds
           if (interval.semitones === 1 || interval.semitones === 2) {
             consecutiveSeconds++;
