@@ -701,26 +701,16 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
             {settings.generatedNotes.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 {settings.generatedNotes.map((note, index) => {
-                  // Calculate interval to next note for intermediate mode
-                  let intervalInfo = null;
+                  // Calculate interval partner note (e.g., Major 6th of current note)
+                  let intervalPartnerNote = null;
+                  if (settings.difficulty === 'intermediate' && settings.selectedIntervalKey) {
+                    intervalPartnerNote = MusicTheory.generateNoteWithInterval(note.name, settings.selectedIntervalKey);
+                  }
+                  
+                  // Calculate next note in sequence for intermediate mode
+                  let nextSequenceNote = null;
                   if (settings.difficulty === 'intermediate' && index < settings.generatedNotes.length - 1) {
-                    // Use the selected interval if available, otherwise calculate
-                    let intervalName;
-                    if (settings.selectedIntervalKey) {
-                      const interval = MusicTheory.getIntervalByKey(settings.selectedIntervalKey);
-                      intervalName = interval?.name || '';
-                    } else {
-                      const interval = MusicTheory.getInterval(
-                        settings.generatedNotes[index].name,
-                        settings.generatedNotes[index + 1].name
-                      );
-                      intervalName = interval.name;
-                    }
-                    
-                    intervalInfo = {
-                      targetNote: settings.generatedNotes[index + 1].name,
-                      intervalName
-                    };
+                    nextSequenceNote = settings.generatedNotes[index + 1].name;
                   }
                   
                   return (
@@ -734,9 +724,16 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                       <div className="text-3xl font-bold mb-2 app-text-primary">
                         {MusicTheory.formatNoteForDisplay(note)}
                       </div>
-                      <div className="app-text-secondary text-sm">
-                        {intervalInfo ? `${note.name} - ${intervalInfo.targetNote}` : ''}
-                      </div>
+                      {intervalPartnerNote && (
+                        <div className="app-text-secondary text-sm mb-2">
+                          {note.name} - {intervalPartnerNote}
+                        </div>
+                      )}
+                      {nextSequenceNote && (
+                        <div className="mt-3 pt-3 border-t border-[var(--app-elevated)]" data-testid={`interval-${index}`}>
+                          <div className="app-accent text-sm font-semibold">→ {nextSequenceNote}</div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
