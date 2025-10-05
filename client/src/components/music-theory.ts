@@ -283,7 +283,7 @@ export class MusicTheory {
     return sequence;
   }
 
-  static getChordFromRomanNumeral(key: string, romanNumeral: string, progressionType?: 'dorian' | 'pop' | 'jazz'): Chord {
+  static getChordFromRomanNumeral(key: string, romanNumeral: string, progressionType?: 'major' | 'harmonic-minor' | 'andalusian' | 'dorian' | 'pop' | 'jazz'): Chord {
     // Handle F#/Gb key selection
     const actualKey = key === 'F#/Gb' ? 'F#' : key;
     const keyNotes = this.keySignatures[actualKey as keyof typeof this.keySignatures]?.notes || this.keySignatures['C'].notes;
@@ -342,7 +342,7 @@ export class MusicTheory {
     };
     
     // Determine if we should prefer flats based on key signature and context
-    const preferFlats = actualKey.includes('b') || isFlat || ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].includes(actualKey) || progressionType === 'dorian';
+    const preferFlats = actualKey.includes('b') || isFlat || ['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb'].includes(actualKey) || progressionType === 'dorian' || progressionType === 'harmonic-minor' || progressionType === 'andalusian';
     
     // Third
     let thirdInterval = isMinor || isDiminished ? 3 : 4; // m3 or M3
@@ -372,8 +372,20 @@ export class MusicTheory {
     };
   }
 
-  static getProgression(type: 'dorian' | 'pop' | 'jazz', key: string): Progression {
+  static getProgression(type: 'major' | 'harmonic-minor' | 'andalusian' | 'dorian' | 'pop' | 'jazz', key: string): Progression {
     const progressions = {
+      major: {
+        name: 'Major Progression',
+        numerals: ['I', 'IV', 'I', 'V']
+      },
+      'harmonic-minor': {
+        name: 'Harmonic Minor',
+        numerals: ['i', 'iv', 'i', 'V']
+      },
+      andalusian: {
+        name: 'Andalusian Cadence',
+        numerals: ['i', '♭VII', '♭VI', 'V7']
+      },
       dorian: {
         name: 'Dorian Rock',
         numerals: ['i', '♭III', '♭VII', 'IV']
@@ -397,7 +409,7 @@ export class MusicTheory {
       name: prog.name,
       chords,
       key,
-      mode: type === 'dorian' ? 'dorian' : 'major'
+      mode: type === 'dorian' || type === 'harmonic-minor' || type === 'andalusian' ? type : 'major'
     };
   }
 

@@ -187,7 +187,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
     }
   };
 
-  const updateProgression = (selectedProgression: 'dorian' | 'pop' | 'jazz') => {
+  const updateProgression = (selectedProgression: 'major' | 'harmonic-minor' | 'andalusian' | 'dorian' | 'pop' | 'jazz') => {
     // Stop playback then restart playback
     const wasPlaying = settings.playback.isPlaying;
     const newSettings = { 
@@ -235,6 +235,9 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   ];
 
   const progressionOptions = [
+    { value: 'major', label: 'Major (I – IV – I – V)' },
+    { value: 'harmonic-minor', label: 'Harmonic Minor (i – iv – i – V)' },
+    { value: 'andalusian', label: 'Andalusian Cadence (i – ♭VII – ♭VI – V7)' },
     { value: 'dorian', label: 'Dorian Rock (i – ♭III – ♭VII – IV)' },
     { value: 'pop', label: 'Pop (vi – IV – I – V)' },
     { value: 'jazz', label: 'Jazz (vi – ii – V – I)' }
@@ -415,6 +418,27 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
                 <div className="app-bg rounded-lg p-4">
                   <h4 className="font-medium mb-2 app-accent">Harmonic Analysis</h4>
                   <div className="app-text-secondary text-sm space-y-1">
+                    {settings.selectedProgression === 'major' && (
+                      <>
+                        <p>• Classic I-IV-I-V progression in {settings.selectedKey} major</p>
+                        <p>• Strong tonic-subdominant-dominant movement</p>
+                        <p>• Foundation of Western harmony and folk music</p>
+                      </>
+                    )}
+                    {settings.selectedProgression === 'harmonic-minor' && (
+                      <>
+                        <p>• Harmonic minor progression in {settings.selectedKey}</p>
+                        <p>• Minor i chord with major V creates tension and resolution</p>
+                        <p>• Characteristic of classical and Eastern European music</p>
+                      </>
+                    )}
+                    {settings.selectedProgression === 'andalusian' && (
+                      <>
+                        <p>• Andalusian cadence descending in {settings.selectedKey}</p>
+                        <p>• Phrygian dominant sound with ♭VII to ♭VI descent</p>
+                        <p>• Common in flamenco, Spanish, and metal music</p>
+                      </>
+                    )}
                     {settings.selectedProgression === 'dorian' && (
                       <>
                         <p>• Modal interchange from {settings.selectedKey} Dorian mode</p>

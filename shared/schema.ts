@@ -49,7 +49,7 @@ export const randomModeSettingsSchema = z.object({
 
 export const progressionsModeSettingsSchema = z.object({
   selectedKey: z.string(),
-  selectedProgression: z.enum(["dorian", "pop", "jazz"]),
+  selectedProgression: z.enum(["major", "harmonic-minor", "andalusian", "dorian", "pop", "jazz"]),
   cycleStart: z.number().min(0).max(3),
   currentProgression: progressionSchema.optional(),
   playback: playbackStateSchema
