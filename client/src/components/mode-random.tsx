@@ -157,6 +157,63 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     }
   }, [settings.generatedNotes, settings.difficulty]);
 
+  const randomizeOctaves = (notes: Note[]): Note[] => {
+    if (notes.length === 0) return notes;
+    
+    const MAX_MIDI = 78; // F#5/Gb5 (1.5 octaves above Middle C)
+    const MIN_MIDI = 48; // C3 (reasonable lower bound)
+    const result = [notes[0]];
+    
+    for (let i = 1; i < notes.length; i++) {
+      const prevNote = result[i - 1];
+      const currentNote = notes[i];
+      
+      // Randomly decide to go higher or lower than previous note
+      const goUp = Math.random() > 0.5;
+      
+      // Start with the current note's base pitch
+      let newMidi = currentNote.midi;
+      
+      // Adjust octaves to be higher or lower than previous note
+      if (goUp) {
+        // Go higher than previous note
+        while (newMidi <= prevNote.midi && newMidi + 12 <= MAX_MIDI) {
+          newMidi += 12;
+        }
+        // If still not higher, try going down instead
+        if (newMidi <= prevNote.midi) {
+          newMidi = currentNote.midi;
+          while (newMidi >= prevNote.midi && newMidi - 12 >= MIN_MIDI) {
+            newMidi -= 12;
+          }
+        }
+      } else {
+        // Go lower than previous note
+        while (newMidi >= prevNote.midi && newMidi - 12 >= MIN_MIDI) {
+          newMidi -= 12;
+        }
+        // If still not lower, try going up instead
+        if (newMidi >= prevNote.midi) {
+          newMidi = currentNote.midi;
+          while (newMidi <= prevNote.midi && newMidi + 12 <= MAX_MIDI) {
+            newMidi += 12;
+          }
+        }
+      }
+      
+      // Final clamp to ensure bounds
+      newMidi = Math.max(MIN_MIDI, Math.min(MAX_MIDI, newMidi));
+      
+      result.push({
+        ...currentNote,
+        midi: newMidi,
+        octave: Math.floor(newMidi / 12) - 1
+      });
+    }
+    
+    return result;
+  };
+
   const generateRandomNotes = () => {
     // Generate random notes using selected note type (white/black/all)
     // For intermediate mode, don't use rare enharmonics unless explicitly selecting "enharmonics"
@@ -165,7 +222,10 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       // In intermediate mode, treat enharmonics as 'all' to exclude rare enharmonics
       noteSelectionForGeneration = 'all';
     }
-    const newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
+    let newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
+    
+    // Randomize octaves for 2nd note onwards
+    newNotes = randomizeOctaves(newNotes);
     
     // Update notes but don't auto-play (user must press Play button)
     onSettingsChange({
@@ -312,26 +372,72 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     // For intermediate mode, default to Perfect 5th
     if (difficulty === 'intermediate') {
       const firstNote = MusicTheory.generateRandomSequence('all', 1)[0];
-      const newNotes = [firstNote];
+      const tempNotes = [firstNote];
       
       // Generate remaining notes using Perfect 5th interval
       const interval = MusicTheory.getIntervalByKey('P5');
+      const MAX_MIDI = 78; // F#5/Gb5 (1.5 octaves above Middle C)
+      const MIN_MIDI = 48; // C3
+      
       for (let i = 1; i < 4; i++) {
-        const prevNote = newNotes[i - 1];
+        const prevNote = tempNotes[i - 1];
         const targetNoteName = MusicTheory.generateNoteWithInterval(prevNote.name, 'P5');
-        const targetMidi = prevNote.midi + (interval?.semitones || 7);
-        const targetOctave = Math.floor(targetMidi / 12) - 1;
-        newNotes.push({
+        
+        // Calculate base MIDI maintaining the interval (same octave region as previous)
+        let baseMidi = prevNote.midi + (interval?.semitones || 7);
+        
+        // Randomly decide to go higher or lower than previous note
+        const goUp = Math.random() > 0.5;
+        
+        // Adjust by octaves to be higher/lower than previous while staying in bounds
+        let targetMidi = baseMidi;
+        
+        if (goUp) {
+          // Need to go higher than previous note
+          if (targetMidi <= prevNote.midi) {
+            // Add octaves until higher
+            while (targetMidi <= prevNote.midi && targetMidi + 12 <= MAX_MIDI) {
+              targetMidi += 12;
+            }
+          }
+          // If still not higher or out of bounds, try going lower
+          if (targetMidi <= prevNote.midi || targetMidi > MAX_MIDI) {
+            targetMidi = baseMidi;
+            while (targetMidi >= prevNote.midi && targetMidi - 12 >= MIN_MIDI) {
+              targetMidi -= 12;
+            }
+          }
+        } else {
+          // Need to go lower than previous note
+          if (targetMidi >= prevNote.midi) {
+            // Subtract octaves until lower
+            while (targetMidi >= prevNote.midi && targetMidi - 12 >= MIN_MIDI) {
+              targetMidi -= 12;
+            }
+          }
+          // If still not lower or out of bounds, try going higher
+          if (targetMidi >= prevNote.midi || targetMidi < MIN_MIDI) {
+            targetMidi = baseMidi;
+            while (targetMidi <= prevNote.midi && targetMidi + 12 <= MAX_MIDI) {
+              targetMidi += 12;
+            }
+          }
+        }
+        
+        // Final clamp
+        targetMidi = Math.max(MIN_MIDI, Math.min(MAX_MIDI, targetMidi));
+        
+        tempNotes.push({
           name: targetNoteName,
           midi: targetMidi,
-          octave: targetOctave
+          octave: Math.floor(targetMidi / 12) - 1
         });
       }
       
       onSettingsChange({ 
         ...settings, 
         difficulty,
-        generatedNotes: newNotes,
+        generatedNotes: tempNotes,
         selectedInterval: 7,
         selectedIntervalKey: 'P5',
         playback: { ...settings.playback, isPlaying: false }
@@ -357,7 +463,10 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       // In intermediate mode, treat enharmonics as 'all' to exclude rare enharmonics
       noteSelectionForGeneration = 'all';
     }
-    const newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
+    let newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
+    
+    // Randomize octaves for 2nd note onwards
+    newNotes = randomizeOctaves(newNotes);
     
     onSettingsChange({ 
       ...settings, 
@@ -374,23 +483,72 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     if (intervalKey) {
       // Generate first note randomly
       const firstNote = MusicTheory.generateRandomSequence('all', 1)[0];
-      newNotes = [firstNote];
+      const tempNotes = [firstNote];
       
       // Generate remaining notes using the specific interval with correct enharmonic spelling
       const interval = MusicTheory.getIntervalByKey(intervalKey);
+      const MAX_MIDI = 78; // F#5/Gb5 (1.5 octaves above Middle C)
+      const MIN_MIDI = 48; // C3
+      
       for (let i = 1; i < 4; i++) {
-        const prevNote = newNotes[i - 1];
+        const prevNote = tempNotes[i - 1];
         const targetNoteName = MusicTheory.generateNoteWithInterval(prevNote.name, intervalKey);
-        const targetMidi = prevNote.midi + (interval?.semitones || selectedInterval);
-        const targetOctave = Math.floor(targetMidi / 12) - 1;
-        newNotes.push({
+        
+        // Calculate base MIDI maintaining the interval (same octave region as previous)
+        let baseMidi = prevNote.midi + (interval?.semitones || selectedInterval);
+        
+        // Randomly decide to go higher or lower than previous note
+        const goUp = Math.random() > 0.5;
+        
+        // Adjust by octaves to be higher/lower than previous while staying in bounds
+        let targetMidi = baseMidi;
+        
+        if (goUp) {
+          // Need to go higher than previous note
+          if (targetMidi <= prevNote.midi) {
+            // Add octaves until higher
+            while (targetMidi <= prevNote.midi && targetMidi + 12 <= MAX_MIDI) {
+              targetMidi += 12;
+            }
+          }
+          // If still not higher or out of bounds, try going lower
+          if (targetMidi <= prevNote.midi || targetMidi > MAX_MIDI) {
+            targetMidi = baseMidi;
+            while (targetMidi >= prevNote.midi && targetMidi - 12 >= MIN_MIDI) {
+              targetMidi -= 12;
+            }
+          }
+        } else {
+          // Need to go lower than previous note
+          if (targetMidi >= prevNote.midi) {
+            // Subtract octaves until lower
+            while (targetMidi >= prevNote.midi && targetMidi - 12 >= MIN_MIDI) {
+              targetMidi -= 12;
+            }
+          }
+          // If still not lower or out of bounds, try going higher
+          if (targetMidi >= prevNote.midi || targetMidi < MIN_MIDI) {
+            targetMidi = baseMidi;
+            while (targetMidi <= prevNote.midi && targetMidi + 12 <= MAX_MIDI) {
+              targetMidi += 12;
+            }
+          }
+        }
+        
+        // Final clamp
+        targetMidi = Math.max(MIN_MIDI, Math.min(MAX_MIDI, targetMidi));
+        
+        tempNotes.push({
           name: targetNoteName,
           midi: targetMidi,
-          octave: targetOctave
+          octave: Math.floor(targetMidi / 12) - 1
         });
       }
+      newNotes = tempNotes;
     } else {
       newNotes = MusicTheory.generateRandomSequence('all', 4);
+      // Randomize octaves for 2nd note onwards
+      newNotes = randomizeOctaves(newNotes);
     }
     
     onSettingsChange({ 
