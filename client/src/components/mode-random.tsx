@@ -479,8 +479,20 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Resolutions</h4>
                     <RadioGroup
-                      value={settings.selectedInterval?.toString()}
-                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      value={settings.selectedIntervalKey || settings.selectedInterval?.toString()}
+                      onValueChange={(value) => {
+                        if (value === 'P8') {
+                          updateSelectedInterval(12, 'P8');
+                        } else if (value === 'P5') {
+                          updateSelectedInterval(7, 'P5');
+                        } else if (value === 'M3') {
+                          updateSelectedInterval(4, 'M3');
+                        } else if (value === 'm3') {
+                          updateSelectedInterval(3, 'm3');
+                        } else {
+                          updateSelectedInterval(parseInt(value));
+                        }
+                      }}
                       disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
@@ -489,19 +501,19 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                         <Label htmlFor="unison" className="app-text-primary text-sm">Unison</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="12" id="octave" />
+                        <RadioGroupItem value="P8" id="octave" />
                         <Label htmlFor="octave" className="app-text-primary text-sm">Octave</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="7" id="perfect-5th" />
+                        <RadioGroupItem value="P5" id="perfect-5th" />
                         <Label htmlFor="perfect-5th" className="app-text-primary text-sm">Perfect 5th</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="4" id="major-3rd" />
+                        <RadioGroupItem value="M3" id="major-3rd" />
                         <Label htmlFor="major-3rd" className="app-text-primary text-sm">Major 3rd</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="3" id="minor-3rd" />
+                        <RadioGroupItem value="m3" id="minor-3rd" />
                         <Label htmlFor="minor-3rd" className="app-text-primary text-sm">Minor 3rd</Label>
                       </div>
                     </RadioGroup>
@@ -511,21 +523,31 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Tensions</h4>
                     <RadioGroup
-                      value={settings.selectedInterval?.toString()}
-                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      value={settings.selectedIntervalKey || settings.selectedInterval?.toString()}
+                      onValueChange={(value) => {
+                        if (value === 'm2') {
+                          updateSelectedInterval(1, 'm2');
+                        } else if (value === 'TT') {
+                          updateSelectedInterval(6, 'TT');
+                        } else if (value === 'M7') {
+                          updateSelectedInterval(11, 'M7');
+                        } else {
+                          updateSelectedInterval(parseInt(value));
+                        }
+                      }}
                       disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="1" id="minor-2nd" />
+                        <RadioGroupItem value="m2" id="minor-2nd" />
                         <Label htmlFor="minor-2nd" className="app-text-primary text-sm">Minor 2nd</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="6" id="tritone" />
+                        <RadioGroupItem value="TT" id="tritone" />
                         <Label htmlFor="tritone" className="app-text-primary text-sm">Tritone</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="11" id="major-7th" />
+                        <RadioGroupItem value="M7" id="major-7th" />
                         <Label htmlFor="major-7th" className="app-text-primary text-sm">Major 7th</Label>
                       </div>
                     </RadioGroup>
@@ -535,21 +557,31 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium app-text-primary border-b border-[var(--app-elevated)] pb-1">Anticipations</h4>
                     <RadioGroup
-                      value={settings.selectedInterval?.toString()}
-                      onValueChange={(value) => updateSelectedInterval(parseInt(value))}
+                      value={settings.selectedIntervalKey || settings.selectedInterval?.toString()}
+                      onValueChange={(value) => {
+                        if (value === 'P4') {
+                          updateSelectedInterval(5, 'P4');
+                        } else if (value === 'm7') {
+                          updateSelectedInterval(10, 'm7');
+                        } else if (value === 'M2') {
+                          updateSelectedInterval(2, 'M2');
+                        } else {
+                          updateSelectedInterval(parseInt(value));
+                        }
+                      }}
                       disabled={settings.playback.isPlaying}
                       className="space-y-1"
                     >
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="5" id="perfect-4th" />
+                        <RadioGroupItem value="P4" id="perfect-4th" />
                         <Label htmlFor="perfect-4th" className="app-text-primary text-sm">Perfect 4th</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="10" id="minor-7th" />
+                        <RadioGroupItem value="m7" id="minor-7th" />
                         <Label htmlFor="minor-7th" className="app-text-primary text-sm">Minor 7th</Label>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="2" id="major-2nd" />
+                        <RadioGroupItem value="M2" id="major-2nd" />
                         <Label htmlFor="major-2nd" className="app-text-primary text-sm">Major 2nd</Label>
                       </div>
                     </RadioGroup>
