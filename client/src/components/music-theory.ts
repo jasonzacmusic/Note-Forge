@@ -126,7 +126,7 @@ export class MusicTheory {
     const naturalTargetMidi = this.getMidiFromNote(targetLetter, 4);
     const accidentalDiff = (targetMidi - naturalTargetMidi + 12) % 12;
 
-    // Apply accidentals
+    // Apply accidentals - avoid double sharps and flats by using enharmonic equivalents
     if (accidentalDiff === 0) {
       return targetLetter;
     } else if (accidentalDiff === 1) {
@@ -134,9 +134,13 @@ export class MusicTheory {
     } else if (accidentalDiff === 11) {
       return targetLetter + 'b';
     } else if (accidentalDiff === 2) {
-      return targetLetter + '##';
+      // Would be double sharp - use enharmonic equivalent (next letter)
+      const nextLetterIndex = (targetLetterIndex + 1) % 7;
+      return noteLetters[nextLetterIndex];
     } else if (accidentalDiff === 10) {
-      return targetLetter + 'bb';
+      // Would be double flat - use enharmonic equivalent (previous letter)
+      const prevLetterIndex = (targetLetterIndex - 1 + 7) % 7;
+      return noteLetters[prevLetterIndex];
     }
 
     return targetLetter;
