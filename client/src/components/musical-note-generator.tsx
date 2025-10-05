@@ -349,31 +349,33 @@ export function MusicalNoteGenerator() {
       {/* Header */}
       <header className="app-surface border-b-2 border-[var(--app-border)] mb-8">
         <div className="container mx-auto px-6 py-8 max-w-7xl">
-          <div className="flex flex-col items-center mb-6">
-            <img 
-              src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
-              alt="Nathaniel School of Music"
-              className="h-24 w-auto object-contain mb-4"
-              data-testid="nsm-logo"
-            />
+          <div className="grid grid-cols-3 gap-4 items-center">
+            {/* Left: Title and Shortcuts */}
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
                 <Music className="text-white text-2xl" />
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold app-text-primary">Musical Note Generator</h1>
-                <p className="text-lg app-text-secondary">4 notes with many creative possibilities</p>
-                <div className="mt-2 app-bg rounded-lg px-3 py-1 text-sm app-text-secondary border border-[var(--app-border)] inline-block">
+                <h1 className="text-2xl md:text-3xl font-bold app-text-primary">Musical Note Generator</h1>
+                <p className="text-sm md:text-base app-text-secondary">4 notes with many creative possibilities</p>
+                <div className="mt-2 app-bg rounded-lg px-3 py-1 text-xs md:text-sm app-text-secondary border border-[var(--app-border)] inline-block">
                   <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
                 </div>
               </div>
             </div>
-          </div>
-          
-          <div className="flex justify-end">
 
-            {/* Global Controls */}
-            <div className="flex items-center space-x-4">
+            {/* Center: Logo */}
+            <div className="flex justify-center">
+              <img 
+                src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
+                alt="Nathaniel School of Music"
+                className="h-24 w-auto object-contain"
+                data-testid="nsm-logo"
+              />
+            </div>
+
+            {/* Right: Audio Controls */}
+            <div className="flex justify-end items-center space-x-4">
               {/* Audio Sample Dropdown */}
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-medium app-text-primary">🎵 Audio:</span>
@@ -403,10 +405,8 @@ export function MusicalNoteGenerator() {
               </div>
               
               <ThemeToggle />
-              
             </div>
           </div>
-
         </div>
       </header>
 
