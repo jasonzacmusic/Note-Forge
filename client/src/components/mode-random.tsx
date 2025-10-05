@@ -353,30 +353,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   };
 
   const updateSelectedInterval = (selectedInterval: number, intervalKey?: string) => {
-    // Generate notes with proper enharmonic spelling when intervalKey is provided
-    let newNotes: Note[];
-    
-    if (intervalKey) {
-      // Generate first note randomly
-      const firstNote = MusicTheory.generateRandomSequence('all', 1)[0];
-      newNotes = [firstNote];
-      
-      // Generate remaining notes using the specific interval with correct enharmonic spelling
-      const interval = MusicTheory.getIntervalByKey(intervalKey);
-      for (let i = 1; i < 4; i++) {
-        const prevNote = newNotes[i - 1];
-        const targetNoteName = MusicTheory.generateNoteWithInterval(prevNote.name, intervalKey);
-        const targetMidi = prevNote.midi + (interval?.semitones || selectedInterval);
-        const targetOctave = Math.floor(targetMidi / 12) - 1;
-        newNotes.push({
-          name: targetNoteName,
-          midi: targetMidi,
-          octave: targetOctave
-        });
-      }
-    } else {
-      newNotes = MusicTheory.generateRandomSequence('all', 4);
-    }
+    // Generate random notes - interval selection only affects playback, not note generation
+    const newNotes = MusicTheory.generateRandomSequence('all', 4);
     
     onSettingsChange({ 
       ...settings, 
