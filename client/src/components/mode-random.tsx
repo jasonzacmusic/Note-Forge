@@ -9,6 +9,74 @@ import { MusicTheory } from "./music-theory";
 import { AudioEngine } from "./audio-engine";
 import type { RandomModeSettings, Note, Interval } from "@shared/schema";
 
+const INTERVAL_INFO: Record<string, { facts: string[]; songs: string[]; theory: string }> = {
+  'P5': {
+    facts: ['Most consonant interval after the octave', 'Foundation of Western harmony', 'Used to tune instruments'],
+    songs: ['Twinkle Twinkle Little Star (opening)', 'Star Wars Theme', 'Scarborough Fair'],
+    theory: 'Start on any note and count up 7 semitones (half steps). On the piano, skip 6 keys total.'
+  },
+  'P4': {
+    facts: ['Inverts to a Perfect 5th', 'Called "perfect" because it sounds pure', 'Used in church music for centuries'],
+    songs: ['Here Comes the Bride', 'Amazing Grace', 'We Wish You a Merry Christmas'],
+    theory: 'Start on any note and count up 5 semitones. On the piano, skip 4 keys total.'
+  },
+  'M3': {
+    facts: ['Defines major chords', 'Sounds bright and happy', 'Two whole steps apart'],
+    songs: ['When the Saints Go Marching In', 'Kumbaya', 'Morning Has Broken'],
+    theory: 'Start on any note and count up 4 semitones. On the piano, skip 3 keys total.'
+  },
+  'm3': {
+    facts: ['Defines minor chords', 'Sounds dark and somber', 'One and a half steps apart'],
+    songs: ['Greensleeves', 'Hey Jude (chorus)', 'Smoke on the Water'],
+    theory: 'Start on any note and count up 3 semitones. On the piano, skip 2 keys total.'
+  },
+  'M6': {
+    facts: ['Inverts to a minor 3rd', 'Sounds sweet and nostalgic', 'Common in romantic melodies'],
+    songs: ['My Bonnie Lies Over the Ocean', 'It Came Upon a Midnight Clear', 'Take On Me'],
+    theory: 'Start on any note and count up 9 semitones. On the piano, skip 8 keys total.'
+  },
+  'm6': {
+    facts: ['Sounds melancholic', 'Inverts to a major 3rd', 'Common in minor key progressions'],
+    songs: ['The Entertainer', 'Love Story (Where Do I Begin)', 'Black Orpheus'],
+    theory: 'Start on any note and count up 8 semitones. On the piano, skip 7 keys total.'
+  },
+  'M2': {
+    facts: ['A whole step', 'Most common melodic interval', 'Foundation of major scales'],
+    songs: ['Silent Night', 'Happy Birthday', 'Frère Jacques'],
+    theory: 'Start on any note and count up 2 semitones. On the piano, skip 1 key.'
+  },
+  'm2': {
+    facts: ['A half step', 'Smallest interval in Western music', 'Creates tension and dissonance'],
+    songs: ['Jaws Theme', 'Pink Panther Theme', 'Für Elise (opening)'],
+    theory: 'Start on any note and move to the very next key on the piano (no keys skipped).'
+  },
+  'M7': {
+    facts: ['Very dissonant', 'Creates tension', 'Wants to resolve upward'],
+    songs: ['Take On Me (synth riff)', 'Somewhere (West Side Story)', 'Fantasy (Earth Wind & Fire)'],
+    theory: 'Start on any note and count up 11 semitones. Almost an octave, just one key down.'
+  },
+  'm7': {
+    facts: ['Used in dominant 7th chords', 'Sounds bluesy', 'Less dissonant than Major 7th'],
+    songs: ['Somewhere Over the Rainbow', 'Star Trek Theme', 'Watermelon Man'],
+    theory: 'Start on any note and count up 10 semitones. Skip 9 keys on the piano.'
+  },
+  'TT': {
+    facts: ['Exactly half an octave', 'Called "diabolus in musica" (devil in music)', 'Splits the octave evenly'],
+    songs: ['The Simpsons Theme', 'Black Sabbath', 'Maria (West Side Story)'],
+    theory: 'Start on any note and count up 6 semitones. Divides the octave perfectly in half.'
+  },
+  'A5': {
+    facts: ['One semitone wider than Perfect 5th', 'Creates an augmented chord', 'Sounds tense and unstable'],
+    songs: ['Oh Darling (Beatles)', 'Dancing Queen (ABBA)', 'Whole Lotta Love (Led Zeppelin)'],
+    theory: 'Start on any note and count up 8 semitones. One semitone more than a Perfect 5th.'
+  },
+  'P8': {
+    facts: ['Same note, different octave', 'Most consonant interval', 'Frequency doubles'],
+    songs: ['Somewhere Over the Rainbow (first two notes)', 'Singin\' in the Rain', 'Bali Hai'],
+    theory: 'Start on any note and count up 12 semitones. Same letter name, one octave higher.'
+  }
+};
+
 interface RandomModeProps {
   settings: RandomModeSettings;
   onSettingsChange: (settings: RandomModeSettings) => void;
@@ -241,15 +309,44 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     // Reset all state when switching difficulty levels
     resetRandomModeState();
     
-    // Update difficulty and clear generated notes
-    onSettingsChange({ 
-      ...settings, 
-      difficulty,
-      generatedNotes: [],
-      selectedInterval: undefined,
-      selectedIntervalKey: undefined,
-      playback: { ...settings.playback, isPlaying: false }
-    });
+    // For intermediate mode, default to Perfect 5th
+    if (difficulty === 'intermediate') {
+      const firstNote = MusicTheory.generateRandomSequence('all', 1)[0];
+      const newNotes = [firstNote];
+      
+      // Generate remaining notes using Perfect 5th interval
+      const interval = MusicTheory.getIntervalByKey('P5');
+      for (let i = 1; i < 4; i++) {
+        const prevNote = newNotes[i - 1];
+        const targetNoteName = MusicTheory.generateNoteWithInterval(prevNote.name, 'P5');
+        const targetMidi = prevNote.midi + (interval?.semitones || 7);
+        const targetOctave = Math.floor(targetMidi / 12) - 1;
+        newNotes.push({
+          name: targetNoteName,
+          midi: targetMidi,
+          octave: targetOctave
+        });
+      }
+      
+      onSettingsChange({ 
+        ...settings, 
+        difficulty,
+        generatedNotes: newNotes,
+        selectedInterval: 7,
+        selectedIntervalKey: 'P5',
+        playback: { ...settings.playback, isPlaying: false }
+      });
+    } else {
+      // Beginner mode: clear everything
+      onSettingsChange({ 
+        ...settings, 
+        difficulty,
+        generatedNotes: [],
+        selectedInterval: undefined,
+        selectedIntervalKey: undefined,
+        playback: { ...settings.playback, isPlaying: false }
+      });
+    }
   };
 
   const updateNoteSelection = (noteSelection: 'all' | 'white' | 'accidentals' | 'enharmonics') => {
@@ -280,14 +377,16 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       newNotes = [firstNote];
       
       // Generate remaining notes using the specific interval with correct enharmonic spelling
+      const interval = MusicTheory.getIntervalByKey(intervalKey);
       for (let i = 1; i < 4; i++) {
         const prevNote = newNotes[i - 1];
         const targetNoteName = MusicTheory.generateNoteWithInterval(prevNote.name, intervalKey);
-        const targetMidi = MusicTheory.getMidiFromNote(targetNoteName, 4);
+        const targetMidi = prevNote.midi + (interval?.semitones || selectedInterval);
+        const targetOctave = Math.floor(targetMidi / 12) - 1;
         newNotes.push({
           name: targetNoteName,
           midi: targetMidi,
-          octave: 4
+          octave: targetOctave
         });
       }
     } else {
@@ -777,24 +876,32 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
             )}
             
             {/* Theory Information */}
-            {settings.generatedNotes.length > 0 && (
+            {settings.generatedNotes.length > 0 && settings.difficulty === 'intermediate' && settings.selectedIntervalKey && INTERVAL_INFO[settings.selectedIntervalKey] && (
               <div className="app-bg rounded-lg p-4">
-                <h4 className="font-medium mb-2 app-accent">Music Theory Analysis</h4>
-                <div className="app-text-secondary text-sm space-y-1">
-                  <p>• No more than 2 consecutive seconds (M2/m2)</p>
-                  <p>• Preferred intervals: P5, P4, M3, m3, M6, m6</p>
-                  {intervalAnalysis.length > 0 && settings.difficulty === 'intermediate' && (
-                    <div>
-                      <p>• All possible intervals:</p>
-                      <div className="grid grid-cols-2 gap-1 mt-2 text-xs">
-                        {intervalAnalysis.map((interval, i) => (
-                          <div key={i} className="app-elevated p-1 rounded">
-                            {interval.abbreviation}: {interval.name}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                <h4 className="font-medium mb-3 app-accent text-lg">
+                  {MusicTheory.getIntervalByKey(settings.selectedIntervalKey)?.name || 'Interval'} Information
+                </h4>
+                <div className="app-text-secondary text-sm space-y-3">
+                  <div>
+                    <h5 className="font-semibold app-text-primary mb-1">📚 Facts:</h5>
+                    <ul className="list-disc list-inside space-y-1">
+                      {INTERVAL_INFO[settings.selectedIntervalKey].facts.map((fact, i) => (
+                        <li key={i}>{fact}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="font-semibold app-text-primary mb-1">🎵 Famous Songs:</h5>
+                    <ul className="list-disc list-inside space-y-1">
+                      {INTERVAL_INFO[settings.selectedIntervalKey].songs.map((song, i) => (
+                        <li key={i}>{song}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="font-semibold app-text-primary mb-1">🎹 How to Form It:</h5>
+                    <p className="italic">{INTERVAL_INFO[settings.selectedIntervalKey].theory}</p>
+                  </div>
                 </div>
               </div>
             )}
