@@ -735,14 +735,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                         {MusicTheory.formatNoteForDisplay(note)}
                       </div>
                       <div className="app-text-secondary text-sm">
-                        {settings.difficulty === 'beginner' ? '' : '2 octaves + interval'}
+                        {intervalInfo ? `${note.name} - ${intervalInfo.targetNote}` : ''}
                       </div>
-                      {intervalInfo && (
-                        <div className="mt-3 pt-3 border-t border-[var(--app-elevated)]" data-testid={`interval-${index}`}>
-                          <div className="text-xs app-text-secondary mb-1">{intervalInfo.intervalName}</div>
-                          <div className="app-accent text-sm font-semibold">→ {intervalInfo.targetNote}</div>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
