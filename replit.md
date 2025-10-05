@@ -51,8 +51,8 @@ Preferred communication style: Simple, everyday language.
 - **Global Metronome**: Centralized timing system with volume and count-in controls
 - **Keyboard Shortcuts**: System-wide shortcuts for playback control and mode switching
 - **Responsive Design**: Mobile-first approach with touch-friendly controls
-- **Branding**: NSM (Nathaniel School of Music) logo prominently displayed in header (same logo in both light and dark modes)
-- **Wave Type Switching**: Seamless audio wave type changes during playback using ref-based dynamic value system
+- **Branding**: NSM (Nathaniel School of Music) logo prominently displayed in header with theme-aware display (white logo for dark mode, black logo for light mode)
+- **Wave Type Switching**: Seamless audio wave type changes during playback using ref-based dynamic value system (no preview sound on selection)
 - **Random Mode Playback Control**: Manual playback activation only - Generate Notes button creates sequences without auto-play; Generate button disabled during playback to prevent mid-playback changes
 
 ## External Dependencies
