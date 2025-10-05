@@ -697,92 +697,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
               <span className="text-xl mr-3">🎲</span>
               Generate New Notes
             </Button>
-            
-            {/* Playback Controls */}
-            <div className="space-y-6 app-elevated rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-semibold app-text-primary text-lg">Playback Controls</h4>
-                <Button
-                  onClick={togglePlayback}
-                  disabled={settings.generatedNotes.length === 0}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${
-                    settings.playback.isPlaying 
-                      ? 'app-danger text-white hover:opacity-90' 
-                      : 'app-secondary text-white hover:opacity-90 hover:scale-105'
-                  }`}
-                  data-testid="button-toggle-playback-random"
-                >
-                  {settings.playback.isPlaying ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
-                  {settings.playback.isPlaying ? 'Stop' : 'Play'}
-                </Button>
-              </div>
-              
-              {/* BPM */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label className="app-text-secondary font-medium">BPM</Label>
-                  <span className="text-lg font-mono" data-testid="text-random-bpm">{settings.playback.bpm}</span>
-                </div>
-                <Slider
-                  value={[settings.playback.bpm]}
-                  onValueChange={updateBPM}
-                  min={20}
-                  max={240}
-                  step={1}
-                  className="w-full"
-                  data-testid="slider-random-bpm"
-                />
-              </div>
-              
-              {/* Subdivision */}
-              <div>
-                <Label className="block app-text-secondary font-medium mb-2">Subdivision</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { value: "1", label: "1× Quarter" },
-                    { value: "2", label: "2× Quavers" },
-                    { value: "3", label: "3× Triplets" },
-                    { value: "4", label: "4× Semiquavers" }
-                  ].map(({ value, label }) => (
-                    <Button
-                      key={value}
-                      onClick={() => updateSubdivision(value as "1" | "2" | "3" | "4")}
-                      className={`p-2 rounded font-medium ${
-                        settings.playback.subdivision === value
-                          ? 'subdivision-button active'
-                          : 'subdivision-button'
-                      }`}
-                      data-testid={`button-subdivision-${value}`}
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Swing - Only for Quavers */}
-              {settings.playback.subdivision === "2" && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="app-text-secondary font-medium">Swing Feel</Label>
-                    <Button
-                      onClick={() => updateSwing(!settings.playback.swingEnabled)}
-                      className={`px-3 py-1 rounded font-medium text-sm ${
-                        settings.playback.swingEnabled
-                          ? 'app-accent-light text-[var(--app-accent)]'
-                          : 'app-elevated border-[var(--app-border)]'
-                      }`}
-                      data-testid="button-random-swing"
-                    >
-                      {settings.playback.swingEnabled ? 'ON' : 'OFF'}
-                    </Button>
-                  </div>
-                  {settings.playback.swingEnabled && (
-                    <div className="text-xs app-text-secondary">8th notes at 2/3 timing</div>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         </div>
         
@@ -868,6 +782,92 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 </div>
               </div>
             )}
+            
+            {/* Playback Controls */}
+            <div className="space-y-6 app-elevated rounded-xl p-6 mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold app-text-primary text-lg">Playback Controls</h4>
+                <Button
+                  onClick={togglePlayback}
+                  disabled={settings.generatedNotes.length === 0}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${
+                    settings.playback.isPlaying 
+                      ? 'app-danger text-white hover:opacity-90' 
+                      : 'app-secondary text-white hover:opacity-90 hover:scale-105'
+                  }`}
+                  data-testid="button-toggle-playback-random"
+                >
+                  {settings.playback.isPlaying ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                  {settings.playback.isPlaying ? 'Stop' : 'Play'}
+                </Button>
+              </div>
+              
+              {/* BPM */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="app-text-secondary font-medium">BPM</Label>
+                  <span className="text-lg font-mono" data-testid="text-random-bpm">{settings.playback.bpm}</span>
+                </div>
+                <Slider
+                  value={[settings.playback.bpm]}
+                  onValueChange={updateBPM}
+                  min={20}
+                  max={240}
+                  step={1}
+                  className="w-full"
+                  data-testid="slider-random-bpm"
+                />
+              </div>
+              
+              {/* Subdivision */}
+              <div>
+                <Label className="block app-text-secondary font-medium mb-2">Subdivision</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: "1", label: "1× Quarter" },
+                    { value: "2", label: "2× Quavers" },
+                    { value: "3", label: "3× Triplets" },
+                    { value: "4", label: "4× Semiquavers" }
+                  ].map(({ value, label }) => (
+                    <Button
+                      key={value}
+                      onClick={() => updateSubdivision(value as "1" | "2" | "3" | "4")}
+                      className={`p-2 rounded font-medium ${
+                        settings.playback.subdivision === value
+                          ? 'subdivision-button active'
+                          : 'subdivision-button'
+                      }`}
+                      data-testid={`button-subdivision-${value}`}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Swing - Only for Quavers */}
+              {settings.playback.subdivision === "2" && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="app-text-secondary font-medium">Swing Feel</Label>
+                    <Button
+                      onClick={() => updateSwing(!settings.playback.swingEnabled)}
+                      className={`px-3 py-1 rounded font-medium text-sm ${
+                        settings.playback.swingEnabled
+                          ? 'app-accent-light text-[var(--app-accent)]'
+                          : 'app-elevated border-[var(--app-border)]'
+                      }`}
+                      data-testid="button-random-swing"
+                    >
+                      {settings.playback.swingEnabled ? 'ON' : 'OFF'}
+                    </Button>
+                  </div>
+                  {settings.playback.swingEnabled && (
+                    <div className="text-xs app-text-secondary">8th notes at 2/3 timing</div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
