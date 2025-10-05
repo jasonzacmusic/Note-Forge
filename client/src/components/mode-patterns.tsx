@@ -299,7 +299,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
             {/* Pattern Selection */}
             <div className="mb-6">
               <Label className="block app-text-secondary font-medium mb-2">Pattern Type</Label>
-              <Select value={settings.patternType} onValueChange={updatePatternType}>
+              <Select value={settings.patternType} onValueChange={updatePatternType} disabled={settings.playback.isPlaying}>
                 <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-pattern-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -316,7 +316,7 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
             {/* Starting Note */}
             <div className="mb-6">
               <Label className="block app-text-secondary font-medium mb-2">Starting Note</Label>
-              <Select value={settings.startingNote} onValueChange={updateStartingNote}>
+              <Select value={settings.startingNote} onValueChange={updateStartingNote} disabled={settings.playback.isPlaying}>
                 <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-starting-note">
                   <SelectValue />
                 </SelectTrigger>
