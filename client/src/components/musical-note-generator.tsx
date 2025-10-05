@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { ThemeToggle } from "./theme-toggle";
+import { useTheme } from "./theme-provider";
 import { RandomMode } from "./mode-random";
 import { ProgressionsMode } from "./mode-progressions";
 import { PatternsMode } from "./mode-patterns";
@@ -13,7 +14,8 @@ import { GlossaryMode } from "./mode-glossary";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
-import nathanielLight from "@assets/nathaniel-light_1759431050954.jpg";
+import nsmWhiteLogo from "@assets/NSM White_1759673454530.png";
+import nsmBlackLogo from "@assets/NSM Black_1759673454530.png";
 
 const defaultSettings: AppSettings = {
   globalMetronome: {
@@ -69,6 +71,7 @@ const defaultSettings: AppSettings = {
 export function MusicalNoteGenerator() {
   const [settings, setSettings] = useLocalStorage<AppSettings>("musical-note-generator", defaultSettings);
   const { initializeAudio, audioContext } = useAudio();
+  const { theme } = useTheme();
   
   // Create separate audio engines for each mode
   const [randomAudioEngine] = useState(() => new AudioEngine());
@@ -296,16 +299,6 @@ export function MusicalNoteGenerator() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [settings]);
 
-  // Preview audio sample function with seamless crossfading
-  const previewAudioSample = (waveType: 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano') => {
-    if (audioContext && randomAudioEngine.isInitialized()) {
-      // Use crossfade for seamless transition between wave types
-      randomAudioEngine.crossfadeToWaveType(261.63, waveType, 0.3);
-    }
-  };
-
-
-
   // Reset function for Random Mode settings
   const resetRandomModeSettings = (prevSettings: AppSettings) => ({
     ...prevSettings.randomMode,
@@ -356,14 +349,14 @@ export function MusicalNoteGenerator() {
       {/* Header */}
       <header className="app-surface border-b-2 border-[var(--app-border)] mb-8">
         <div className="container mx-auto px-6 py-8 max-w-7xl">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col items-center mb-6">
+            <img 
+              src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
+              alt="Nathaniel School of Music"
+              className="h-24 w-auto object-contain mb-4"
+              data-testid="nsm-logo"
+            />
             <div className="flex items-center space-x-4">
-              <img 
-                src={nathanielLight}
-                alt="Nathaniel School of Music"
-                className="h-16 w-auto object-contain"
-                data-testid="nsm-logo"
-              />
               <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
                 <Music className="text-white text-2xl" />
               </div>
@@ -375,6 +368,9 @@ export function MusicalNoteGenerator() {
                 </div>
               </div>
             </div>
+          </div>
+          
+          <div className="flex justify-end">
 
             {/* Global Controls */}
             <div className="flex items-center space-x-4">
@@ -391,7 +387,6 @@ export function MusicalNoteGenerator() {
                       ...prev, 
                       globalAudio: { waveType }
                     }));
-                    previewAudioSample(waveType);
                   }}
                 >
                   <SelectTrigger className="w-32 app-elevated border-[var(--app-border)]" data-testid="select-audio-sample">
