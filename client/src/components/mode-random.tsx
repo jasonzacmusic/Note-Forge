@@ -686,17 +686,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 </div>
               </div>
             )}
-            
-            {/* Generate Button */}
-            <Button
-              onClick={generateRandomNotes}
-              disabled={settings.playback.isPlaying}
-              className="w-full app-primary text-white hover:opacity-90 transition-all hover:scale-105 shadow-lg py-4 text-lg font-semibold rounded-xl mb-8 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              data-testid="button-generate-random"
-            >
-              <span className="text-xl mr-3">🎲</span>
-              Generate New Notes
-            </Button>
           </div>
         </div>
         
@@ -782,6 +771,17 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 </div>
               </div>
             )}
+            
+            {/* Generate Button */}
+            <Button
+              onClick={generateRandomNotes}
+              disabled={settings.playback.isPlaying}
+              className="w-full app-primary text-white hover:opacity-90 transition-all hover:scale-105 shadow-lg py-4 text-lg font-semibold rounded-xl mt-6 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              data-testid="button-generate-random"
+            >
+              <span className="text-xl mr-3">🎲</span>
+              Generate New Notes
+            </Button>
             
             {/* Playback Controls */}
             <div className="space-y-6 app-elevated rounded-xl p-6 mt-6">
