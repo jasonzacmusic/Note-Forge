@@ -253,7 +253,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
             {/* Key Selection */}
             <div className="mb-6">
               <Label className="block app-text-secondary font-medium mb-2">Key</Label>
-              <Select value={settings.selectedKey} onValueChange={updateKey}>
+              <Select value={settings.selectedKey} onValueChange={updateKey} disabled={settings.playback.isPlaying}>
                 <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-key">
                   <SelectValue />
                 </SelectTrigger>
@@ -270,7 +270,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
             {/* Progression Selection */}
             <div className="mb-6">
               <Label className="block app-text-secondary font-medium mb-2">Progression</Label>
-              <Select value={settings.selectedProgression} onValueChange={updateProgression}>
+              <Select value={settings.selectedProgression} onValueChange={updateProgression} disabled={settings.playback.isPlaying}>
                 <SelectTrigger className="w-full app-bg border-[var(--app-elevated)]" data-testid="select-progression">
                   <SelectValue />
                 </SelectTrigger>
