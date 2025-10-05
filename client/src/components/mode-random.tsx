@@ -550,6 +550,10 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                         <RadioGroupItem value="9" id="major-6th" />
                         <Label htmlFor="major-6th" className="app-text-primary text-sm">Major 6th</Label>
                       </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="8" id="aug-5th" />
+                        <Label htmlFor="aug-5th" className="app-text-primary text-sm">Augmented 5th</Label>
+                      </div>
                     </RadioGroup>
                   </div>
                 </div>
@@ -663,27 +667,43 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
             {/* Note Display */}
             {settings.generatedNotes.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {settings.generatedNotes.map((note, index) => (
-                  <div
-                    key={index}
-                    className={`note-card rounded-lg p-6 text-center ${
-                      currentNoteIndex === index && settings.playback.isPlaying ? 'active' : ''
-                    }`}
-                    data-testid={`note-card-${index}`}
-                  >
-                    <div className="text-3xl font-bold mb-2 app-text-primary">
-                      {MusicTheory.formatNoteForDisplay(note)}
-                    </div>
-                    <div className="app-text-secondary text-sm">
-                      {settings.difficulty === 'beginner' ? '' : '2 octaves + interval'}
-                    </div>
-                    {settings.difficulty === 'intermediate' && index < settings.generatedNotes.length - 1 && (
-                      <div className="app-accent text-xs mt-2" data-testid={`interval-${index}`}>
-                        →{settings.generatedNotes[index + 1].name}
+                {settings.generatedNotes.map((note, index) => {
+                  // Calculate interval to next note for intermediate mode
+                  let intervalInfo = null;
+                  if (settings.difficulty === 'intermediate' && index < settings.generatedNotes.length - 1) {
+                    const interval = MusicTheory.getInterval(
+                      settings.generatedNotes[index].name,
+                      settings.generatedNotes[index + 1].name
+                    );
+                    intervalInfo = {
+                      targetNote: settings.generatedNotes[index + 1].name,
+                      intervalName: interval.name
+                    };
+                  }
+                  
+                  return (
+                    <div
+                      key={index}
+                      className={`note-card rounded-lg p-6 text-center ${
+                        currentNoteIndex === index && settings.playback.isPlaying ? 'active' : ''
+                      }`}
+                      data-testid={`note-card-${index}`}
+                    >
+                      <div className="text-3xl font-bold mb-2 app-text-primary">
+                        {MusicTheory.formatNoteForDisplay(note)}
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <div className="app-text-secondary text-sm">
+                        {settings.difficulty === 'beginner' ? '' : '2 octaves + interval'}
+                      </div>
+                      {intervalInfo && (
+                        <div className="mt-3 pt-3 border-t border-[var(--app-elevated)]" data-testid={`interval-${index}`}>
+                          <div className="text-xs app-text-secondary mb-1">{intervalInfo.intervalName}</div>
+                          <div className="app-accent text-sm font-semibold">→ {intervalInfo.targetNote}</div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12 app-text-secondary">
