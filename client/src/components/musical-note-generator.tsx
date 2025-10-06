@@ -347,9 +347,69 @@ export function MusicalNoteGenerator() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="app-surface border-b-2 border-[var(--app-border)] mb-8">
-        <div className="container mx-auto px-6 py-8 max-w-7xl">
-          <div className="grid grid-cols-3 gap-4 items-center">
+      <header className="app-surface border-b-2 border-[var(--app-border)] mb-4 md:mb-8">
+        <div className="container mx-auto px-3 md:px-6 py-4 md:py-8 max-w-7xl">
+          {/* Mobile Layout */}
+          <div className="lg:hidden">
+            {/* Logo at top on mobile */}
+            <div className="flex justify-center mb-4">
+              <img 
+                src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
+                alt="Nathaniel School of Music"
+                className="h-16 w-auto object-contain"
+                data-testid="nsm-logo"
+              />
+            </div>
+            
+            {/* Title and controls on mobile */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2 flex-1">
+                <div className="w-10 h-10 rounded-xl app-primary flex items-center justify-center shadow-lg flex-shrink-0">
+                  <Music className="text-white text-lg" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-lg font-bold app-text-primary truncate">Musical Note Generator</h1>
+                  <p className="text-xs app-text-secondary">4 notes with many possibilities</p>
+                </div>
+              </div>
+              <ThemeToggle />
+            </div>
+            
+            {/* Audio controls on mobile */}
+            <div className="flex items-center justify-center space-x-2">
+              <span className="text-xs font-medium app-text-primary">🎵 Audio:</span>
+              <Select
+                value={settings.globalAudio?.waveType || 'piano'}
+                onValueChange={(value) => {
+                  const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
+                  currentWaveTypeRef.current = waveType;
+                  setSettings(prev => ({ 
+                    ...prev, 
+                    globalAudio: { waveType }
+                  }));
+                }}
+              >
+                <SelectTrigger className="w-28 app-elevated border-[var(--app-border)]" data-testid="select-audio-sample">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="piano" data-testid="audio-piano">🎹 Piano</SelectItem>
+                  <SelectItem value="sine" data-testid="audio-sine">🌊 Sine</SelectItem>
+                  <SelectItem value="triangle" data-testid="audio-triangle">📐 Triangle</SelectItem>
+                  <SelectItem value="sawtooth" data-testid="audio-sawtooth">🔺 Sawtooth</SelectItem>
+                  <SelectItem value="square" data-testid="audio-square">🔲 Square</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Shortcuts hint on mobile - collapsible */}
+            <div className="mt-3 app-bg rounded-lg px-2 py-1 text-xs app-text-secondary border border-[var(--app-border)] text-center">
+              <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
+            </div>
+          </div>
+          
+          {/* Desktop Layout (unchanged) */}
+          <div className="hidden lg:grid grid-cols-3 gap-4 items-center">
             {/* Left: Title and Shortcuts */}
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
@@ -383,7 +443,6 @@ export function MusicalNoteGenerator() {
                   value={settings.globalAudio?.waveType || 'piano'}
                   onValueChange={(value) => {
                     const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
-                    // Update ref for seamless wave type switching during playback
                     currentWaveTypeRef.current = waveType;
                     setSettings(prev => ({ 
                       ...prev, 
@@ -411,9 +470,9 @@ export function MusicalNoteGenerator() {
       </header>
 
       {/* Tab Navigation */}
-      <div className="container mx-auto px-6 max-w-7xl">
-        <nav className="mb-8">
-          <div className="flex flex-wrap gap-3 p-2 app-elevated rounded-xl">
+      <div className="container mx-auto px-3 md:px-6 max-w-7xl">
+        <nav className="mb-4 md:mb-8">
+          <div className="flex flex-wrap gap-2 md:gap-3 p-2 app-elevated rounded-xl">
             {[
               { key: 'random', label: 'Random Notes', icon: '🎲', color: 'app-primary' },
               { key: 'progressions', label: 'Chord Progressions', icon: '🎵', color: 'app-secondary' },
@@ -425,14 +484,14 @@ export function MusicalNoteGenerator() {
                 variant="ghost"
                 size="lg"
                 onClick={() => switchTab(key as AppSettings['currentMode'])}
-                className={`flex-1 min-w-fit px-6 py-4 rounded-lg transition-all duration-200 ${
+                className={`flex-1 min-w-fit px-3 md:px-6 py-3 md:py-4 rounded-lg transition-all duration-200 text-sm md:text-base ${
                   settings.currentMode === key
                     ? `${color} text-white shadow-lg transform scale-105 font-semibold`
                     : `hover:border-2 hover:border-[var(--${color.replace('app-', 'app-')})] app-text-secondary hover:app-text-primary border border-[var(--app-border)] hover:font-semibold`
                 }`}
                 data-testid={`tab-${key}`}
               >
-                <span className="mr-3 text-xl">{icon}</span>
+                <span className="mr-2 md:mr-3 text-lg md:text-xl">{icon}</span>
                 <span className="font-medium">{label}</span>
               </Button>
             ))}

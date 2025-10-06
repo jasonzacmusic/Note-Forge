@@ -388,32 +388,32 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
 
 
   return (
-    <section className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <section className="space-y-4 md:space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         {/* Controls Panel */}
         <div className="lg:col-span-1">
-          <div className="app-surface rounded-2xl p-8 shadow-lg">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 rounded-xl app-primary flex items-center justify-center mr-4">
+          <div className="app-surface rounded-xl md:rounded-2xl p-4 md:p-8 shadow-lg">
+            <div className="flex items-center mb-4 md:mb-6">
+              <div className="w-10 h-10 rounded-xl app-primary flex items-center justify-center mr-3 md:mr-4">
                 <span className="text-white text-xl">🎲</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold app-text-primary">Random Notes</h3>
-                <p className="text-sm app-text-secondary">Generate random note sequences</p>
+                <h3 className="text-lg md:text-xl font-bold app-text-primary">Random Notes</h3>
+                <p className="text-xs md:text-sm app-text-secondary">Generate random note sequences</p>
               </div>
             </div>
             
             {/* Difficulty Level */}
-            <div className="mb-8">
-              <Label className="block app-text-primary font-semibold mb-4 text-sm uppercase tracking-wide">
+            <div className="mb-4 md:mb-8">
+              <Label className="block app-text-primary font-semibold mb-3 md:mb-4 text-xs md:text-sm uppercase tracking-wide">
                 Difficulty Level
               </Label>
               <RadioGroup
                 value={settings.difficulty}
                 onValueChange={updateDifficulty}
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-2 gap-3 md:gap-4"
               >
-                <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                <div className={`p-3 md:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                   settings.difficulty === 'beginner' 
                     ? 'border-[var(--app-primary)] app-elevated shadow-md' 
                     : 'border-[var(--app-border)] hover:border-[var(--app-primary)] app-elevated'
@@ -421,13 +421,13 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   <RadioGroupItem value="beginner" id="beginner" className="sr-only" />
                   <Label htmlFor="beginner" className="cursor-pointer block">
                     <div className="text-center">
-                      <div className="text-2xl mb-2">🌟</div>
-                      <div className={`font-bold ${settings.difficulty === 'beginner' ? 'text-[var(--app-primary)]' : 'app-text-primary'}`}>Beginner</div>
+                      <div className="text-xl md:text-2xl mb-1 md:mb-2">🌟</div>
+                      <div className={`font-bold text-sm md:text-base ${settings.difficulty === 'beginner' ? 'text-[var(--app-primary)]' : 'app-text-primary'}`}>Beginner</div>
                       <div className="text-xs app-text-secondary mt-1">Note Recognition</div>
                     </div>
                   </Label>
                 </div>
-                <div className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                <div className={`p-3 md:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                   settings.difficulty === 'intermediate' 
                     ? 'border-[var(--app-secondary)] app-elevated shadow-md' 
                     : 'border-[var(--app-border)] hover:border-[var(--app-secondary)] app-elevated'
@@ -435,8 +435,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   <RadioGroupItem value="intermediate" id="intermediate" className="sr-only" />
                   <Label htmlFor="intermediate" className="cursor-pointer block">
                     <div className="text-center">
-                      <div className="text-2xl mb-2">🎯</div>
-                      <div className={`font-bold ${settings.difficulty === 'intermediate' ? 'text-[var(--app-secondary)]' : 'app-text-primary'}`}>Intermediate</div>
+                      <div className="text-xl md:text-2xl mb-1 md:mb-2">🎯</div>
+                      <div className={`font-bold text-sm md:text-base ${settings.difficulty === 'intermediate' ? 'text-[var(--app-secondary)]' : 'app-text-primary'}`}>Intermediate</div>
                       <div className="text-xs app-text-secondary mt-1">Interval Practice</div>
                     </div>
                   </Label>
@@ -446,17 +446,17 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
             
             {/* Note Selection - Only for Beginner */}
             {settings.difficulty === 'beginner' && (
-              <div className="mb-8">
-                <Label className="block app-text-primary font-semibold mb-4 text-sm uppercase tracking-wide">
+              <div className="mb-4 md:mb-8">
+                <Label className="block app-text-primary font-semibold mb-3 md:mb-4 text-xs md:text-sm uppercase tracking-wide">
                   Note Selection
                 </Label>
                 <RadioGroup
                   value={settings.noteSelection}
                   onValueChange={updateNoteSelection}
                   disabled={settings.playback.isPlaying}
-                  className="space-y-3"
+                  className="space-y-2 md:space-y-3"
                 >
-                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                  <div className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
                     settings.playback.isPlaying 
                       ? 'opacity-50 cursor-not-allowed pointer-events-none' 
                       : 'cursor-pointer'
@@ -467,14 +467,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   }`}>
                     <RadioGroupItem value="all" id="all-notes" className="sr-only" />
                     <Label htmlFor="all-notes" className="cursor-pointer flex items-center">
-                      <span className="text-xl mr-3">🎹</span>
+                      <span className="text-lg md:text-xl mr-2 md:mr-3">🎹</span>
                       <div>
-                        <div className={`font-bold ${settings.noteSelection === 'all' ? 'text-[var(--app-accent)]' : 'app-text-primary'}`}>All 12 Notes</div>
+                        <div className={`font-bold text-sm md:text-base ${settings.noteSelection === 'all' ? 'text-[var(--app-accent)]' : 'app-text-primary'}`}>All 12 Notes</div>
                         <div className="text-xs app-text-secondary">Chromatic scale</div>
                       </div>
                     </Label>
                   </div>
-                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                  <div className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
                     settings.playback.isPlaying 
                       ? 'opacity-50 cursor-not-allowed pointer-events-none' 
                       : 'cursor-pointer'
@@ -485,14 +485,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   }`}>
                     <RadioGroupItem value="white" id="white-notes" className="sr-only" />
                     <Label htmlFor="white-notes" className="cursor-pointer flex items-center">
-                      <span className="text-xl mr-3">⚪</span>
+                      <span className="text-lg md:text-xl mr-2 md:mr-3">⚪</span>
                       <div>
-                        <div className={`font-bold ${settings.noteSelection === 'white' ? 'text-[var(--app-secondary)]' : 'app-text-primary'}`}>White Keys Only</div>
+                        <div className={`font-bold text-sm md:text-base ${settings.noteSelection === 'white' ? 'text-[var(--app-secondary)]' : 'app-text-primary'}`}>White Keys Only</div>
                         <div className="text-xs app-text-secondary">Natural notes</div>
                       </div>
                     </Label>
                   </div>
-                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                  <div className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
                     settings.playback.isPlaying 
                       ? 'opacity-50 cursor-not-allowed pointer-events-none' 
                       : 'cursor-pointer'
@@ -503,14 +503,14 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   }`}>
                     <RadioGroupItem value="accidentals" id="black-notes" className="sr-only" />
                     <Label htmlFor="black-notes" className="cursor-pointer flex items-center">
-                      <span className="text-xl mr-3">⚫</span>
+                      <span className="text-lg md:text-xl mr-2 md:mr-3">⚫</span>
                       <div>
-                        <div className={`font-bold ${settings.noteSelection === 'accidentals' ? 'text-[var(--app-warning)]' : 'app-text-primary'}`}>Black Keys Only</div>
+                        <div className={`font-bold text-sm md:text-base ${settings.noteSelection === 'accidentals' ? 'text-[var(--app-warning)]' : 'app-text-primary'}`}>Black Keys Only</div>
                         <div className="text-xs app-text-secondary">Sharps and flats</div>
                       </div>
                     </Label>
                   </div>
-                  <div className={`p-4 rounded-xl border-2 transition-all ${
+                  <div className={`p-3 md:p-4 rounded-xl border-2 transition-all ${
                     settings.playback.isPlaying 
                       ? 'opacity-50 cursor-not-allowed pointer-events-none' 
                       : 'cursor-pointer'
@@ -521,9 +521,9 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   }`}>
                     <RadioGroupItem value="enharmonics" id="enharmonic-notes" className="sr-only" />
                     <Label htmlFor="enharmonic-notes" className="cursor-pointer flex items-center">
-                      <span className="text-xl mr-3">🎭</span>
+                      <span className="text-lg md:text-xl mr-2 md:mr-3">🎭</span>
                       <div>
-                        <div className={`font-bold ${settings.noteSelection === 'enharmonics' ? 'text-[var(--app-primary)]' : 'app-text-primary'}`}>Include Enharmonics</div>
+                        <div className={`font-bold text-sm md:text-base ${settings.noteSelection === 'enharmonics' ? 'text-[var(--app-primary)]' : 'app-text-primary'}`}>Include Enharmonics</div>
                         <div className="text-xs app-text-secondary">E#, Fb, B#, Cb</div>
                       </div>
                     </Label>
@@ -691,12 +691,12 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
         
         {/* Generated Sequence Display */}
         <div className="lg:col-span-2">
-          <div className="app-surface rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-6 text-[var(--app-secondary)]">Generated Sequence</h3>
+          <div className="app-surface rounded-xl md:rounded-xl p-4 md:p-6">
+            <h3 className="text-base md:text-lg font-semibold mb-4 md:mb-6 text-[var(--app-secondary)]">Generated Sequence</h3>
             
             {/* Note Display */}
             {settings.generatedNotes.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
                 {settings.generatedNotes.map((note, index) => {
                   // Calculate interval partner note (e.g., Major 6th of current note)
                   let intervalPartnerNote = null;
@@ -713,22 +713,22 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   return (
                     <div
                       key={index}
-                      className={`note-card rounded-lg p-6 text-center ${
+                      className={`note-card rounded-lg p-4 md:p-6 text-center ${
                         currentNoteIndex === index && settings.playback.isPlaying ? 'active' : ''
                       }`}
                       data-testid={`note-card-${index}`}
                     >
-                      <div className="text-3xl font-bold mb-2 app-text-primary">
+                      <div className="text-2xl md:text-3xl font-bold mb-1 md:mb-2 app-text-primary">
                         {MusicTheory.formatNoteForDisplay(note)}
                       </div>
                       {intervalPartnerNote && (
-                        <div className="app-text-secondary text-sm mb-2">
+                        <div className="app-text-secondary text-xs md:text-sm mb-1 md:mb-2">
                           {note.name} - {intervalPartnerNote}
                         </div>
                       )}
                       {nextSequenceNote && (
-                        <div className="mt-3 pt-3 border-t border-[var(--app-elevated)]" data-testid={`interval-${index}`}>
-                          <div className="app-accent text-sm font-semibold">→ {nextSequenceNote}</div>
+                        <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-[var(--app-elevated)]" data-testid={`interval-${index}`}>
+                          <div className="app-accent text-xs md:text-sm font-semibold">→ {nextSequenceNote}</div>
                         </div>
                       )}
                     </div>
@@ -736,18 +736,18 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                 })}
               </div>
             ) : (
-              <div className="text-center py-12 app-text-secondary">
+              <div className="text-center py-8 md:py-12 app-text-secondary text-sm md:text-base">
                 Click "Generate Random Notes" to create a 4 note sequence or hit "R"
               </div>
             )}
             
             {/* Theory Information */}
             {settings.generatedNotes.length > 0 && settings.difficulty === 'intermediate' && settings.selectedIntervalKey && INTERVAL_INFO[settings.selectedIntervalKey] && (
-              <div className="app-bg rounded-lg p-4">
-                <h4 className="font-medium mb-3 app-accent text-lg">
+              <div className="app-bg rounded-lg p-3 md:p-4">
+                <h4 className="font-medium mb-2 md:mb-3 app-accent text-base md:text-lg">
                   {MusicTheory.getIntervalByKey(settings.selectedIntervalKey)?.name || 'Interval'} Information
                 </h4>
-                <div className="app-text-secondary text-sm space-y-3">
+                <div className="app-text-secondary text-xs md:text-sm space-y-2 md:space-y-3">
                   <div>
                     <h5 className="font-semibold app-text-primary mb-1">📚 Facts:</h5>
                     <ul className="list-disc list-inside space-y-1">
@@ -776,28 +776,28 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
             <Button
               onClick={generateRandomNotes}
               disabled={settings.playback.isPlaying}
-              className="w-full app-primary text-white hover:opacity-90 transition-all hover:scale-105 shadow-lg py-4 text-lg font-semibold rounded-xl mt-6 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="w-full app-primary text-white hover:opacity-90 transition-all hover:scale-105 shadow-lg py-3 md:py-4 text-base md:text-lg font-semibold rounded-xl mt-4 md:mt-6 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               data-testid="button-generate-random"
             >
-              <span className="text-xl mr-3">🎲</span>
+              <span className="text-lg md:text-xl mr-2 md:mr-3">🎲</span>
               Generate New Notes
             </Button>
             
             {/* Playback Controls */}
-            <div className="space-y-6 app-elevated rounded-xl p-6 mt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-semibold app-text-primary text-lg">Playback Controls</h4>
+            <div className="space-y-4 md:space-y-6 app-elevated rounded-xl p-4 md:p-6 mt-4 md:mt-6">
+              <div className="flex items-center justify-between mb-3 md:mb-4">
+                <h4 className="font-semibold app-text-primary text-base md:text-lg">Playback Controls</h4>
                 <Button
                   onClick={togglePlayback}
                   disabled={settings.generatedNotes.length === 0}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${
+                  className={`px-4 md:px-6 py-2 md:py-3 rounded-xl font-semibold transition-all shadow-md text-sm md:text-base ${
                     settings.playback.isPlaying 
                       ? 'app-danger text-white hover:opacity-90' 
                       : 'app-secondary text-white hover:opacity-90 hover:scale-105'
                   }`}
                   data-testid="button-toggle-playback-random"
                 >
-                  {settings.playback.isPlaying ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
+                  {settings.playback.isPlaying ? <Pause className="mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" /> : <Play className="mr-1 md:mr-2 h-3 md:h-4 w-3 md:w-4" />}
                   {settings.playback.isPlaying ? 'Stop' : 'Play'}
                 </Button>
               </div>
@@ -805,8 +805,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
               {/* BPM */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="app-text-secondary font-medium">BPM</Label>
-                  <span className="text-lg font-mono" data-testid="text-random-bpm">{settings.playback.bpm}</span>
+                  <Label className="app-text-secondary font-medium text-sm md:text-base">BPM</Label>
+                  <span className="text-base md:text-lg font-mono" data-testid="text-random-bpm">{settings.playback.bpm}</span>
                 </div>
                 <Slider
                   value={[settings.playback.bpm]}
@@ -821,7 +821,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
               
               {/* Subdivision */}
               <div>
-                <Label className="block app-text-secondary font-medium mb-2">Subdivision</Label>
+                <Label className="block app-text-secondary font-medium mb-2 text-sm md:text-base">Subdivision</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { value: "1", label: "1× Quarter" },
