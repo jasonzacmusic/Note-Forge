@@ -58,10 +58,12 @@ Preferred communication style: Simple, everyday language.
 - **Branding**: NSM (Nathaniel School of Music) logo prominently displayed in header with theme-aware display (white logo for dark mode, black logo for light mode)
 - **Wave Type Switching**: Seamless audio wave type changes during playback using ref-based dynamic value system (no preview sound on selection)
 - **Random Mode Playback Control**: Manual playback activation only - Generate Notes button creates sequences without auto-play; Generate button disabled during playback to prevent mid-playback changes
-- **Dynamic Playback Settings**: BPM, subdivision, and swing changes apply seamlessly during playback without restarting
+- **Dynamic Playback Settings**: All modes (Random, Progressions, Patterns) support real-time BPM, subdivision, and swing changes
   - Uses React refs (currentBpmRef, currentSubdivisionRef, currentSwingRef) for dynamic value access
-  - Scheduler reads latest values from refs on each iteration
+  - Scheduler reads latest values from refs on each iteration without restarting playback
   - Maintains current playback position when tempo/timing settings change
+  - Tempo adjustments apply immediately to the next scheduled note/chord
+  - No interruption to ongoing playback when adjusting controls
 
 ## External Dependencies
 
