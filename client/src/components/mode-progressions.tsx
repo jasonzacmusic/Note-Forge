@@ -22,6 +22,18 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   const [currentChordIndex, setCurrentChordIndex] = useState(0);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shouldContinuePlaybackRef = useRef(false);
+  
+  // Use refs to store current playback settings for dynamic updates without restart
+  const currentBpmRef = useRef(settings.playback.bpm);
+  const currentSubdivisionRef = useRef(settings.playback.subdivision);
+  const currentSwingRef = useRef(settings.playback.swingEnabled);
+
+  // Update refs whenever settings change
+  useEffect(() => {
+    currentBpmRef.current = settings.playback.bpm;
+    currentSubdivisionRef.current = settings.playback.subdivision;
+    currentSwingRef.current = settings.playback.swingEnabled;
+  }, [settings.playback.bpm, settings.playback.subdivision, settings.playback.swingEnabled]);
 
   useEffect(() => {
     // Listen for global stop event
@@ -46,30 +58,6 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
       stopPlayback();
     }
   }, [settings.playback.isPlaying]);
-
-  // Restart playback when BPM changes to apply new tempo immediately
-  useEffect(() => {
-    if (settings.playback.isPlaying) {
-      stopPlayback();
-      const timer = setTimeout(() => {
-        startPlayback();
-      }, 50); // Small delay to ensure cleanup completes
-      
-      return () => clearTimeout(timer);
-    }
-  }, [settings.playback.bpm]);
-
-  // Restart playback when subdivision or swing changes to apply new timing immediately
-  useEffect(() => {
-    if (settings.playback.isPlaying) {
-      stopPlayback();
-      const timer = setTimeout(() => {
-        startPlayback();
-      }, 50); // Small delay to ensure cleanup completes
-      
-      return () => clearTimeout(timer);
-    }
-  }, [settings.playback.subdivision, settings.playback.swingEnabled]);
 
   const startPlayback = () => {
     if (!settings.currentProgression || !audioContext) return;
@@ -99,16 +87,17 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
         }
       };
       
-      const repetitionsPerBar = getRepetitionsPerBar(settings.playback.subdivision);
-      const chordInterval = (60 / settings.playback.bpm) / (repetitionsPerBar / 4); // Time between repetitions
+      // Use refs to get latest values dynamically
+      const repetitionsPerBar = getRepetitionsPerBar(currentSubdivisionRef.current);
+      const chordInterval = (60 / currentBpmRef.current) / (repetitionsPerBar / 4); // Time between repetitions
 
       const chord = settings.currentProgression.chords[currentChordIndex];
       setCurrentChordIndex(currentChordIndex);
       
       // Apply swing only to quavers (eighth notes) when enabled
       let swingDelay = 0;
-      if (settings.playback.subdivision === "2" && settings.playback.swingEnabled) {
-        swingDelay = AudioEngine.getSwingDelay(playbackRepetition, settings.playback.swingEnabled, chordInterval);
+      if (currentSubdivisionRef.current === "2" && currentSwingRef.current) {
+        swingDelay = AudioEngine.getSwingDelay(playbackRepetition, currentSwingRef.current, chordInterval);
       }
       
       // Schedule chord with swing delay

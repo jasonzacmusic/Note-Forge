@@ -50,10 +50,18 @@ Preferred communication style: Simple, everyday language.
 - **Mode System**: Three independent modes (Random, Progressions, Patterns) with shared playback controls
 - **Global Metronome**: Centralized timing system with volume and count-in controls
 - **Keyboard Shortcuts**: System-wide shortcuts for playback control and mode switching
-- **Responsive Design**: Mobile-first approach with touch-friendly controls
+- **Responsive Design**: Mobile-first approach with touch-friendly controls using Tailwind's md: and lg: breakpoints
+  - Mobile portrait view optimized with compact spacing, smaller text, and stacked layouts
+  - Desktop version unchanged - responsive breakpoints only activate on smaller screens
+  - Header reorganized for mobile: Logo centered at top, title and controls stacked below
+  - All sections use responsive padding (p-4 on mobile, p-6-8 on desktop)
 - **Branding**: NSM (Nathaniel School of Music) logo prominently displayed in header with theme-aware display (white logo for dark mode, black logo for light mode)
 - **Wave Type Switching**: Seamless audio wave type changes during playback using ref-based dynamic value system (no preview sound on selection)
 - **Random Mode Playback Control**: Manual playback activation only - Generate Notes button creates sequences without auto-play; Generate button disabled during playback to prevent mid-playback changes
+- **Dynamic Playback Settings**: BPM, subdivision, and swing changes apply seamlessly during playback without restarting
+  - Uses React refs (currentBpmRef, currentSubdivisionRef, currentSwingRef) for dynamic value access
+  - Scheduler reads latest values from refs on each iteration
+  - Maintains current playback position when tempo/timing settings change
 
 ## External Dependencies
 
