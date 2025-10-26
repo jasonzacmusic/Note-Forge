@@ -350,34 +350,32 @@ export function MusicalNoteGenerator() {
       <header className="app-surface border-b-2 border-[var(--app-border)] mb-4 md:mb-8">
         <div className="container mx-auto px-3 md:px-6 py-4 md:py-8 max-w-7xl">
           {/* Mobile Layout */}
-          <div className="lg:hidden">
-            {/* Logo at top on mobile */}
-            <div className="flex justify-center mb-4">
+          <div className="lg:hidden space-y-3">
+            {/* Row 1: Logo and Theme Toggle */}
+            <div className="flex items-center justify-between">
               <img 
                 src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
-                alt="Nathaniel School of Music"
-                className="h-16 w-auto object-contain"
+                alt="NSM"
+                className="h-10 w-auto object-contain"
                 data-testid="nsm-logo"
               />
-            </div>
-            
-            {/* Title and controls on mobile */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2 flex-1">
-                <div className="w-10 h-10 rounded-xl app-primary flex items-center justify-center shadow-lg flex-shrink-0">
-                  <Music className="text-white text-lg" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-lg font-bold app-text-primary truncate">Musical Note Generator</h1>
-                  <p className="text-xs app-text-secondary">4 notes with many possibilities</p>
-                </div>
-              </div>
               <ThemeToggle />
             </div>
             
-            {/* Audio controls on mobile */}
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-xs font-medium app-text-primary">🎵 Audio:</span>
+            {/* Row 2: Title */}
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg app-primary flex items-center justify-center shadow-md flex-shrink-0">
+                <Music className="text-white text-base" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base font-bold app-text-primary leading-tight">Musical Note Generator</h1>
+                <p className="text-xs app-text-secondary leading-tight">Interactive ear training tool</p>
+              </div>
+            </div>
+            
+            {/* Row 3: Audio controls - compact */}
+            <div className="flex items-center justify-between space-x-2 app-elevated rounded-lg px-3 py-2">
+              <span className="text-xs font-medium app-text-primary whitespace-nowrap">Audio:</span>
               <Select
                 value={settings.globalAudio?.waveType || 'piano'}
                 onValueChange={(value) => {
@@ -389,7 +387,7 @@ export function MusicalNoteGenerator() {
                   }));
                 }}
               >
-                <SelectTrigger className="w-28 app-elevated border-[var(--app-border)]" data-testid="select-audio-sample">
+                <SelectTrigger className="w-full app-bg border-[var(--app-border)]" data-testid="select-audio-sample">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -400,11 +398,6 @@ export function MusicalNoteGenerator() {
                   <SelectItem value="square" data-testid="audio-square">🔲 Square</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            
-            {/* Shortcuts hint on mobile - collapsible */}
-            <div className="mt-3 app-bg rounded-lg px-2 py-1 text-xs app-text-secondary border border-[var(--app-border)] text-center">
-              <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
             </div>
           </div>
           
