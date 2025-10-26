@@ -1,0 +1,138 @@
+I want to build a Musical Note Generator Program which plays back using proper timing and music theory concepts (chords & intervals)
+
+There should be 3 modes for notes to be displayed. 4 notes to be played at a time in loop with one button toggling play/stop. All modes should have independent playback control and playback should stop as and when modes are toggled. Even tempos should be independently controlled for each mode
+
+Playback speed options - This plays the generated notes and the speeds below. Swing the notes if selected
+
+1x - Quarter Notes (pulse) played at the speed of the tempo
+2x - Quavers played at double the speed of the tempo (Add Swing Feel as an option to this speed)
+3x - Triplets played at triple the speed (Eight Note Quavers) of the tempo
+4x - Semiquavers played at 4 times the speed (Sixteenth Notes) of the tempo (Add Swing Feel as an option to this speed)
+
+I need a Metronome (musically accurate) with a real-time tempo slider, loop mode (on by default) and a volume control option for the metronome
+
+Also, need a Count in option to be either 1 bar (4 beats) or 2 bars (8 beats)
+
+MODE 1 : Random
+
+Generate 4-note sequence with rules:
+
+At most 2 consecutive seconds (m2/M2).
+
+Prefer intervals P5, P4, M3, m3, M6, m6.
+
+Sharps/flats can be chosen randomly.
+
+Beginner mode: “All 12 Notes” | “White Notes only” | “Sharps/Flats only.”
+
+Intermediate: choose interval category (Resolutions, Tensions, Anticipations, Mystery) → show target note relative to generated note.
+
+Playback: Beginner = 4 octaves of each note. Intermediate = 2 octaves + interval. Loop with mode’s BPM/subdivision.
+
+UI: “Generate Random” button.
+
+MODE 2 : Popular Chord Progressions
+
+Select key + progression.
+
+Roman numeral rules: I=Major, i=Minor, i°=Diminished, I+=Augmented.
+
+Progressions:
+
+Dorian Rock = i – ♭III – ♭VII – IV
+
+Pop = vi – IV – I – V (cyclical start selectable)
+
+Jazz = vi – ii – V – I (cyclical start selectable)
+
+Apply correct enharmonic spellings per key signature (Ab=flats, D=sharps).
+
+Show chord with diatonic 3rd→5th→7th under notes.
+
+Playback loops to tempo/subdivision.
+
+MODE 3 : Patterns
+
+Circle of Fifths: clockwise, counterclockwise, triangles (M3 apart), squares (m3 apart). Draw 12-note circle and highlight notes as they play.
+
+Whole Tone: move ↑/↓ in whole tones.
+
+Half-Whole Diminished: move ↑/↓, highlight Dim7 families (e.g., C°, D♭°, E°, G♭°).
+
+Chromatic: move ↑/↓ in semitones.
+
+Display active notes in real time.
+
+Playback loops to tempo/subdivision.
+
+Core Music Knowledge (labels/tooltips)
+
+Intervals: m2, M2, m3, M3, P4, TT/♯4, P5, m6, M6, m7, M7, P8
+
+Scales: Major, Natural Minor, Harmonic Minor, Melodic Minor, Major/Minor Pentatonic, Blues
+
+Chords: Triads (maj/min/dim/aug), 7ths (maj7, dom7, min7, half-dim7), diatonic functions
+
+Subdivisions: 1×=Quarter, 2×=Quavers, 3×=Triplets, 4×=Semiquavers. Swing% applies to 2×/4× only.
+
+Timing & Audio (must follow)
+
+Use Web Audio API with lookahead scheduler (queue ≈100ms ahead; scheduler tick ≈25ms).
+
+Never rely on UI loops for sound (setInterval, requestAnimationFrame).
+
+Keep drift/jitter <5ms. Log scheduled vs actual time; reschedule if error >0.005s.
+
+Sounds: High click (accent), low click (subdivision), light piano/sine for notes.
+
+Triplets = evenly spaced (beat/3). Swing = only 2×/4× pairs.
+
+Mobile: unlock audio on first gesture; preload buffers.
+
+Global Metronome & Transport
+
+BPM 20–240, count-in (1 bar / 2 bars), loop ON by default, volume control.
+
+Each mode has independent BPM, subdivision, swing% and Start/Stop.
+
+Switching modes instantly stops others.
+
+UI / UX
+
+Tabs: Random | Progressions | Patterns | Glossary
+
+Each tab: BPM slider, subdivision chips (1×/2×/3×/4×), swing%, Start/Stop
+
+Keyboard shortcuts: Space=Start/Stop, ↑/↓=BPM, 1–4=subdivisions
+
+Persistence
+
+Store last used settings + 20 history items in LocalStorage.
+
+Allow export/import JSON of settings.
+
+Deliverables
+
+Working app with README (run/deploy + timing scheduler note).
+
+Lightweight bundle (Vanilla JS + HTML/CSS preferred).
+
+Works offline after first load (PWA ok).
+
+Acceptance Tests (must pass)
+
+1× @120 BPM: 8 beats, accent on bar start, no drift.
+
+2× @120 BPM: 2 clicks/beat, only bar accent.
+
+3× @120 BPM: triplets evenly spaced.
+
+4× @120 BPM + Swing 60%: swing alters pairs; triplets unaffected.
+
+Switching modes stops previous immediately; each keeps its own BPM/subdivision.
+
+Random mode: no >2 consecutive seconds; Beginner plays 4 octaves; Intermediate plays note+interval across octaves.
+
+Progressions: chords spelled per key signature; 3rd→5th→7th displayed correctly.
+
+Patterns: Circle drawn + highlighted in sync; shapes (triangle/square) animate; Whole Tone/Diminished/Chromatic playback matches theory.
