@@ -1,10 +1,8 @@
-# Musical Note Generator Application
+# Note-Forge
 
 ## Overview
 
-This is a comprehensive musical note generator application built as a full-stack web application. The application provides three distinct modes for generating and playing musical sequences with proper timing and music theory concepts. It includes a real-time metronome, audio playback with Web Audio API, and educational tools for learning music theory intervals and chord progressions.
-
-The application is designed to help users learn music theory through interactive generation of random note sequences, popular chord progressions, and musical patterns, all with accurate timing and playback capabilities.
+Note-Forge is a note-taking application currently in its initial setup phase. The repository contains minimal configuration, suggesting this is a newly initialized project intended for building a note management system.
 
 ## User Preferences
 
@@ -12,87 +10,48 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React with TypeScript using Vite as the build tool
-- **UI Library**: Shadcn/ui components built on Radix UI primitives
-- **Styling**: Tailwind CSS with custom CSS variables for theming
-- **Routing**: Wouter for lightweight client-side routing
-- **State Management**: React hooks with local storage persistence via custom hooks
-- **Audio Engine**: Custom Web Audio API implementation with Web Workers for precise timing
+### Current State
+The project is in early development with only a README file present. No architectural decisions have been made yet.
 
-### Backend Architecture
-- **Server**: Express.js with TypeScript
-- **Development Server**: Vite integration for hot module replacement
-- **Storage Interface**: Abstract storage interface with in-memory implementation (ready for database integration)
-- **API Structure**: RESTful API with `/api` prefix routing
+### Anticipated Architecture (To Be Implemented)
 
-### Data Management
-- **Schema Validation**: Zod schemas for type-safe data validation
-- **Database ORM**: Drizzle ORM configured for PostgreSQL
-- **Local Storage**: Custom hook for persisting user settings and application state
-- **State Persistence**: Settings automatically saved to browser local storage
+**Frontend**
+- Not yet implemented
+- Typical note-taking apps use a component-based UI framework (React, Vue, or similar)
+- Should support rich text editing, organization (folders/tags), and search functionality
 
-### Audio System Design
-- **Audio Context**: Web Audio API with mobile compatibility
-- **Timing Engine**: Web Worker-based scheduler for precise musical timing
-- **Metronome**: Real-time BPM control with count-in functionality
-- **Note Generation**: Music theory-based algorithms for interval generation and chord progressions
-- **Playback Control**: Independent playback for each mode with configurable subdivisions and swing
+**Backend**
+- Not yet implemented
+- Will likely need API endpoints for CRUD operations on notes
+- Authentication system for user management
+- Real-time sync capabilities may be considered
 
-### Music Theory Engine
-- **Interval Calculations**: Complete interval system with semitone mapping
-- **Chord Progressions**: Popular progressions (Dorian Rock, Pop, Jazz) with correct enharmonic spelling
-- **Circle of Fifths**: Pattern generation with clockwise/counterclockwise movement
-- **Scale Systems**: Support for major/minor scales with proper key signature handling
-- **Note Validation**: Rules-based generation preventing excessive consecutive seconds
+**Data Storage**
+- Not yet implemented
+- Will require a database schema for:
+  - Users (authentication, profiles)
+  - Notes (content, metadata, timestamps)
+  - Organization structures (folders, tags, categories)
+  - Sharing/collaboration settings (if applicable)
 
-### Component Architecture
-- **Mode System**: Three independent modes (Random, Progressions, Patterns) with shared playback controls
-- **Global Metronome**: Centralized timing system with volume and count-in controls
-- **Keyboard Shortcuts**: System-wide shortcuts for playback control and mode switching
-- **Responsive Design**: Mobile-first approach with touch-friendly controls using Tailwind's md: and lg: breakpoints
-  - Mobile portrait view optimized with compact spacing, smaller text, and stacked layouts
-  - Desktop version unchanged - responsive breakpoints only activate on smaller screens
-  - Header reorganized for mobile: Logo centered at top, title and controls stacked below
-  - All sections use responsive padding (p-4 on mobile, p-6-8 on desktop)
-- **Branding**: NSM (Nathaniel School of Music) logo prominently displayed in header with theme-aware display (white logo for dark mode, black logo for light mode)
-- **Wave Type Switching**: Seamless audio wave type changes during playback using ref-based dynamic value system (no preview sound on selection)
-- **Random Mode Playback Control**: Manual playback activation only - Generate Notes button creates sequences without auto-play; Generate button disabled during playback to prevent mid-playback changes
-- **Dynamic Playback Settings**: All modes (Random, Progressions, Patterns) support real-time BPM, subdivision, and swing changes
-  - Uses React refs (currentBpmRef, currentSubdivisionRef, currentSwingRef) for dynamic value access
-  - Scheduler reads latest values from refs on each iteration without restarting playback
-  - Maintains current playback position when tempo/timing settings change
-  - Tempo adjustments apply immediately to the next scheduled note/chord
-  - No interruption to ongoing playback when adjusting controls
+**Authentication & Authorization**
+- Not yet implemented
+- Will need user registration, login, and session management
+- May require role-based access for shared notes
 
 ## External Dependencies
 
-### Core Framework Dependencies
-- **React Ecosystem**: React 18 with TypeScript, React DOM, React Query for state management
-- **Build Tools**: Vite for development and bundling, ESBuild for production builds
-- **Routing**: Wouter for lightweight client-side routing
+### Current Dependencies
+None currently configured.
 
-### UI and Styling
-- **Component Library**: Radix UI primitives for accessibility-compliant components
-- **Styling**: Tailwind CSS with PostCSS for processing
-- **Icons**: Lucide React for consistent iconography
-- **Animations**: Class Variance Authority for component variants
+### Potential Future Dependencies
+- **Database**: Likely to use PostgreSQL, SQLite, or similar relational database
+- **ORM/Query Builder**: May use Drizzle, Prisma, or similar for database operations
+- **Authentication**: Could integrate Auth0, Clerk, or implement custom JWT-based auth
+- **Rich Text Editor**: May integrate libraries like TipTap, Quill, or Draft.js
+- **Cloud Storage**: Might use AWS S3, Cloudinary, or similar for attachments/images
+- **Search**: Could implement full-text search with database features or integrate services like Algolia
 
-### Audio and Music
-- **Web Audio API**: Native browser audio context for sound generation
-- **Web Workers**: For precise timing scheduling independent of main thread
-- **Date Functions**: date-fns for time calculations and formatting
+---
 
-### Development and Database
-- **Database**: Drizzle ORM with PostgreSQL dialect, Neon Database serverless integration
-- **Validation**: Zod for runtime type checking and schema validation
-- **Development**: TypeScript for type safety, TSX for server runtime
-
-### Form Handling and Utilities
-- **Forms**: React Hook Form with Hookform Resolvers for validation
-- **Utilities**: clsx and tailwind-merge for conditional styling
-- **Session Management**: Connect-pg-simple for PostgreSQL session storage (configured but not actively used)
-
-### Replit Integration
-- **Development Tools**: Replit-specific plugins for error handling and cartographer integration
-- **Environment**: Configured for Replit deployment with proper asset handling
+**Note**: This is a greenfield project. All architectural decisions are pending implementation. The code agent should work with the user to establish the tech stack, architecture patterns, and feature set based on their specific requirements.
