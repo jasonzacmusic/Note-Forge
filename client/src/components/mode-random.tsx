@@ -730,7 +730,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
               </div>
             ) : (
               <div className="text-center py-8 md:py-12 app-text-secondary text-sm md:text-base">
-                Click "Generate Random Notes" to create a 4 note sequence or hit "R"
+                Click "Generate Random Notes" to create a 4 note sequence
               </div>
             )}
             

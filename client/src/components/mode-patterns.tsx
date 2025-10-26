@@ -477,11 +477,11 @@ function getStepLabel(patternType: PatternsModeSettings['patternType']): string 
     case 'triangles': return '+M3';
     case 'squares': return '+m3';
     case 'whole-up': return '↑W';
-    case 'whole-down': return '↓W';
+    case 'whole-down': return '↓';
     case 'dim-up': return '↑H/W';
-    case 'dim-down': return '↓H/W';
+    case 'dim-down': return '↓';
     case 'chromatic-up': return '↑H';
-    case 'chromatic-down': return '↓H';
+    case 'chromatic-down': return '↓';
     default: return '+P5';
   }
 }

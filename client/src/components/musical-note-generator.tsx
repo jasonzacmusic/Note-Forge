@@ -243,55 +243,6 @@ export function MusicalNoteGenerator() {
             }));
           }
           break;
-        
-        case 'KeyR':
-          // Randomize for current mode
-          if (settings.currentMode === 'random') {
-            // Generate new random notes and start playback
-            // For intermediate mode, don't use rare enharmonics unless explicitly selecting "enharmonics"
-            let noteSelectionForGeneration = settings.randomMode.noteSelection;
-            if (settings.randomMode.difficulty === 'intermediate' && settings.randomMode.noteSelection === 'enharmonics') {
-              // In intermediate mode, treat enharmonics as 'all' to exclude rare enharmonics
-              noteSelectionForGeneration = 'all';
-            }
-            const newNotes = MusicTheory.generateRandomSequence(noteSelectionForGeneration, 4);
-            setSettings(prev => ({
-              ...prev,
-              randomMode: {
-                ...prev.randomMode,
-                generatedNotes: newNotes,
-                playback: { ...prev.randomMode.playback, isPlaying: true }
-              }
-            }));
-          } else if (settings.currentMode === 'progressions') {
-            // Randomize progression
-            const progressionNames = ['pop', 'dorian', 'jazz'];
-            const randomProgression = progressionNames[Math.floor(Math.random() * progressionNames.length)] as 'pop' | 'dorian' | 'jazz';
-            setSettings(prev => ({
-              ...prev,
-              progressionsMode: {
-                ...prev.progressionsMode,
-                selectedProgression: randomProgression,
-                playback: { ...prev.progressionsMode.playback, isPlaying: true }
-              }
-            }));
-          } else if (settings.currentMode === 'patterns') {
-            // Randomize pattern type and starting note
-            const patternTypes = ['circle-cw', 'circle-ccw', 'triangles', 'squares', 'whole-up', 'whole-down', 'dim-up', 'dim-down', 'chromatic-up', 'chromatic-down'];
-            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-            const randomPattern = patternTypes[Math.floor(Math.random() * patternTypes.length)];
-            const randomNote = notes[Math.floor(Math.random() * notes.length)];
-            setSettings(prev => ({
-              ...prev,
-              patternsMode: {
-                ...prev.patternsMode,
-                patternType: randomPattern as any,
-                startingNote: randomNote,
-                playback: { ...prev.patternsMode.playback, isPlaying: true }
-              }
-            }));
-          }
-          break;
       }
     };
 
@@ -404,7 +355,7 @@ export function MusicalNoteGenerator() {
             
             {/* Shortcuts hint on mobile - collapsible */}
             <div className="mt-3 app-bg rounded-lg px-2 py-1 text-xs app-text-secondary border border-[var(--app-border)] text-center">
-              <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
+              <span className="font-semibold app-text-primary">Shortcuts:</span> Space = Play/Stop
             </div>
           </div>
           
@@ -419,7 +370,7 @@ export function MusicalNoteGenerator() {
                 <h1 className="text-2xl md:text-3xl font-bold app-text-primary">Musical Note Generator</h1>
                 <p className="text-sm md:text-base app-text-secondary">4 notes with many creative possibilities</p>
                 <div className="mt-2 app-bg rounded-lg px-3 py-1 text-xs md:text-sm app-text-secondary border border-[var(--app-border)] inline-block">
-                  <span className="font-semibold app-text-primary">Shortcuts:</span> R = Randomize | Space = Play/Stop
+                  <span className="font-semibold app-text-primary">Shortcuts:</span> Space = Play/Stop
                 </div>
               </div>
             </div>
