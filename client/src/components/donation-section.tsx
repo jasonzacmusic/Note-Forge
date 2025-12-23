@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { Heart, CreditCard, Smartphone, Building2, Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Heart, CreditCard, Smartphone, Building2, Copy, Check, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PayPalButton from "./PayPalButton";
 import upiQrCode from "@/assets/upi-qr-code.png";
 
 type PaymentMethod = "paypal" | "upi" | null;
-type DonationAmount = "5" | "10" | "25" | "50" | "custom";
 
 export function DonationSection() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
-  const [selectedAmount, setSelectedAmount] = useState<DonationAmount>("10");
-  const [customAmount, setCustomAmount] = useState("");
+  const [customAmount, setCustomAmount] = useState("10");
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const PAYPAL_EMAIL = "music@nathanielschool.com";
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -20,11 +19,10 @@ export function DonationSection() {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const getDonationAmount = () => {
-    if (selectedAmount === "custom") {
-      return customAmount || "10";
-    }
-    return selectedAmount;
+  const handlePayPalPayment = () => {
+    const amount = parseFloat(customAmount) || 10;
+    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(PAYPAL_EMAIL)}&item_name=${encodeURIComponent("Support Nathaniel School of Music Development")}&amount=${amount}&currency_code=USD`;
+    window.open(paypalUrl, "_blank");
   };
 
   const bankDetails = {
@@ -109,62 +107,37 @@ export function DonationSection() {
 
                 {selectedMethod === "paypal" && (
                   <div className="mt-6 p-6 app-bg rounded-xl">
-                    <h4 className="font-semibold app-text-primary mb-4">Select Donation Amount (USD)</h4>
+                    <h4 className="font-semibold app-text-primary mb-4 text-center">Support Development</h4>
                     
-                    <div className="flex flex-wrap gap-3 mb-6">
-                      {(["5", "10", "25", "50"] as const).map((amount) => (
-                        <button
-                          key={amount}
-                          onClick={() => setSelectedAmount(amount)}
-                          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                            selectedAmount === amount
-                              ? "bg-blue-500 text-white"
-                              : "app-elevated app-text-primary hover:bg-blue-500/20"
-                          }`}
-                        >
-                          ${amount}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() => setSelectedAmount("custom")}
-                        className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                          selectedAmount === "custom"
-                            ? "bg-blue-500 text-white"
-                            : "app-elevated app-text-primary hover:bg-blue-500/20"
-                        }`}
-                      >
-                        Custom
-                      </button>
-                    </div>
-
-                    {selectedAmount === "custom" && (
-                      <div className="mb-6">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl font-bold app-text-primary">$</span>
-                          <input
-                            type="number"
-                            min="1"
-                            value={customAmount}
-                            onChange={(e) => setCustomAmount(e.target.value)}
-                            placeholder="Enter amount"
-                            className="flex-1 px-4 py-3 rounded-lg app-elevated border border-[var(--app-border)] app-text-primary focus:outline-none focus:border-blue-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex justify-center">
-                      <div className="inline-block">
-                        <PayPalButton 
-                          amount={getDonationAmount()} 
-                          currency="USD" 
-                          intent="CAPTURE" 
+                    <div className="max-w-xs mx-auto">
+                      <label className="block text-sm app-text-secondary mb-2">Enter Amount (USD)</label>
+                      <div className="flex items-center gap-2 mb-6">
+                        <span className="text-xl font-bold app-text-primary">$</span>
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.01"
+                          value={customAmount}
+                          onChange={(e) => setCustomAmount(e.target.value)}
+                          placeholder="10.00"
+                          className="flex-1 px-4 py-3 rounded-lg app-elevated border border-[var(--app-border)] app-text-primary focus:outline-none focus:border-blue-500 text-center text-lg font-semibold"
                         />
                       </div>
+
+                      <Button
+                        onClick={handlePayPalPayment}
+                        className="w-full bg-[#0070ba] hover:bg-[#005ea6] text-white py-4 text-lg font-semibold rounded-lg flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.59 3.025-2.566 6.082-7.356 6.082H10.2c-.508 0-.94.37-1.019.875l-1.078 6.839-.306 1.943a.61.61 0 0 0 .603.703h3.95a.86.86 0 0 0 .85-.73l.033-.178.67-4.25.043-.233a.86.86 0 0 1 .85-.73h.536c3.47 0 6.185-1.41 6.98-5.488.333-1.704.16-3.13-.719-4.126a3.5 3.5 0 0 0-1.4-.92z"/>
+                        </svg>
+                        Pay Now
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
                     </div>
 
                     <p className="text-xs app-text-secondary text-center mt-4">
-                      Secure payment processed by PayPal
+                      Secure payment processed by PayPal. You'll be redirected to complete your payment.
                     </p>
                   </div>
                 )}
