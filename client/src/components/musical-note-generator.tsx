@@ -17,8 +17,8 @@ import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
 import nsmWhiteLogo from "@assets/NSM White_1759673454530.png";
 import nsmBlackLogo from "@assets/NSM Black_1759673454530.png";
-import schoolLogoWhite from "@assets/nsm-logo-white.png";
-import schoolLogoBlack from "@assets/nsm-logo-black.png";
+import schoolLogoWhite from "@/assets/nsm-logo-white.png";
+import schoolLogoBlack from "@/assets/nsm-logo-black.png";
 
 const LANDING_PAGE_URL = "https://music-practice.nathanielschool.com";
 
