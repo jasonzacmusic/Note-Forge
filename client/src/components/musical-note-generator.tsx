@@ -11,6 +11,7 @@ import { RandomMode } from "./mode-random";
 import { ProgressionsMode } from "./mode-progressions";
 import { PatternsMode } from "./mode-patterns";
 import { GlossaryMode } from "./mode-glossary";
+import { DonationSection } from "./donation-section";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
@@ -484,7 +485,7 @@ export function MusicalNoteGenerator() {
           {settings.currentMode === 'glossary' && <GlossaryMode />}
         </main>
 
-
+        <DonationSection />
       </div>
     </div>
   );
