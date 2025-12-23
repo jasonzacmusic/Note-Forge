@@ -17,8 +17,6 @@ import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
 import nsmWhiteLogo from "@assets/NSM White_1759673454530.png";
 import nsmBlackLogo from "@assets/NSM Black_1759673454530.png";
-import schoolLogoWhite from "@/assets/nsm-logo-white.png";
-import schoolLogoBlack from "@/assets/nsm-logo-black.png";
 
 const LANDING_PAGE_URL = "https://music-practice.nathanielschool.com";
 
@@ -309,12 +307,7 @@ export function MusicalNoteGenerator() {
           <div className="lg:hidden">
             {/* Logo at top on mobile */}
             <div className="flex justify-center mb-4">
-              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <img 
-                  src={theme === 'dark' ? schoolLogoWhite : schoolLogoBlack}
-                  alt="Nathaniel School of Music"
-                  className="h-10 w-auto object-contain"
-                />
+              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
                 <img 
                   src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
                   alt="Nathaniel School of Music"
@@ -389,12 +382,7 @@ export function MusicalNoteGenerator() {
 
             {/* Center: Logo */}
             <div className="flex justify-center">
-              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                <img 
-                  src={theme === 'dark' ? schoolLogoWhite : schoolLogoBlack}
-                  alt="Nathaniel School of Music"
-                  className="h-16 w-auto object-contain"
-                />
+              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
                 <img 
                   src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
                   alt="Nathaniel School of Music"
@@ -513,13 +501,8 @@ export function MusicalNoteGenerator() {
                 href={LANDING_PAGE_URL} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity mb-4"
+                className="inline-block hover:opacity-80 transition-opacity mb-4"
               >
-                <img 
-                  src={theme === 'dark' ? schoolLogoWhite : schoolLogoBlack}
-                  alt="Nathaniel School of Music"
-                  className="h-12 w-auto object-contain"
-                />
                 <img 
                   src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
                   alt="Nathaniel School of Music"
