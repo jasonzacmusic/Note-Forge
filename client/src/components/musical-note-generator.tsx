@@ -17,6 +17,10 @@ import { useAudio } from "@/hooks/use-audio";
 import type { AppSettings } from "@shared/schema";
 import nsmWhiteLogo from "@assets/NSM White_1759673454530.png";
 import nsmBlackLogo from "@assets/NSM Black_1759673454530.png";
+import schoolLogoWhite from "@assets/nsm-logo-white.png";
+import schoolLogoBlack from "@assets/nsm-logo-black.png";
+
+const LANDING_PAGE_URL = "https://music-practice.nathanielschool.com";
 
 const defaultSettings: AppSettings = {
   globalMetronome: {
@@ -305,12 +309,19 @@ export function MusicalNoteGenerator() {
           <div className="lg:hidden">
             {/* Logo at top on mobile */}
             <div className="flex justify-center mb-4">
-              <img 
-                src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
-                alt="Nathaniel School of Music"
-                className="h-16 w-auto object-contain"
-                data-testid="nsm-logo"
-              />
+              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <img 
+                  src={theme === 'dark' ? schoolLogoWhite : schoolLogoBlack}
+                  alt="Nathaniel School of Music"
+                  className="h-10 w-auto object-contain"
+                />
+                <img 
+                  src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
+                  alt="Nathaniel School of Music"
+                  className="h-14 w-auto object-contain"
+                  data-testid="nsm-logo"
+                />
+              </a>
             </div>
             
             {/* Title and controls on mobile */}
@@ -378,12 +389,19 @@ export function MusicalNoteGenerator() {
 
             {/* Center: Logo */}
             <div className="flex justify-center">
-              <img 
-                src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
-                alt="Nathaniel School of Music"
-                className="h-24 w-auto object-contain"
-                data-testid="nsm-logo"
-              />
+              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                <img 
+                  src={theme === 'dark' ? schoolLogoWhite : schoolLogoBlack}
+                  alt="Nathaniel School of Music"
+                  className="h-16 w-auto object-contain"
+                />
+                <img 
+                  src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
+                  alt="Nathaniel School of Music"
+                  className="h-20 w-auto object-contain"
+                  data-testid="nsm-logo"
+                />
+              </a>
             </div>
 
             {/* Right: Audio Controls */}
@@ -486,6 +504,42 @@ export function MusicalNoteGenerator() {
         </main>
 
         <DonationSection />
+
+        {/* Footer */}
+        <footer className="mt-8 mb-4">
+          <div className="container mx-auto px-3 md:px-6 max-w-7xl">
+            <div className="app-surface rounded-xl p-6 text-center">
+              <a 
+                href={LANDING_PAGE_URL} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity mb-4"
+              >
+                <img 
+                  src={theme === 'dark' ? schoolLogoWhite : schoolLogoBlack}
+                  alt="Nathaniel School of Music"
+                  className="h-12 w-auto object-contain"
+                />
+                <img 
+                  src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
+                  alt="Nathaniel School of Music"
+                  className="h-16 w-auto object-contain"
+                />
+              </a>
+              <p className="app-text-secondary text-sm">
+                Explore more music practice tools and resources at{" "}
+                <a 
+                  href={LANDING_PAGE_URL} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[var(--app-primary)] hover:underline font-medium"
+                >
+                  Nathaniel School of Music
+                </a>
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
