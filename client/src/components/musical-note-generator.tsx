@@ -1,10 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Music } from "lucide-react";
 import { AudioEngine } from "./audio-engine";
-import { MusicTheory } from "./music-theory";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { ThemeToggle } from "./theme-toggle";
 import { useTheme } from "./theme-provider";
 import { RandomMode } from "./mode-random";
@@ -298,166 +293,103 @@ export function MusicalNoteGenerator() {
     }));
   };
 
+  const waveTypes = [
+    { value: 'piano', label: 'Piano' },
+    { value: 'sine', label: 'Sine' },
+    { value: 'triangle', label: 'Triangle' },
+    { value: 'sawtooth', label: 'Saw' },
+    { value: 'square', label: 'Square' },
+  ] as const;
+
+  const tabs = [
+    { key: 'random' as const, label: 'Random', color: 'var(--app-primary)' },
+    { key: 'progressions' as const, label: 'Progressions', color: 'var(--app-secondary)' },
+    { key: 'patterns' as const, label: 'Patterns', color: 'var(--app-accent)' },
+    { key: 'glossary' as const, label: 'Glossary', color: 'var(--app-warning)' },
+  ];
+
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="app-surface border-b-2 border-[var(--app-border)] mb-4 md:mb-8">
-        <div className="container mx-auto px-3 md:px-6 py-4 md:py-8 max-w-7xl">
-          {/* Mobile Layout */}
-          <div className="lg:hidden">
-            {/* Logo at top on mobile */}
-            <div className="flex justify-center mb-4">
-              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-                <img 
+      {/* Header — tight utility bar */}
+      <header className="border-b border-[var(--app-border)]">
+        <div className="container mx-auto px-3 md:px-6 max-w-7xl">
+          <div className="flex items-center justify-between h-14 md:h-16">
+            {/* Left: Logo + Title */}
+            <div className="flex items-center gap-3">
+              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity flex-shrink-0">
+                <img
                   src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
                   alt="Nathaniel School of Music"
-                  className="h-14 w-auto object-contain"
+                  className="h-8 md:h-10 w-auto object-contain"
                   data-testid="nsm-logo"
                 />
               </a>
-            </div>
-            
-            {/* Title and controls on mobile */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2 flex-1">
-                <div className="w-10 h-10 rounded-xl app-primary flex items-center justify-center shadow-lg flex-shrink-0">
-                  <Music className="text-white text-lg" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h1 className="text-lg font-bold app-text-primary truncate">Musical Note Generator</h1>
-                  <p className="text-xs app-text-secondary">4 notes with many possibilities</p>
-                </div>
-              </div>
-              <ThemeToggle />
-            </div>
-            
-            {/* Audio controls on mobile */}
-            <div className="flex items-center justify-center space-x-2">
-              <span className="text-xs font-medium app-text-primary">🎵 Audio:</span>
-              <Select
-                value={settings.globalAudio?.waveType || 'piano'}
-                onValueChange={(value) => {
-                  const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
-                  currentWaveTypeRef.current = waveType;
-                  setSettings(prev => ({ 
-                    ...prev, 
-                    globalAudio: { waveType }
-                  }));
-                }}
-              >
-                <SelectTrigger className="w-28 app-elevated border-[var(--app-border)]" data-testid="select-audio-sample">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="piano" data-testid="audio-piano">🎹 Piano</SelectItem>
-                  <SelectItem value="sine" data-testid="audio-sine">🌊 Sine</SelectItem>
-                  <SelectItem value="triangle" data-testid="audio-triangle">📐 Triangle</SelectItem>
-                  <SelectItem value="sawtooth" data-testid="audio-sawtooth">🔺 Sawtooth</SelectItem>
-                  <SelectItem value="square" data-testid="audio-square">🔲 Square</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Shortcuts hint on mobile - collapsible */}
-            <div className="mt-3 app-bg rounded-lg px-2 py-1 text-xs app-text-secondary border border-[var(--app-border)] text-center">
-              <span className="font-semibold app-text-primary">Shortcuts:</span> Space = Play/Stop
-            </div>
-          </div>
-          
-          {/* Desktop Layout (unchanged) */}
-          <div className="hidden lg:grid grid-cols-3 gap-4 items-center">
-            {/* Left: Title and Shortcuts */}
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-xl app-primary flex items-center justify-center shadow-lg">
-                <Music className="text-white text-2xl" />
-              </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold app-text-primary">Musical Note Generator</h1>
-                <p className="text-sm md:text-base app-text-secondary">4 notes with many creative possibilities</p>
-                <div className="mt-2 app-bg rounded-lg px-3 py-1 text-xs md:text-sm app-text-secondary border border-[var(--app-border)] inline-block">
-                  <span className="font-semibold app-text-primary">Shortcuts:</span> Space = Play/Stop
-                </div>
-              </div>
+              <div className="hidden sm:block w-px h-6 bg-[var(--app-border)]" />
+              <h1 className="hidden sm:block text-sm md:text-base font-semibold app-text-primary tracking-tight">
+                Note Generator
+              </h1>
             </div>
 
-            {/* Center: Logo */}
-            <div className="flex justify-center">
-              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
-                <img 
-                  src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
-                  alt="Nathaniel School of Music"
-                  className="h-20 w-auto object-contain"
-                  data-testid="nsm-logo"
-                />
-              </a>
-            </div>
-
-            {/* Right: Audio Controls */}
-            <div className="flex justify-end items-center space-x-4">
-              {/* Audio Sample Dropdown */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium app-text-primary">🎵 Audio:</span>
-                <Select
-                  value={settings.globalAudio?.waveType || 'piano'}
-                  onValueChange={(value) => {
-                    const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
-                    currentWaveTypeRef.current = waveType;
-                    setSettings(prev => ({ 
-                      ...prev, 
-                      globalAudio: { waveType }
-                    }));
-                  }}
-                >
-                  <SelectTrigger className="w-32 app-elevated border-[var(--app-border)]" data-testid="select-audio-sample">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="piano" data-testid="audio-piano">🎹 Piano</SelectItem>
-                    <SelectItem value="sine" data-testid="audio-sine">🌊 Sine</SelectItem>
-                    <SelectItem value="triangle" data-testid="audio-triangle">📐 Triangle</SelectItem>
-                    <SelectItem value="sawtooth" data-testid="audio-sawtooth">🔺 Sawtooth</SelectItem>
-                    <SelectItem value="square" data-testid="audio-square">🔲 Square</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Right: Wave selector + theme */}
+            <div className="flex items-center gap-1">
+              <div className="flex items-center rounded-lg app-elevated p-0.5 gap-0.5" data-testid="select-audio-sample">
+                {waveTypes.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => {
+                      const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
+                      currentWaveTypeRef.current = waveType;
+                      setSettings(prev => ({
+                        ...prev,
+                        globalAudio: { waveType }
+                      }));
+                    }}
+                    className={`px-2 md:px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                      (settings.globalAudio?.waveType || 'piano') === value
+                        ? 'app-surface app-text-primary shadow-sm'
+                        : 'app-text-secondary hover:app-text-primary'
+                    }`}
+                    data-testid={`audio-${value}`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
-              
               <ThemeToggle />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation — underline style */}
       <div className="container mx-auto px-3 md:px-6 max-w-7xl">
-        <nav className="mb-4 md:mb-8">
-          <div className="flex flex-wrap gap-2 md:gap-3 p-2 app-elevated rounded-xl">
-            {[
-              { key: 'random', label: 'Random Notes', icon: '🎲', color: 'app-primary' },
-              { key: 'progressions', label: 'Chord Progressions', icon: '🎵', color: 'app-secondary' },
-              { key: 'patterns', label: 'Circle Patterns', icon: '🔄', color: 'app-accent' },
-              { key: 'glossary', label: 'Music Glossary', icon: '📚', color: 'app-warning' }
-            ].map(({ key, label, icon, color }) => (
-              <Button
+        <nav className="mb-6 md:mb-8 border-b border-[var(--app-border)]">
+          <div className="flex">
+            {tabs.map(({ key, label, color }) => (
+              <button
                 key={key}
-                variant="ghost"
-                size="lg"
-                onClick={() => switchTab(key as AppSettings['currentMode'])}
-                className={`flex-1 min-w-fit px-3 md:px-6 py-3 md:py-4 rounded-lg transition-all duration-200 text-sm md:text-base ${
+                onClick={() => switchTab(key)}
+                className={`relative px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-medium transition-colors ${
                   settings.currentMode === key
-                    ? `${color} text-white shadow-lg transform scale-105 font-semibold`
-                    : `hover:border-2 hover:border-[var(--${color.replace('app-', 'app-')})] app-text-secondary hover:app-text-primary border border-[var(--app-border)] hover:font-semibold`
+                    ? 'app-text-primary'
+                    : 'app-text-secondary hover:app-text-primary'
                 }`}
                 data-testid={`tab-${key}`}
               >
-                <span className="mr-2 md:mr-3 text-lg md:text-xl">{icon}</span>
-                <span className="font-medium">{label}</span>
-              </Button>
+                {label}
+                {settings.currentMode === key && (
+                  <span
+                    className="absolute bottom-0 left-2 right-2 h-[3px] rounded-t-full transition-all"
+                    style={{ backgroundColor: color }}
+                  />
+                )}
+              </button>
             ))}
           </div>
         </nav>
 
         {/* Mode Content */}
-        <main className="container mx-auto px-6 max-w-7xl">
+        <main className="container mx-auto px-3 md:px-6 max-w-7xl">
           {settings.currentMode === 'random' && (
             <RandomMode
               settings={settings.randomMode}
@@ -494,31 +426,23 @@ export function MusicalNoteGenerator() {
         <DonationSection />
 
         {/* Footer */}
-        <footer className="mt-8 mb-4">
+        <footer className="mt-12 mb-6">
           <div className="container mx-auto px-3 md:px-6 max-w-7xl">
-            <div className="app-surface rounded-xl p-6 text-center">
-              <a 
-                href={LANDING_PAGE_URL} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="inline-block hover:opacity-80 transition-opacity mb-4"
+            <div className="border-t border-[var(--app-border)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <a
+                href={LANDING_PAGE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity"
               >
-                <img 
+                <img
                   src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
                   alt="Nathaniel School of Music"
-                  className="h-16 w-auto object-contain"
+                  className="h-8 w-auto object-contain"
                 />
               </a>
-              <p className="app-text-secondary text-sm">
-                Explore more music practice tools and resources at{" "}
-                <a 
-                  href={LANDING_PAGE_URL} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-[var(--app-primary)] hover:underline font-medium"
-                >
-                  Nathaniel School of Music
-                </a>
+              <p className="app-text-secondary text-xs">
+                <kbd className="px-1.5 py-0.5 app-elevated rounded text-[10px] font-mono">Space</kbd> Play / Stop
               </p>
             </div>
           </div>
