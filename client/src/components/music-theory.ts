@@ -265,8 +265,8 @@ export class MusicTheory {
         const lastNote = sequence[sequence.length - 1];
         const safeSemitones = [5, 7]; // P4, P5
         const randomSemitones = safeSemitones[Math.floor(Math.random() * safeSemitones.length)];
-        let newMidi = (lastNote.midi + randomSemitones) % 12;
-        
+        let newMidi = ((lastNote.midi - 60 + randomSemitones) % 12);
+
         // Ensure we don't use an already used semitone
         while (usedSemitones.has(newMidi)) {
           newMidi = (newMidi + 1) % 12;
@@ -420,7 +420,10 @@ export class MusicTheory {
     
     // Seventh if specified
     if (has7th) {
-      const seventhInterval = isMinor || romanNumeral.includes('7') ? 10 : 11; // m7 or M7
+      // Dominant 7th (V7) and minor 7th both use m7 interval (10 semitones)
+      // Major 7th (Imaj7, IVmaj7) uses M7 interval (11 semitones)
+      const isDominant7th = !isMinor && romanNumeral.includes('7');
+      const seventhInterval = isMinor || isDominant7th ? 10 : 11; // m7 for minor/dominant, M7 for major
       chordTones.push(getEnharmonicNote(rootMidi + seventhInterval, preferFlats));
     }
 
@@ -539,7 +542,7 @@ export class MusicTheory {
         midi: currentMidi, 
         octave: 4 
       });
-      currentMidi = (currentMidi + 4) % 12 + 60; // Keep in 5th octave
+      currentMidi = ((currentMidi - 60 + 4) % 12) + 60; // Keep in 5th octave
     }
 
     return pattern;
@@ -570,7 +573,7 @@ export class MusicTheory {
         midi: currentMidi, 
         octave: 4 
       });
-      currentMidi = (currentMidi + 3) % 12 + 60; // Keep in 5th octave
+      currentMidi = ((currentMidi - 60 + 3) % 12) + 60; // Keep in 5th octave
     }
 
     return pattern;

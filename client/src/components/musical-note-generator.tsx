@@ -363,6 +363,10 @@ export function MusicalNoteGenerator() {
 
       {/* Tab Navigation — underline style */}
       <div className="container mx-auto px-3 md:px-6 max-w-7xl">
+        <p className="app-text-secondary text-sm mt-4 mb-2 max-w-2xl">
+          Generate random notes, explore chord progressions, or trace patterns through the circle of fifths.
+          Pick a mode below and hit play — your next idea might be one bar away.
+        </p>
         <nav className="mb-6 md:mb-8 border-b border-[var(--app-border)]">
           <div className="flex">
             {tabs.map(({ key, label, color }) => (

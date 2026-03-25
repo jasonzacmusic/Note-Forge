@@ -146,9 +146,10 @@ export class AudioEngine {
       });
       
       // Clean up after the note ends
+      const cleanupDelay = Math.max(0, (startTime - this.audioContext!.currentTime + duration) * 1000) + 50;
       setTimeout(() => {
         this.activeOscillators.delete(trackKey);
-      }, (startTime - this.audioContext!.currentTime + duration) * 1000);
+      }, cleanupDelay);
     }
 
     // Start and stop all oscillators
@@ -194,9 +195,10 @@ export class AudioEngine {
       });
       
       // Clean up after the note ends
+      const cleanupDelay = Math.max(0, (startTime - this.audioContext!.currentTime + duration) * 1000) + 50;
       setTimeout(() => {
         this.activeOscillators.delete(trackKey);
-      }, (startTime - this.audioContext!.currentTime + duration) * 1000);
+      }, cleanupDelay);
     }
 
     oscillator.start(startTime);
