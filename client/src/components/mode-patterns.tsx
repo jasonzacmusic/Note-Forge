@@ -34,7 +34,8 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
     currentBpmRef.current = settings.playback.bpm;
     currentSubdivisionRef.current = settings.playback.subdivision;
     currentSwingRef.current = settings.playback.swingEnabled;
-  }, [settings.playback.bpm, settings.playback.subdivision, settings.playback.swingEnabled]);
+    audioEngine.setVolume(settings.playback.volume);
+  }, [settings]);
 
   useEffect(() => {
     // Listen for global stop event
@@ -411,6 +412,23 @@ export function PatternsMode({ settings, onSettingsChange, audioContext, globalA
                   )}
                 </div>
               )}
+
+              {/* Volume */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="app-text-secondary font-medium">Volume</Label>
+                  <span className="text-lg font-mono" data-testid="text-patterns-volume">{settings.playback.volume}%</span>
+                </div>
+                <Slider
+                  value={[settings.playback.volume]}
+                  onValueChange={(v) => onSettingsChange({ ...settings, playback: { ...settings.playback, volume: v[0] } })}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                  data-testid="slider-patterns-volume"
+                />
+              </div>
             </div>
           </div>
         </div>

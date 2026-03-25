@@ -27,13 +27,16 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
   const currentBpmRef = useRef(settings.playback.bpm);
   const currentSubdivisionRef = useRef(settings.playback.subdivision);
   const currentSwingRef = useRef(settings.playback.swingEnabled);
+  const settingsRef = useRef(settings);
 
   // Update refs whenever settings change
   useEffect(() => {
     currentBpmRef.current = settings.playback.bpm;
     currentSubdivisionRef.current = settings.playback.subdivision;
     currentSwingRef.current = settings.playback.swingEnabled;
-  }, [settings.playback.bpm, settings.playback.subdivision, settings.playback.swingEnabled]);
+    settingsRef.current = settings;
+    audioEngine.setVolume(settings.playback.volume);
+  }, [settings]);
 
   useEffect(() => {
     // Listen for global stop event
@@ -74,7 +77,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
     
     const scheduleChord = () => {
       // Check ref flag to prevent old closures from continuing
-      if (!shouldContinuePlaybackRef.current || !settings.currentProgression) return;
+      if (!shouldContinuePlaybackRef.current || !settingsRef.current.currentProgression) return;
 
       // Dynamically calculate repetitions per bar based on current subdivision  
       const getRepetitionsPerBar = (subdivision: string) => {
@@ -91,7 +94,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
       const repetitionsPerBar = getRepetitionsPerBar(currentSubdivisionRef.current);
       const chordInterval = (60 / currentBpmRef.current) / (repetitionsPerBar / 4); // Time between repetitions
 
-      const chord = settings.currentProgression.chords[currentChordIndex];
+      const chord = settingsRef.current.currentProgression!.chords[currentChordIndex];
       setCurrentChordIndex(currentChordIndex);
       
       // Apply swing only to quavers (eighth notes) when enabled
@@ -114,7 +117,7 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
       
       // Move to next chord after completing all repetitions for current chord
       if (playbackRepetition >= repetitionsPerBar) {
-        currentChordIndex = (currentChordIndex + 1) % settings.currentProgression.chords.length;
+        currentChordIndex = (currentChordIndex + 1) % settingsRef.current.currentProgression!.chords.length;
         playbackRepetition = 0;
       }
       
@@ -357,6 +360,23 @@ export function ProgressionsMode({ settings, onSettingsChange, audioContext, glo
                   )}
                 </div>
               )}
+
+              {/* Volume */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="app-text-secondary font-medium">Volume</Label>
+                  <span className="text-lg font-mono" data-testid="text-progressions-volume">{settings.playback.volume}%</span>
+                </div>
+                <Slider
+                  value={[settings.playback.volume]}
+                  onValueChange={(v) => onSettingsChange({ ...settings, playback: { ...settings.playback, volume: v[0] } })}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                  data-testid="slider-progressions-volume"
+                />
+              </div>
             </div>
           </div>
         </div>

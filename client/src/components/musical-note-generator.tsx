@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AudioEngine } from "./audio-engine";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "./theme-toggle";
 import { useTheme } from "./theme-provider";
 import { RandomMode } from "./mode-random";
@@ -310,13 +311,43 @@ export function MusicalNoteGenerator() {
 
   return (
     <div className="min-h-screen">
-      {/* Header — tight utility bar */}
+      {/* Header */}
       <header className="border-b border-[var(--app-border)]">
         <div className="container mx-auto px-3 md:px-6 max-w-7xl">
-          <div className="flex items-center justify-between h-14 md:h-16">
-            {/* Left: Logo + Title */}
-            <div className="flex items-center gap-3">
-              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity flex-shrink-0">
+          {/* Top bar: controls */}
+          <div className="flex items-center justify-between h-12">
+            <div className="flex items-center gap-2">
+              <span className="text-xs app-text-secondary font-medium uppercase tracking-wider">Sound</span>
+              <Select
+                value={settings.globalAudio?.waveType || 'piano'}
+                onValueChange={(value) => {
+                  const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
+                  currentWaveTypeRef.current = waveType;
+                  setSettings(prev => ({
+                    ...prev,
+                    globalAudio: { waveType }
+                  }));
+                }}
+              >
+                <SelectTrigger className="w-28 h-8 text-xs app-elevated border-[var(--app-border)]" data-testid="select-audio-sample">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {waveTypes.map(({ value, label }) => (
+                    <SelectItem key={value} value={value} data-testid={`audio-${value}`}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <ThemeToggle />
+          </div>
+
+          {/* Hero area */}
+          <div className="py-6 md:py-10 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
+            <div>
+              <a href={LANDING_PAGE_URL} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity inline-block mb-3">
                 <img
                   src={theme === 'dark' ? nsmWhiteLogo : nsmBlackLogo}
                   alt="Nathaniel School of Music"
@@ -324,38 +355,13 @@ export function MusicalNoteGenerator() {
                   data-testid="nsm-logo"
                 />
               </a>
-              <div className="hidden sm:block w-px h-6 bg-[var(--app-border)]" />
-              <h1 className="hidden sm:block text-sm md:text-base font-semibold app-text-primary tracking-tight">
-                Note Generator
+              <h1 className="text-3xl md:text-5xl font-bold app-text-primary tracking-tight leading-tight">
+                Note<br className="sm:hidden" /> Generator
               </h1>
-            </div>
-
-            {/* Right: Wave selector + theme */}
-            <div className="flex items-center gap-1">
-              <div className="flex items-center rounded-lg app-elevated p-0.5 gap-0.5" data-testid="select-audio-sample">
-                {waveTypes.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    onClick={() => {
-                      const waveType = value as 'sine' | 'triangle' | 'sawtooth' | 'square' | 'piano';
-                      currentWaveTypeRef.current = waveType;
-                      setSettings(prev => ({
-                        ...prev,
-                        globalAudio: { waveType }
-                      }));
-                    }}
-                    className={`px-2 md:px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                      (settings.globalAudio?.waveType || 'piano') === value
-                        ? 'app-surface app-text-primary shadow-sm'
-                        : 'app-text-secondary hover:app-text-primary'
-                    }`}
-                    data-testid={`audio-${value}`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <ThemeToggle />
+              <p className="app-text-secondary text-sm md:text-base mt-2 max-w-lg">
+                Generate random notes, explore chord progressions, or trace patterns
+                through the circle of fifths. Pick a mode and hit play.
+              </p>
             </div>
           </div>
         </div>
@@ -363,10 +369,6 @@ export function MusicalNoteGenerator() {
 
       {/* Tab Navigation — underline style */}
       <div className="container mx-auto px-3 md:px-6 max-w-7xl">
-        <p className="app-text-secondary text-sm mt-4 mb-2 max-w-2xl">
-          Generate random notes, explore chord progressions, or trace patterns through the circle of fifths.
-          Pick a mode below and hit play — your next idea might be one bar away.
-        </p>
         <nav className="mb-6 md:mb-8 border-b border-[var(--app-border)]">
           <div className="flex">
             {tabs.map(({ key, label, color }) => (

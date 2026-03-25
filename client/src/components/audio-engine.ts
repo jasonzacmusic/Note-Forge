@@ -449,6 +449,13 @@ export class AudioEngine {
     }
   }
 
+  setVolume(volume: number) {
+    const normalizedVolume = Math.max(0, Math.min(100, volume)) / 100;
+    if (this.masterGainNode && this.audioContext) {
+      this.masterGainNode.gain.setValueAtTime(normalizedVolume, this.audioContext.currentTime);
+    }
+  }
+
   setBPM(bpm: number) {
     this.tempo = Math.max(20, Math.min(240, bpm));
   }

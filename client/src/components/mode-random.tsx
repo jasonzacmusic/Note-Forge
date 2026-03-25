@@ -97,13 +97,18 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
   const currentBpmRef = useRef(settings.playback.bpm);
   const currentSubdivisionRef = useRef(settings.playback.subdivision);
   const currentSwingRef = useRef(settings.playback.swingEnabled);
+  const generatedNotesRef = useRef(settings.generatedNotes);
+  const settingsRef = useRef(settings);
 
   // Update refs whenever settings change
   useEffect(() => {
     currentBpmRef.current = settings.playback.bpm;
     currentSubdivisionRef.current = settings.playback.subdivision;
     currentSwingRef.current = settings.playback.swingEnabled;
-  }, [settings.playback.bpm, settings.playback.subdivision, settings.playback.swingEnabled]);
+    generatedNotesRef.current = settings.generatedNotes;
+    settingsRef.current = settings;
+    audioEngine.setVolume(settings.playback.volume);
+  }, [settings]);
 
   useEffect(() => {
     // Listen for global stop event
@@ -182,7 +187,8 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
     
     const scheduleNote = () => {
       // Check ref flag to prevent old closures from continuing
-      if (!shouldContinuePlaybackRef.current || settings.generatedNotes.length === 0) return;
+      const currentNotes = generatedNotesRef.current;
+      if (!shouldContinuePlaybackRef.current || currentNotes.length === 0) return;
 
       // Dynamically calculate repetitions per bar based on current subdivision
       const getRepetitionsPerBar = (subdivision: string) => {
@@ -199,8 +205,6 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       const repetitionsPerBar = getRepetitionsPerBar(currentSubdivisionRef.current);
       const noteInterval = (60 / currentBpmRef.current) / (repetitionsPerBar / 4); // Time between repetitions
 
-      // Always use current notes from settings
-      const currentNotes = settings.generatedNotes;
       if (currentNoteIndex >= currentNotes.length) {
         currentNoteIndex = 0; // Reset if index is out of bounds
       }
@@ -247,7 +251,7 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
       nextNoteTime += noteInterval + swingDelay;
       
       // Only continue if still playing
-      if (settings.playback.isPlaying) {
+      if (shouldContinuePlaybackRef.current) {
         // Use immediate callback for better timing  
         const timeUntilNext = Math.max(10, (nextNoteTime - audioContext.currentTime) * 1000 - 10);
         playbackTimeoutRef.current = setTimeout(scheduleNote, timeUntilNext);
@@ -860,6 +864,23 @@ export function RandomMode({ settings, onSettingsChange, audioContext, globalAud
                   )}
                 </div>
               )}
+
+              {/* Volume */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="app-text-secondary font-medium text-sm md:text-base">Volume</Label>
+                  <span className="text-base md:text-lg font-mono" data-testid="text-random-volume">{settings.playback.volume}%</span>
+                </div>
+                <Slider
+                  value={[settings.playback.volume]}
+                  onValueChange={(v) => onSettingsChange({ ...settings, playback: { ...settings.playback, volume: v[0] } })}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                  data-testid="slider-random-volume"
+                />
+              </div>
             </div>
           </div>
         </div>

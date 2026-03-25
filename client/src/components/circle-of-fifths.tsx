@@ -55,12 +55,25 @@ export function CircleOfFifths({ activeNotes, currentNote, isPlaying, patternTyp
       const toPos = findNotePosition(activeNotes[i + 1]);
       
       if (fromPos && toPos) {
+        // Highlight the connection from the current note to the next
+        const isCurrentConnection = currentNote && (
+          activeNotes[i] === currentNote ||
+          // Check enharmonic match
+          (() => {
+            const enharmonics: Record<string, string> = {
+              'F#': 'Gb', 'Gb': 'F#', 'C#': 'Db', 'Db': 'C#',
+              'G#': 'Ab', 'Ab': 'G#', 'D#': 'Eb', 'Eb': 'D#',
+              'A#': 'Bb', 'Bb': 'A#'
+            };
+            return enharmonics[currentNote] === activeNotes[i] || enharmonics[activeNotes[i]] === currentNote;
+          })()
+        );
         lines.push({
           x1: fromPos.x,
           y1: fromPos.y,
           x2: toPos.x,
           y2: toPos.y,
-          isActive: i === 0 // Highlight the current connection
+          isActive: !!isCurrentConnection
         });
       }
     }
